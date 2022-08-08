@@ -77,6 +77,8 @@ declare namespace Eventful {
       groups: Group[]
     }
 
+    type EventAdd = Pick<Event, 'name'>
+
     interface LogInOptions {
       username: string
       password: string

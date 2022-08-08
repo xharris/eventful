@@ -8,7 +8,7 @@ export const Page = () => {
   const { session } = useSession()
   return (
     <Flex css={{ padding: '$root' }} column fill>
-      <Flex row css={{ justifyContent: 'space-between', flexGrow: 0 }}>
+      <Flex row flex="0" css={{ justifyContent: 'space-between' }}>
         <Flex>
           <LinkButton to="/" variant="ghost">
             <FiHome />

@@ -7,6 +7,8 @@ export const Input = styled('input', {
   fontSize: '$control',
   borderRadius: '$control',
   borderColor: '$controlBorder',
+  borderWidth: 1,
+  borderStyle: 'solid',
   variants: {
     variant: {
       filled: {

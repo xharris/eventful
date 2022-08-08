@@ -27,9 +27,10 @@ export const { styled, css } = createStitches({
       control: '0.8rem',
     },
     colors: {
+      background: 'white',
       black: '#212121',
       disabled: '#BDBDBD',
-      controlBorder: '#616161',
+      controlBorder: '#9E9E9E',
       controlBackground: '#E0E0E0',
       inputBackground: '#EEEEEE',
     },

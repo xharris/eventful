@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Eventful } from 'types'
 import { api } from './api'
 
@@ -7,7 +7,21 @@ export const useEvents = () => {
     api.get('events').then((res) => res.data)
   )
 
-  return query
+  const qc = useQueryClient()
+
+  const muCreateEvent = useMutation(
+    (body: Eventful.API.EventAdd) => api.post<Eventful.API.EventGet>('events/add', body),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries(['events'])
+      },
+    }
+  )
+
+  return {
+    ...query,
+    createEvent: muCreateEvent.mutateAsync,
+  }
 }
 
 export const useEvent = ({ id }: { id?: string }) => {

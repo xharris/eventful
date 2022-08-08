@@ -1,21 +1,39 @@
 import { ComponentProps } from '@stitches/react'
 import { HTMLProps } from 'react'
+import { Link } from 'react-router-dom'
 import { styled } from 'src/features/styled'
 
 export const Component = styled('button', {
   cursor: 'pointer',
   padding: '$controlPadding',
   backgroundColor: '$controlBackground',
-  border: 'none',
+  borderColor: 'transparent',
   borderRadius: '$control',
+  borderStyle: 'solid',
+  borderWidth: 1,
   transition: 'all ease-in-out 0.1s',
   variants: {
     variant: {
       ghost: {
         backgroundColor: 'transparent',
-        border: 'none',
+        borderColor: 'transparent',
         '&:hover:not(:disabled)': {
           backgroundColor: '$controlBackground',
+        },
+      },
+      outline: {
+        backgroundColor: 'transparent',
+        borderColor: '$controlBackground',
+        '&:hover:not(:disabled)': {
+          backgroundColor: '$controlBackground',
+        },
+      },
+      filled: {
+        backgroundColor: '$controlBackground',
+        borderColor: 'transparent',
+        '&:hover:not(:disabled)': {
+          backgroundColor: 'transparent',
+          borderColor: '$controlBackground',
         },
       },
     },
@@ -49,7 +67,7 @@ interface LinkButtonProps extends ButtonProps {
 }
 
 export const LinkButton = ({ to, ...props }: LinkButtonProps) => (
-  <a href={to}>
+  <Link to={to}>
     <Button {...props} />
-  </a>
+  </Link>
 )

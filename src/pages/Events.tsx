@@ -1,4 +1,4 @@
-import { Button } from 'src/components/Button'
+import { Button, LinkButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { Input } from 'src/components/Input'
 import { useEvents } from 'src/features/event'
@@ -7,13 +7,14 @@ import { useMemo, useState } from 'react'
 import { H1, H2, H3, H4, H5, H6 } from 'src/components/Header'
 import moment from 'moment'
 import { Eventful } from 'types'
+import { Link, useNavigate } from 'react-router-dom'
 
 const Event = ({ event }: { event: Eventful.API.EventGet }) => (
-  <Flex>
-    <a href={`/e/${event._id}`}>
+  <LinkButton to={`/e/${event._id}`} css={{ width: '100%' }} variant="ghost">
+    <Flex>
       <H3>{event.name}</H3>
-    </a>
-  </Flex>
+    </Flex>
+  </LinkButton>
 )
 
 const Month = ({
@@ -24,13 +25,35 @@ const Month = ({
   days: Record<string, Eventful.API.EventGet[]>
 }) => (
   <Flex column>
-    <H1 css={{ marginLeft: '3.5rem' }}>{label}</H1>
+    <H1
+      css={{
+        marginLeft: '3.5rem',
+        color: '#616161',
+        background: 'linear-gradient(to bottom, $background 90%, transparent)',
+        zIndex: 10,
+        padding: '0.5rem 0',
+        position: 'sticky',
+        top: 0,
+      }}
+    >
+      {label}
+    </H1>
     <Flex column>
       <Flex column>
         {Object.entries(days).map(([day, events]) => (
-          <Flex key={day} flex="0">
-            <H3 css={{ color: '$disabled' }}>{day}</H3>
-            <Flex column>
+          <Flex key={day} flex="0" css={{ position: 'relative', alignItems: 'flex-start' }}>
+            <H3
+              css={{
+                color: '$disabled',
+                position: 'sticky',
+                left: 0,
+                top: 0,
+                padding: '0.2rem 0',
+              }}
+            >
+              {day}
+            </H3>
+            <Flex column css={{ gap: '0.25rem' }}>
               {events.map((event) => (
                 <Event key={event._id.toString()} event={event} />
               ))}
@@ -43,8 +66,11 @@ const Month = ({
 )
 
 export const Events = () => {
-  const { data: events } = useEvents()
+  const { data: events, createEvent } = useEvents()
   const [newEventValue, setNewEventValue] = useState<string>('')
+  const navigate = useNavigate()
+  const placeholders = ['Add an event', 'What are you planning?']
+  const placeholder = placeholders[Math.floor(Math.random() * placeholders.length)]
 
   const tbdEvents = useMemo(
     () => ({
@@ -79,8 +105,8 @@ export const Events = () => {
   )
 
   return (
-    <Flex column fill>
-      <Flex column>
+    <Flex column fill css={{ gap: 0 }}>
+      <Flex column css={{ overflow: 'auto' }}>
         {!!events?.length ? (
           <>
             <Month label="Still planning" days={tbdEvents} />
@@ -94,11 +120,17 @@ export const Events = () => {
           </H1>
         )}
       </Flex>
-      <Flex css={{ flex: 0 }}>
+      <Flex
+        css={{
+          flex: 0,
+          paddingBottom: '$root',
+          background: '$background',
+        }}
+      >
         <Input
           variant="filled"
           name="name"
-          placeholder="Add an event"
+          placeholder={placeholder}
           value={newEventValue}
           onChange={(e) => setNewEventValue(e.target.value)}
           css={{
@@ -110,7 +142,9 @@ export const Events = () => {
           variant="ghost"
           square={39}
           disabled={!newEventValue.length}
-          onClick={() => console.log(newEventValue)}
+          onClick={() =>
+            createEvent({ name: newEventValue }).then((res) => navigate(`/e/${res.data._id}`))
+          }
         >
           <FiPlus />
         </Button>
