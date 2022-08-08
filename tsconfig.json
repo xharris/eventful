@@ -15,7 +15,10 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "typeRoots": ["./types"]
+    "baseUrl": "."
   },
-  "include": ["src"]
+  "include": ["**/*.js", "**/*.ts", "**/*.jsx", "**/*.tsx"],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
 }

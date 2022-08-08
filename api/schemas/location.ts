@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose'
 import LatLng from './latlng'
-import { Eventful } from '../../types'
+import type { Eventful } from 'types'
 
 export default new Schema<Eventful.Location>(
   {

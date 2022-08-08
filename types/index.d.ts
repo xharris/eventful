@@ -1,3 +1,4 @@
+import { RequestHandler } from 'express'
 import { Types } from 'mongoose'
 
 declare namespace Eventful {
@@ -8,12 +9,12 @@ declare namespace Eventful {
     Carpool,
     Meet,
   }
-  export interface LatLng {
+  interface LatLng {
     latitude: number
     longitude: number
   }
-  export interface Time {
-    start: Date
+  interface Time {
+    start?: Date
     end?: Date
     allday?: boolean
   }
@@ -25,32 +26,74 @@ declare namespace Eventful {
     updatedAt: Date
   }
 
-  export interface Event extends Document {
+  interface Event extends Document {
     name: string
-    rootGroup: ID
   }
 
-  export interface Group extends Document {
+  interface Group extends Document {
     name: string
     category: CATEGORY
     event: ID
+    isRoot: boolean
   }
 
-  export interface Plan extends Document {
+  interface Plan extends Document {
     what: string
     location: ID
     time: Time
     who: ID[]
   }
 
-  export interface Location extends Document {
+  interface Location extends Document {
     label?: string
     coords: LatLng
     address: string
   }
 
-  export interface User extends Document {
+  interface User extends Document {
     username: string
     password: string
+  }
+
+  interface Contact extends Document {
+    user: ID
+  }
+
+  namespace API {
+    interface RouteOptions {
+      route: {
+        getAll?: RequestHandler
+        create?: RequestHandler
+        get: RequestHandler
+        update: RequestHandler
+        delete: RequestHandler
+      }
+    }
+
+    interface EventGet extends Event {
+      start: Date
+      end?: Date
+      allday?: boolean
+      groups: Group[]
+    }
+
+    interface LogInOptions {
+      username: string
+      password: string
+      remember?: boolean
+    }
+
+    interface SignUpOptions {
+      username: string
+      password: string
+      confirm_password: string
+      remember?: boolean
+    }
+  }
+}
+
+declare module 'express-session' {
+  interface SessionData {
+    user: Eventful.User
   }
 }

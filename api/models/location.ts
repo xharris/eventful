@@ -1,4 +1,4 @@
 import { model } from 'mongoose'
-import location from '../schemas/location'
+import schema from '../schemas/location'
 
-export default model('locations', location)
+export const location = model('locations', schema)

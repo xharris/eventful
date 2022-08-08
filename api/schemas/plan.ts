@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose'
-import { Eventful } from '../../types'
+import type { Eventful } from 'types'
 import Time from './time'
 
 export default new Schema<Eventful.Plan>(

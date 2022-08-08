@@ -30,6 +30,8 @@
   - meet-up location
 - User
   - can store list of locations
+  - can store list of contacts
 - Calendar (agenda view for starters)
   - list of dates with events for each date
     - below it, show all plans that occur on that date
+- Contact

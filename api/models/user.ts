@@ -1,4 +1,4 @@
 import { model } from 'mongoose'
-import user from '../schemas/user'
+import schema from '../schemas/user'
 
-export default model('users', user)
+export const user = model('users', schema)

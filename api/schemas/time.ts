@@ -1,9 +1,9 @@
 import { Schema } from 'mongoose'
-import { Eventful } from '../../types'
+import type { Eventful } from 'types'
 
 export default new Schema<Eventful.Time>(
   {
-    start: { type: Date, required: true },
+    start: Date,
     end: Date,
     allday: Boolean,
   },

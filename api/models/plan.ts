@@ -1,4 +1,4 @@
 import { model } from 'mongoose'
-import plan from '../schemas/plan'
+import schema from '../schemas/plan'
 
-export default model('plans', plan)
+export const plan = model('plans', schema)

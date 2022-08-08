@@ -1,4 +1,4 @@
 import { model } from 'mongoose'
-import group from '../schemas/group'
+import schema from '../schemas/group'
 
-export default model('groups', group)
+export const group = model('groups', schema)

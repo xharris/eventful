@@ -2,6 +2,14 @@
   "name": "eventful",
   "version": "0.1.0",
   "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "api": "nodemon --config nodemon.json api/index.ts",
+    "dev": "concurrently -n api,web \"cross-env PORT=3000 yarn run api\" \"cross-env PORT=3001 yarn run start\""
+  },
   "dependencies": {
     "@stitches/react": "^1.2.8",
     "@tanstack/react-query": "^4.0.10",
@@ -12,29 +20,28 @@
     "@types/node": "^16.7.13",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
+    "axios": "^0.27.2",
+    "bcrypt": "^5.0.1",
     "body-parser": "^1.20.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "express-session": "^1.17.3",
+    "formik": "^2.2.9",
     "moment": "^2.29.4",
     "mongoose": "^6.5.1",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+    "nanoid": "^4.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^4.4.0",
+    "react-router-dom": "6",
     "react-scripts": "5.0.1",
     "tinycolor": "^0.0.1",
     "typescript": "^4.4.2",
     "web-vitals": "^2.1.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "api": "yarn nodemon --exec ts-node api/index.ts"
   },
   "eslintConfig": {
     "extends": [
@@ -55,11 +62,15 @@
     ]
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.3",
+    "@types/cors": "^2.8.12",
     "@types/express-session": "^1.17.5",
+    "@types/morgan": "^1.9.3",
     "concurrently": "^7.3.0",
     "cross-env": "^7.0.3",
     "nodemon": "^2.0.19",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.1.0"
   }
 }

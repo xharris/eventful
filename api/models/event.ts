@@ -1,4 +1,4 @@
 import { model } from 'mongoose'
-import event from '../schemas/event'
+import schema from '../schemas/event'
 
-export default model('events', event)
+export const event = model('events', schema)
