@@ -1,6 +1,6 @@
 import { ComponentProps } from '@stitches/react'
 import { HTMLProps } from 'react'
-import { FiPlus } from 'react-icons/fi'
+import { FiMinus, FiPlus } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 import { styled } from 'src/libs/styled'
 import { Flex } from './Flex'
@@ -123,6 +123,32 @@ export const AddButton = ({ css, children, square, ...props }: ButtonProps) => (
       }}
     >
       <FiPlus />
+    </Flex>
+  </Button>
+)
+
+export const RemoveButton = ({ css, children, square, ...props }: ButtonProps) => (
+  <Button
+    css={{
+      ...css,
+      position: 'relative',
+    }}
+    square={square}
+    {...props}
+  >
+    {children}
+    <Flex
+      className="add-icon"
+      css={{
+        position: 'absolute',
+        right: -5,
+        bottom: -5,
+        borderRadius: '100%',
+        background: '$controlBackground',
+        color: '#616161',
+      }}
+    >
+      <FiMinus />
     </Flex>
   </Button>
 )

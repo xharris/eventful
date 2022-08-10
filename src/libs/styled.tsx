@@ -45,6 +45,7 @@ export const { styled, css, config } = createStitches({
       5: '2.4rem',
       6: '1.5rem',
       control: '0.8rem',
+      small: '0.7rem',
     },
     colors: {
       background: 'white',
@@ -56,6 +57,7 @@ export const { styled, css, config } = createStitches({
       inputBackground: '#EEEEEE',
       successFg: '#1B5E20',
       successBg: '#A5D6A7',
+      red: '#F44336',
     },
     shadows: {
       text: '-1px 0px 2px white, 1px 0px 2px white, 0px -1px 2px white, 0px 1px 2px white',

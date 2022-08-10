@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { IconType } from 'react-icons'
 import { FiFile, FiHome, FiMapPin, FiTruck } from 'react-icons/fi'
 import { Eventful } from 'types'
 import { api } from './api'
@@ -12,7 +13,7 @@ export const CATEGORY = {
 
 export interface CategoryInfo {
   label: string
-  icon: JSX.Element
+  icon: IconType
   placeholder: Partial<Record<keyof Eventful.API.PlanAdd, string>>
   fields: Partial<Record<keyof Eventful.API.PlanAdd, boolean>>
 }
@@ -20,7 +21,7 @@ export interface CategoryInfo {
 export const CATEGORY_INFO: Record<number, CategoryInfo> = {
   0: {
     label: 'Empty',
-    icon: <FiFile />,
+    icon: FiFile,
     placeholder: {
       what: 'Name',
       location: 'Location',
@@ -36,7 +37,7 @@ export const CATEGORY_INFO: Record<number, CategoryInfo> = {
   },
   1: {
     label: 'Lodging',
-    icon: <FiMapPin />,
+    icon: FiHome,
     placeholder: {
       location: 'Where to stay?',
     },
@@ -47,17 +48,18 @@ export const CATEGORY_INFO: Record<number, CategoryInfo> = {
   },
   2: {
     label: 'Carpool',
-    icon: <FiHome />,
+    icon: FiTruck,
     placeholder: {
       what: 'Who is driving?',
     },
     fields: {
+      what: true,
       who: true,
     },
   },
   3: {
     label: 'Location',
-    icon: <FiTruck />,
+    icon: FiMapPin,
     placeholder: {
       what: 'Where are you going?',
     },

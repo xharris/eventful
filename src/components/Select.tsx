@@ -3,6 +3,7 @@ import ReactSelect from 'react-select'
 import { ComponentProps } from 'react'
 
 export const selectCss = css({
+  flex: 1,
   '.rs__control': {
     border: 'none',
     backgroundColor: '$inputBackground',

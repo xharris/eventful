@@ -1,4 +1,6 @@
 import { RequestHandler } from 'express'
+import { SessionData } from 'express-session'
+import { Session } from 'inspector'
 import { Types } from 'mongoose'
 
 declare namespace Eventful {
@@ -94,7 +96,7 @@ declare namespace Eventful {
     interface PlanEdit extends Omit<Plan, keyof Document | 'event'> {
       _id: ID
       location?: LocationAdd
-      who?: User[]
+      who?: ID[]
       category?: Plan['category']
     }
 
@@ -118,5 +120,11 @@ declare namespace Eventful {
 declare module 'express-session' {
   interface SessionData {
     user: Eventful.User
+  }
+}
+
+declare module 'express' {
+  interface Request {
+    session: (Session & Partial<SessionData>) | null
   }
 }

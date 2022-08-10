@@ -4,10 +4,11 @@ import { Input } from 'src/components/Input'
 import { useEvents } from 'src/libs/event'
 import { FiPlus } from 'react-icons/fi'
 import { useMemo, useState } from 'react'
-import { H3 } from 'src/components/Header'
+import { H1, H3, H4 } from 'src/components/Header'
 import { Eventful } from 'types'
 import { useNavigate } from 'react-router-dom'
 import { Agenda } from 'src/features/Agenda'
+import { useSession } from 'src/libs/session'
 
 const Event = ({ event }: { event: Eventful.API.EventGet }) => (
   <LinkButton to={`/e/${event._id}`} css={{ width: '100%' }} variant="ghost">
@@ -18,6 +19,7 @@ const Event = ({ event }: { event: Eventful.API.EventGet }) => (
 )
 
 export const Events = () => {
+  const { session } = useSession()
   const { data: events, createEvent } = useEvents()
   const [newEventValue, setNewEventValue] = useState<string>('')
   const navigate = useNavigate()
@@ -26,7 +28,7 @@ export const Events = () => {
   const [rand] = useState(Math.floor(Math.random() * placeholders.length))
   const placeholder = useMemo(() => placeholders[rand], [rand])
 
-  return (
+  return session ? (
     <Flex column fill css={{ gap: 0 }}>
       <Agenda
         items={events}
@@ -63,6 +65,13 @@ export const Events = () => {
         >
           <FiPlus />
         </Button>
+      </Flex>
+    </Flex>
+  ) : (
+    <Flex column fill css={{ gap: 0, alignItems: 'center', justifyContent: 'center' }}>
+      <Flex column flex="0" css={{ gap: 0 }}>
+        <H1>Eventful</H1>
+        <H4>{`(You need to log in)`}</H4>
       </Flex>
     </Flex>
   )

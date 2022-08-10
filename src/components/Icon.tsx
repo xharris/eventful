@@ -41,14 +41,14 @@ export const Icon = ({ icon, css, square, subtle, size, ...props }: IconProps) =
   </Component>
 )
 
-interface IconSideProps extends Omit<IconProps, 'color'> {
-  icon: IconProps['icon']
+interface IconSideProps extends Omit<IconProps, 'color' | 'icon'> {
+  icon?: IconProps['icon']
   subtle?: IconProps['subtle']
   flexProps?: ComponentProps<typeof Flex>
   color?: Stitches.CSS<typeof config>['color']
 }
 
-export const IconSide = ({ children, css, flexProps, color, ...props }: IconSideProps) => (
+export const IconSide = ({ children, css, flexProps, color, icon, ...props }: IconSideProps) => (
   <Flex
     css={{
       alignItems: 'center',
@@ -56,13 +56,16 @@ export const IconSide = ({ children, css, flexProps, color, ...props }: IconSide
     }}
     {...flexProps}
   >
-    <Icon
-      {...props}
-      css={{
-        ...css,
-        color,
-      }}
-    />
+    {icon && (
+      <Icon
+        {...props}
+        icon={icon}
+        css={{
+          ...css,
+          color,
+        }}
+      />
+    )}
     {children}
   </Flex>
 )

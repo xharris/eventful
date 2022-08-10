@@ -5,6 +5,7 @@ import { Eventful } from 'types'
 
 // 3 months
 const REMEMBER_TIME = 1000 * 60 * 60 * 24 * 90
+const EXPIRE_TIME = 0
 
 const router = express.Router()
 
@@ -22,6 +23,13 @@ const newSession = (req: Express.Request, user: Eventful.User, remember?: boolea
     req.sessionOptions.expires = new Date(Date.now() + REMEMBER_TIME)
     req.sessionOptions.maxAge = REMEMBER_TIME
   }
+}
+
+const destroySession = (req: Express.Request) => {
+  req.sessionOptions.expires = new Date(Date.now() + EXPIRE_TIME)
+  req.sessionOptions.maxAge = EXPIRE_TIME
+  // @ts-expect-error
+  req.session = null
 }
 
 router.post('/signup', async (req, res) => {
@@ -60,7 +68,7 @@ router.post('/login', async (req, res) => {
 })
 
 router.get('/logout', (req, res) => {
-  req.session.destroy(() => console.log('User logged out'))
+  destroySession(req)
   res.sendStatus(200)
 })
 

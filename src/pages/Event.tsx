@@ -1,202 +1,17 @@
 import { useParams } from 'react-router-dom'
-import { AddButton, Button } from 'src/components/Button'
+import { AddButton } from 'src/components/Button'
 import { Flex, HStack } from 'src/components/Flex'
-import { H1, H2, H3, H4, H5, H6 } from 'src/components/Header'
+import { H1 } from 'src/components/Header'
 import { Input } from 'src/components/Input'
 import { useEvent } from 'src/libs/event'
 import { useSession } from 'src/libs/session'
-import {
-  FiFile,
-  FiMapPin,
-  FiClock,
-  FiUsers,
-  FiSave,
-  FiX,
-  FiEdit2,
-  FiArrowLeft,
-} from 'react-icons/fi'
-import { CATEGORY, CategoryInfo, CATEGORY_INFO, usePlans } from 'src/libs/plan'
+import { FiFile } from 'react-icons/fi'
+import { CATEGORY, CATEGORY_INFO, usePlans } from 'src/libs/plan'
 import { Agenda } from 'src/features/Agenda'
 import { Eventful } from 'types'
-import { useFormik } from 'formik'
-import { ReactNode, useEffect, useMemo, useState } from 'react'
-import { Select } from 'src/components/Select'
-import { TimeInput } from 'src/features/TimeInput'
-import { IconSide } from 'src/components/Icon'
-import { Time } from 'src/components/Time'
-
-interface EmptyProps {
-  info: CategoryInfo
-  plan: Eventful.API.PlanGet
-  onEdit: PlanProps['onEdit']
-  children: ReactNode
-}
-
-const Empty = ({ plan, info, onEdit, children }: EmptyProps) => {
-  const isEmpty = useMemo(
-    () => !plan.what?.length && !plan.location?.address?.length && !plan.time && !plan.who?.length,
-    [plan]
-  )
-
-  return isEmpty ? (
-    <H4
-      clickable
-      onClick={() => onEdit()}
-      css={{
-        fontStyle: 'italic',
-        color: '$disabled',
-        '&:hover': {
-          textDecorationColor: '$disabled',
-        },
-      }}
-    >
-      {`${info.label} plan...`}
-    </H4>
-  ) : (
-    <>{children}</>
-  )
-}
-
-interface PlanProps {
-  editing?: boolean
-  plan: Eventful.API.PlanGet
-  onEdit: () => void
-  onClose: () => void
-}
-
-const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
-  const { updatePlan } = usePlans({ event: plan.event.toString() })
-  const { handleChange, setFieldValue, resetForm, values, dirty, submitForm } = useFormik({
-    initialValues: plan,
-    onSubmit: (values) => {
-      updatePlan({
-        ...values,
-        _id: plan._id,
-      })
-      onClose()
-    },
-  })
-  const info = useMemo(() => CATEGORY_INFO[values.category ?? plan.category], [plan, values])
-
-  return (
-    <Flex
-      column
-      css={{
-        padding: '$controlPadding',
-        gap: '$small',
-        border: '1px solid $controlBorder',
-        borderRadius: '$control',
-        boxShadow: '$card',
-        '& > .edit-button': {
-          opacity: 0,
-        },
-        '&:hover > .edit-button': {
-          opacity: 1,
-        },
-      }}
-    >
-      {editing ? (
-        <>
-          {info.fields.what && (
-            <Input
-              name="what"
-              small
-              value={values.what}
-              onChange={handleChange}
-              placeholder={info.placeholder.what}
-              variant="underline"
-            />
-          )}
-          {info.fields.location && (
-            <IconSide css={{ gap: '$small' }} icon={FiMapPin} subtle>
-              <Input
-                name="location.address"
-                small
-                value={values.location?.address}
-                placeholder={info.placeholder.location}
-                onChange={handleChange}
-                variant="underline"
-              />
-            </IconSide>
-          )}
-          {info.fields.time && (
-            <TimeInput
-              name="time"
-              defaultValue={values.time}
-              onChange={(v) => setFieldValue('time', v)}
-              gap="$small"
-              small
-              square={25}
-              variant="underline"
-            />
-          )}
-          <Flex css={{ justifyContent: 'space-between' }}>
-            <Flex css={{ gap: '$small' }}>
-              <Button
-                onClick={() => (dirty ? submitForm() : onClose())}
-                variant={dirty ? 'filled' : 'ghost'}
-                color={dirty ? 'success' : undefined}
-                square
-              >
-                {dirty ? <FiSave /> : <FiArrowLeft />}
-              </Button>
-              {dirty && (
-                <Button
-                  onClick={() => {
-                    resetForm()
-                    onClose()
-                  }}
-                  variant="ghost"
-                  square
-                >
-                  <FiX />
-                </Button>
-              )}
-            </Flex>
-            <Select
-              defaultValue={{
-                value: values.category ?? 0,
-                label: CATEGORY_INFO[values.category ?? 0].label,
-              }}
-              onChange={(v) => setFieldValue('category', v?.value ?? 0)}
-              options={Object.entries(CATEGORY_INFO).map(([key, cat]) => ({
-                value: parseInt(key),
-                label: cat.label,
-              }))}
-              menuPortalTarget={document.body}
-            />
-          </Flex>
-        </>
-      ) : (
-        <Empty plan={plan} info={info} onEdit={onEdit}>
-          {info.fields.what && (
-            <H4
-              clickable
-              onClick={() => onEdit()}
-              css={{
-                fontStyle: !!plan.what?.length ? 'normal' : 'italic',
-                color: !!plan.what?.length ? '$black' : '$disabled',
-              }}
-            >
-              {plan.what}
-            </H4>
-          )}
-          {info.fields.location && plan.location && (
-            <IconSide icon={FiMapPin} color="#F44336" css={{ opacity: 0.5 }}>
-              <H5>{plan.location.address}</H5>
-            </IconSide>
-          )}
-          {info.fields.time && plan.time && (
-            <Flex css={{ gap: '$small', alignItems: 'center' }}>
-              <FiClock />
-              <Time time={plan.time} />
-            </Flex>
-          )}
-        </Empty>
-      )}
-    </Flex>
-  )
-}
+import { useState } from 'react'
+import { Plan } from 'src/features/Plan'
+import { Icon, IconSide } from 'src/components/Icon'
 
 export const Event = () => {
   const { eventId } = useParams()
@@ -287,8 +102,7 @@ export const Event = () => {
                     css={{ display: 'flex', gap: 4, alignItems: 'center' }}
                     onClick={() => addPlan({ category: parseInt(key) })}
                   >
-                    {cat.icon}
-                    {cat.label}
+                    <IconSide icon={cat.icon}>{cat.label}</IconSide>
                   </AddButton>
                 ))}
               {/* <Input

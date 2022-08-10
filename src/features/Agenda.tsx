@@ -4,6 +4,8 @@ import { Flex } from 'src/components/Flex'
 import { H1, H2, H3 } from 'src/components/Header'
 import { Eventful } from 'types'
 
+// TODO: show past days with less opacity
+
 interface Item {
   time?: Eventful.Time
 }
@@ -71,6 +73,7 @@ export const Agenda = <I extends Item = Item>({
   noTimeSubheader,
   noItemsText,
   renderItem,
+  //
   renderOnEveryDay = true,
 }: AgendaProps<I>) => {
   const tbdItems = useMemo(

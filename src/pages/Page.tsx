@@ -4,9 +4,12 @@ import { Flex } from 'src/components/Flex'
 import { useSession } from 'src/libs/session'
 import { FiHome } from 'react-icons/fi'
 import { Container } from 'src/components/Flex'
+import { useEffect } from 'react'
+import { Avatar } from 'src/components/Avatar'
 
 export const Page = () => {
   const { session } = useSession()
+
   return (
     <Container css={{ padding: '$root' }}>
       <Flex column fill>
@@ -17,8 +20,9 @@ export const Page = () => {
             </LinkButton>
           </Flex>
           {session ? (
-            <LinkButton to={`/u/${session.username}`}>{session.username}</LinkButton>
+            <Avatar username={session.username} size="medium" to={`/u/${session.username}`} />
           ) : (
+            // <LinkButton to={`/u/${session.username}`}>{session.username}</LinkButton>
             <LinkButton to="/auth">Log In</LinkButton>
           )}
         </Flex>
