@@ -1,7 +1,21 @@
-import { styled, css } from 'src/features/styled'
+import { styled, css } from 'src/libs/styled'
 
 const style = css({
   margin: 0,
+  transition: 'all ease-in-out 0.2s',
+  textDecorationLine: 'underline',
+  textDecorationColor: 'transparent',
+  fontWeight: 100,
+  variants: {
+    clickable: {
+      true: {
+        '&:hover': {
+          textDecorationColor: '$black',
+          cursor: 'pointer',
+        },
+      },
+    },
+  },
 })
 
 export const H1 = styled('h1', {

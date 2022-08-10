@@ -14,12 +14,12 @@
   - Plan
     - belongs to a group / event
     - (choose at least 2)
-      - what
-      - where
-      - duration (start/[end])
-      - person(s)
+      - [x] what
+      - [x] where
+      - [x] duration (start/[end])
+      - [ ] person(s)
         - checkbox for just including everyone (default TRUE~)
-  - Group
+  - ~~Group~~ --> Agenda filter
     - for grouping plans
     - has a...
       - name

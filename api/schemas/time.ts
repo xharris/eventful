@@ -1,11 +1,15 @@
 import { Schema } from 'mongoose'
-import type { Eventful } from 'types'
+import { Eventful } from 'types'
+
+const TimePart = new Schema<Eventful.TimePart>({
+  date: { type: Date, required: true },
+  allday: Boolean,
+})
 
 export default new Schema<Eventful.Time>(
   {
-    start: Date,
-    end: Date,
-    allday: Boolean,
+    start: TimePart,
+    end: TimePart,
   },
   { timestamps: true }
 )

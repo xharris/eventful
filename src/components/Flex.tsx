@@ -1,10 +1,11 @@
-import { styled } from 'src/features/styled'
+import { styled } from 'src/libs/styled'
 
 export const Flex = styled('div', {
   display: 'flex',
   flex: 1,
   gap: '$root',
   boxSizing: 'border-box',
+  color: '#212121',
   variants: {
     fill: {
       true: {
@@ -61,4 +62,11 @@ export const VStack = styled(Flex, {
       },
     },
   },
+})
+
+export const Container = styled(Flex, {
+  maxWidth: '800px',
+  width: '80%',
+  height: '100%',
+  margin: '0 auto',
 })

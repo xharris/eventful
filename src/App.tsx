@@ -1,5 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { SessionProvider, useSession } from './libs/session'
+import { globalStyles } from './libs/styled'
 import { Auth } from './pages/Auth'
 import { Event } from './pages/Event'
 import { Events } from './pages/Events'
@@ -8,24 +10,34 @@ import { User } from './pages/User'
 
 const qc = new QueryClient()
 
+const Inner = () => {
+  useSession(true)
+  return null
+}
+
 function App() {
+  globalStyles()
+
   return (
     <QueryClientProvider client={qc}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Page />}>
-            <Route index element={<Navigate to="/events" />} />
-            <Route path="events" element={<Events />} />
-            <Route path="e">
-              <Route path=":eventId" element={<Event />} />
+      <SessionProvider>
+        <Inner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Page />}>
+              <Route index element={<Navigate to="/events" />} />
+              <Route path="events" element={<Events />} />
+              <Route path="e">
+                <Route path=":eventId" element={<Event />} />
+              </Route>
+              <Route path="u">
+                <Route path=":username" element={<User />} />
+              </Route>
             </Route>
-            <Route path="u">
-              <Route path=":username" element={<User />} />
-            </Route>
-          </Route>
-          <Route path="auth" element={<Auth />} />
-        </Routes>
-      </BrowserRouter>
+            <Route path="auth" element={<Auth />} />
+          </Routes>
+        </BrowserRouter>
+      </SessionProvider>
     </QueryClientProvider>
   )
 }

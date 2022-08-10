@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { Button } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { H1 } from 'src/components/Header'
-import { useSession } from 'src/features/session'
+import { useSession } from 'src/libs/session'
 
 export const User = () => {
   const { username } = useParams()

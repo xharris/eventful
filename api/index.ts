@@ -3,6 +3,7 @@ import express from 'express'
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
 import session from 'express-session'
+import cookieSession from 'cookie-session'
 import { router } from './routes'
 import mongoose, { mongo } from 'mongoose'
 import cors from 'cors'
@@ -24,10 +25,9 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(
-  session({
+  cookieSession({
+    name: 'session',
     secret: process.env.SESSION_SECRET as string,
-    resave: false,
-    saveUninitialized: false,
   })
 )
 // routes

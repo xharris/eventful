@@ -13,10 +13,13 @@ declare namespace Eventful {
     latitude: number
     longitude: number
   }
+  interface TimePart {
+    date: Date
+    allday: boolean
+  }
   interface Time {
-    start?: Date
-    end?: Date
-    allday?: boolean
+    start?: TimePart
+    end?: TimePart
   }
 
   interface Document {
@@ -38,16 +41,18 @@ declare namespace Eventful {
   }
 
   interface Plan extends Document {
-    what: string
-    location: ID
-    time: Time
-    who: ID[]
+    event: ID
+    category: CATEGORY
+    what?: string
+    location?: Location
+    time?: Time
+    who?: ID[]
   }
 
   interface Location extends Document {
     label?: string
-    coords: LatLng
-    address: string
+    coords?: LatLng
+    address?: string
   }
 
   interface User extends Document {
@@ -70,14 +75,30 @@ declare namespace Eventful {
       }
     }
 
+    interface PlanGet extends Plan {
+      who?: User[]
+    }
+
     interface EventGet extends Event {
-      start: Date
-      end?: Date
-      allday?: boolean
+      time: Time
       groups: Group[]
+      plans: PlanGet[]
     }
 
     type EventAdd = Pick<Event, 'name'>
+
+    interface PlanAdd extends Omit<Plan, keyof Document | 'event'> {
+      location?: LocationAdd
+    }
+
+    interface PlanEdit extends Omit<Plan, keyof Document | 'event'> {
+      _id: ID
+      location?: LocationAdd
+      who?: User[]
+      category?: Plan['category']
+    }
+
+    interface LocationAdd extends Omit<Location, keyof Document> {}
 
     interface LogInOptions {
       username: string

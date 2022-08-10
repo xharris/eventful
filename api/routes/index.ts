@@ -1,6 +1,7 @@
-import express, { RequestHandler } from 'express'
+import express from 'express'
 import auth, { checkSession } from './auth'
-import event from './event'
+import * as event from './event'
+import * as plan from './plan'
 import type { Eventful } from 'types'
 
 export const router = express.Router()
@@ -23,4 +24,7 @@ const routes = (name: string, { route }: Eventful.API.RouteOptions) => {
   router.delete(`/${name}/:${name}Id`, checkSession, route.delete)
 }
 
-routes('event', event)
+// event
+routes('event', event.options)
+router.use(event.router)
+router.use(plan.router)

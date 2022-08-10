@@ -1,0 +1,97 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { FiFile, FiHome, FiMapPin, FiTruck } from 'react-icons/fi'
+import { Eventful } from 'types'
+import { api } from './api'
+
+export const CATEGORY = {
+  None: 0,
+  Lodging: 1,
+  Carpool: 2,
+  Meet: 3,
+}
+
+export interface CategoryInfo {
+  label: string
+  icon: JSX.Element
+  placeholder: Partial<Record<keyof Eventful.API.PlanAdd, string>>
+  fields: Partial<Record<keyof Eventful.API.PlanAdd, boolean>>
+}
+
+export const CATEGORY_INFO: Record<number, CategoryInfo> = {
+  0: {
+    label: 'Empty',
+    icon: <FiFile />,
+    placeholder: {
+      what: 'Name',
+      location: 'Location',
+      time: 'Time',
+      who: 'People',
+    },
+    fields: {
+      what: true,
+      time: true,
+      location: true,
+      who: true,
+    },
+  },
+  1: {
+    label: 'Lodging',
+    icon: <FiMapPin />,
+    placeholder: {
+      location: 'Where to stay?',
+    },
+    fields: {
+      location: true,
+      who: true,
+    },
+  },
+  2: {
+    label: 'Carpool',
+    icon: <FiHome />,
+    placeholder: {
+      what: 'Who is driving?',
+    },
+    fields: {
+      who: true,
+    },
+  },
+  3: {
+    label: 'Location',
+    icon: <FiTruck />,
+    placeholder: {
+      what: 'Where are you going?',
+    },
+    fields: {
+      location: true,
+      who: true,
+      time: true,
+    },
+  },
+}
+
+export const usePlans = ({ event }: { event?: string }) => {
+  const qc = useQueryClient()
+
+  const muAddPlan = useMutation(
+    (body: Eventful.API.PlanAdd) => api.post<Eventful.Plan>(`event/${event}/plans/add`, body),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries(['event', { id: event }])
+      },
+    }
+  )
+
+  const muUpdatePlan = useMutation(
+    (body: Eventful.API.PlanEdit) => api.put<Eventful.Plan>(`plan/${body._id}`, body),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries(['event', { id: event }])
+      },
+    }
+  )
+
+  return {
+    addPlan: muAddPlan.mutateAsync,
+    updatePlan: muUpdatePlan.mutateAsync,
+  }
+}

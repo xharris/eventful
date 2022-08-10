@@ -1,6 +1,7 @@
 import express, { RequestHandler } from 'express'
 import { user } from '../models'
 import bcrypt from 'bcrypt'
+import { Eventful } from 'types'
 
 // 3 months
 const REMEMBER_TIME = 1000 * 60 * 60 * 24 * 90
@@ -12,6 +13,14 @@ export const checkSession: RequestHandler = (req, res, next) => {
     res.status(401).send('UNAUTHORIZED')
   } else {
     next()
+  }
+}
+
+const newSession = (req: Express.Request, user: Eventful.User, remember?: boolean) => {
+  req.session.user = user
+  if (remember) {
+    req.sessionOptions.expires = new Date(Date.now() + REMEMBER_TIME)
+    req.sessionOptions.maxAge = REMEMBER_TIME
   }
 }
 
@@ -31,11 +40,7 @@ router.post('/signup', async (req, res) => {
     username: req.body.username,
     password: hashedPassword,
   })
-  req.session.user = docUser
-  if (req.body.remember) {
-    req.session.cookie.expires = new Date(Date.now() + REMEMBER_TIME)
-    req.session.cookie.maxAge = REMEMBER_TIME
-  }
+  newSession(req, docUser, req.body.remember)
   return res.status(200).send(docUser)
 })
 
@@ -50,11 +55,7 @@ router.post('/login', async (req, res) => {
   if (!(await bcrypt.compare(req.body.password, docUser.password))) {
     return res.sendStatus(401)
   }
-  req.session.user = docUser
-  if (req.body.remember) {
-    req.session.cookie.expires = new Date(Date.now() + REMEMBER_TIME)
-    req.session.cookie.maxAge = REMEMBER_TIME
-  }
+  newSession(req, docUser, req.body.remember)
   return res.status(200).send(docUser)
 })
 
