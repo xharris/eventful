@@ -4,6 +4,28 @@
   - locations + start/end dates/times
   - who is participating
 
+# ToDo
+
+- [x] get api/events start/end dates from plans
+- [x] contact list on user page
+- [ ] simple chat window
+  - message
+    - text (str)
+    - replyTo (message.\_id)
+- agenda
+  - show old events, but scroll to current date
+  - separate agendas for TBD and dated events? (two columns)
+    - OR make TDB collapsible (might prefer this one)
+
+# Nice features
+
+- [ ] very simple, mini calendar showing busy/free dates. also shown on event page to show when plans are.
+- [ ] notifications
+
+# Revisit Later
+
+- [ ] Carpool plan 'what' username autocomplete? Should the value just store a user id as a string and parse it differently in the UI?
+
 # How
 
 - Event (name)
@@ -17,7 +39,7 @@
       - [x] what
       - [x] where
       - [x] duration (start/[end])
-      - [ ] person(s)
+      - [x] person(s)
         - checkbox for just including everyone (default TRUE~)
   - ~~Group~~ --> Agenda filter
     - for grouping plans

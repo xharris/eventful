@@ -10,9 +10,12 @@ export const globalStyles = globalCss({
   '.rs__menu-portal': {
     zIndex: '100 !important',
   },
+  '[data-radix-popper-content-wrapper=""]': {
+    zIndex: '100 !important',
+  },
 })
 
-export const { styled, css, config } = createStitches({
+export const { styled, css, config, keyframes } = createStitches({
   utils: {
     w: (v: number | string) => ({ width: v }),
     h: (v: number | string) => ({ height: v }),
@@ -58,10 +61,32 @@ export const { styled, css, config } = createStitches({
       successFg: '#1B5E20',
       successBg: '#A5D6A7',
       red: '#F44336',
+      cardBg: '#ECEFF1',
     },
     shadows: {
       text: '-1px 0px 2px white, 1px 0px 2px white, 0px -1px 2px white, 0px 1px 2px white',
       card: '2px 2px 0px 0px #BDBDBD', //'0 0 3px 0px #BDBDBD',
+      popoverTrigger: '0px 0px 1px #212121',
     },
   },
+})
+
+export const slideUpAndFade = keyframes({
+  '0%': { opacity: 0, transform: 'translateY(2px)' },
+  '100%': { opacity: 1, transform: 'translateY(0)' },
+})
+
+export const slideRightAndFade = keyframes({
+  '0%': { opacity: 0, transform: 'translateX(-2px)' },
+  '100%': { opacity: 1, transform: 'translateX(0)' },
+})
+
+export const slideDownAndFade = keyframes({
+  '0%': { opacity: 0, transform: 'translateY(-2px)' },
+  '100%': { opacity: 1, transform: 'translateY(0)' },
+})
+
+export const slideLeftAndFade = keyframes({
+  '0%': { opacity: 0, transform: 'translateX(2px)' },
+  '100%': { opacity: 1, transform: 'translateX(0)' },
 })

@@ -15,6 +15,12 @@ const style = css({
         },
       },
     },
+    subtle: {
+      true: {
+        fontStyle: 'italic',
+        opacity: 0.75,
+      },
+    },
   },
 })
 

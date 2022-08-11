@@ -1,5 +1,5 @@
 import { css, styled } from 'src/libs/styled'
-import ReactSelect from 'react-select'
+import ReactSelect, { components } from 'react-select'
 import { ComponentProps } from 'react'
 
 export const selectCss = css({
@@ -27,8 +27,18 @@ export const selectCss = css({
   }
 })
 
-interface ISelectProps<O, isMulti extends boolean = false> extends ComponentProps<typeof ReactSelect<O, isMulti>> {}
+interface Option  {
+  value: unknown 
+  label: string
+  isFixed?: boolean
+}
 
-export const Select = <O, isMulti extends boolean = false>({ ...props }: ISelectProps<O, isMulti>) => {
-  return <ReactSelect<O, isMulti> {...props} className={selectCss()} classNamePrefix='rs' />
+interface ISelectProps<O extends Option, isMulti extends boolean = false> extends ComponentProps<typeof ReactSelect<O, isMulti>> {}
+
+export const Select = <O extends Option, isMulti extends boolean = false>({ ...props }: ISelectProps<O, isMulti>) => {
+  return <ReactSelect<O, isMulti> {...props} 
+    components={{
+      MultiValueRemove: (props) => props.data.isFixed ? null : <components.MultiValueRemove {...props} />
+    }}
+  className={selectCss()} classNamePrefix='rs' />
 }

@@ -11,6 +11,8 @@
     "dev": "concurrently -n api,web \"cross-env PORT=3000 yarn run api\" \"cross-env PORT=3001 yarn run start\""
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.0.0",
+    "@radix-ui/react-popover": "^1.0.0",
     "@stitches/react": "^1.2.8",
     "@tanstack/react-query": "^4.0.10",
     "@testing-library/jest-dom": "^5.14.1",

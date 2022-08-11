@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IconType } from 'react-icons'
 import { FiFile, FiHome, FiMapPin, FiTruck } from 'react-icons/fi'
+import { TbCar } from 'react-icons/tb'
 import { Eventful } from 'types'
 import { api } from './api'
 
@@ -48,7 +49,7 @@ export const CATEGORY_INFO: Record<number, CategoryInfo> = {
   },
   2: {
     label: 'Carpool',
-    icon: FiTruck,
+    icon: TbCar,
     placeholder: {
       what: 'Who is driving?',
     },
@@ -69,6 +70,17 @@ export const CATEGORY_INFO: Record<number, CategoryInfo> = {
       time: true,
     },
   },
+  // 4: {
+  //   label: 'Flight',
+  //   icon: FiMapPin,
+  //   placeholder: {
+  //     what: 'Flight Number',
+  //   },
+  //   fields: {
+  //     what: true,
+  //     who: true,
+  //   },
+  // }
 }
 
 export const usePlans = ({ event }: { event?: string }) => {
@@ -92,8 +104,15 @@ export const usePlans = ({ event }: { event?: string }) => {
     }
   )
 
+  const muDeletePlan = useMutation((id: Eventful.ID) => api.delete(`plan/${id}`), {
+    onSuccess: () => {
+      qc.invalidateQueries(['event', { id: event }])
+    },
+  })
+
   return {
     addPlan: muAddPlan.mutateAsync,
     updatePlan: muUpdatePlan.mutateAsync,
+    deletePlan: muDeletePlan.mutateAsync,
   }
 }

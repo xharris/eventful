@@ -1,10 +1,10 @@
 import { Time } from 'src/components/Time'
 import { useFormik } from 'formik'
 import { ReactNode, useEffect, useMemo } from 'react'
-import { FiMapPin, FiUsers, FiSave, FiArrowLeft, FiX, FiClock } from 'react-icons/fi'
+import { FiMapPin, FiUsers, FiSave, FiArrowLeft, FiX, FiClock, FiTrash2 } from 'react-icons/fi'
 import { Button } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
-import { H4, H5 } from 'src/components/Header'
+import { H4, H5, H6 } from 'src/components/Header'
 import { IconSide } from 'src/components/Icon'
 import { CategoryInfo, usePlans, CATEGORY_INFO, CATEGORY } from 'src/libs/plan'
 import { Eventful } from 'types'
@@ -15,6 +15,8 @@ import { Select } from 'src/components/Select'
 import { useContacts } from 'src/libs/contact'
 import { useSession } from 'src/libs/session'
 import { Avatar, AvatarGroup } from 'src/components/Avatar'
+import { Popover, PopoverContent, PopoverTrigger } from 'src/components/Popover'
+import { useEvent } from 'src/libs/event'
 
 interface EmptyProps {
   info: CategoryInfo
@@ -56,7 +58,7 @@ interface PlanProps {
 }
 
 export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
-  const { updatePlan } = usePlans({ event: plan.event.toString() })
+  const { updatePlan, deletePlan } = usePlans({ event: plan.event.toString() })
   const { handleChange, setFieldValue, resetForm, values, dirty, submitForm } =
     useFormik<Eventful.API.PlanEdit>({
       initialValues: {
@@ -75,6 +77,12 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
   const info = useMemo(() => CATEGORY_INFO[values.category ?? plan.category], [plan, values])
   const { session } = useSession()
   const { data: contacts } = useContacts({ user: session?._id })
+  const { data: event } = useEvent({ id: plan.event })
+
+  const whoOptions = useMemo(
+    () => [...(contacts ?? []), session].filter((user) => user != null) as Eventful.User[],
+    [contacts, session]
+  )
 
   return (
     <Flex
@@ -96,14 +104,16 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
       {editing && session ? (
         <>
           {info.fields.what && (
-            <Input
-              name="what"
-              small
-              value={values.what}
-              onChange={handleChange}
-              placeholder={info.placeholder.what}
-              variant="underline"
-            />
+            <IconSide icon={info.icon}>
+              <Input
+                name="what"
+                small
+                value={values.what}
+                onChange={handleChange}
+                placeholder={info.placeholder.what}
+                variant="underline"
+              />
+            </IconSide>
           )}
           {info.fields.location && (
             <IconSide icon={FiMapPin} color="$red" subtle>
@@ -132,16 +142,18 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
             <IconSide icon={FiUsers} subtle>
               <UserSelect
                 name="who"
-                users={[...(contacts ?? []), session]}
-                value={[...(contacts ?? []), session].filter((user) =>
-                  values.who?.find((user2) => user._id === user2)
-                )}
+                users={event?.who ?? []}
+                options={whoOptions}
+                value={event?.who?.filter((user) => values.who?.some((id) => id === user._id))}
                 onChange={(users) =>
                   setFieldValue(
                     'who',
                     users.map((user) => user._id)
                   )
                 }
+                fixedUsers={event?.who
+                  ?.filter((user) => !whoOptions.some((user2) => user2._id === user._id))
+                  .map((user) => user._id)}
               />
             </IconSide>
           )}
@@ -165,6 +177,20 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
                   square
                 >
                   <FiX />
+                </Button>
+              )}
+              {plan.createdBy === session._id && (
+                <Button
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to delete this plan?')) {
+                      deletePlan(plan._id)
+                      onClose()
+                    }
+                  }}
+                  variant="ghost"
+                  square
+                >
+                  <FiTrash2 />
                 </Button>
               )}
             </Flex>
@@ -196,13 +222,38 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
                     color: !!plan.what?.length ? '$black' : '$disabled',
                   }}
                 >
-                  {plan.what}
+                  {plan.category === CATEGORY.Carpool ? `${plan.what} carpool` : plan.what}
                 </H4>
               )}
             </IconSide>
             {info.fields.who && (
               <Flex flex="0">
-                <AvatarGroup avatars={plan.who} />
+                {!!plan.who?.length && (
+                  <Popover>
+                    <PopoverTrigger clickable>
+                      <AvatarGroup
+                        avatars={plan.who.map((user) => ({
+                          username: user.username,
+                        }))}
+                      />
+                    </PopoverTrigger>
+                    <PopoverContent>
+                      <Flex column css={{ gap: '$small' }}>
+                        <H5>{`Participants (${plan.who.length})`}</H5>
+                        <Flex css={{ flexWrap: 'wrap', overflow: 'auto', gap: 7 }}>
+                          {plan.who.map((user) => (
+                            <Avatar
+                              key={user._id.toString()}
+                              username={user.username}
+                              size="medium"
+                              to={`/u/${user.username}`}
+                            />
+                          ))}
+                        </Flex>
+                      </Flex>
+                    </PopoverContent>
+                  </Popover>
+                )}
               </Flex>
             )}
           </Flex>

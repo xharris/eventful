@@ -27,8 +27,10 @@ declare namespace Eventful {
   interface Document {
     _id: ID
     createdBy?: ID
-    createdAt: Date
-    updatedAt: Date
+    /** Date */
+    createdAt: string
+    /** Date */
+    updatedAt: string
   }
 
   interface Event extends Document {
@@ -85,6 +87,7 @@ declare namespace Eventful {
       time: Time
       groups: Group[]
       plans: PlanGet[]
+      who: User[]
     }
 
     type EventAdd = Pick<Event, 'name'>

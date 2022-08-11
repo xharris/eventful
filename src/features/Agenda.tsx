@@ -1,5 +1,5 @@
 import moment from 'moment'
-import { ReactNode, useMemo } from 'react'
+import { ReactNode, useEffect, useMemo } from 'react'
 import { Flex } from 'src/components/Flex'
 import { H1, H2, H3 } from 'src/components/Header'
 import { Eventful } from 'types'
@@ -8,6 +8,7 @@ import { Eventful } from 'types'
 
 interface Item {
   time?: Eventful.Time
+  createdAt: string
 }
 
 interface MonthProps<I extends Item> {
@@ -23,7 +24,7 @@ const Month = <I extends Item = Item>({ label, days, renderItem }: MonthProps<I>
         marginLeft: '3rem',
         color: '#616161',
         background: 'linear-gradient(to bottom, $background 90%, transparent)',
-        zIndex: 10,
+        zIndex: 1,
         padding: '0.5rem 0',
         position: 'sticky',
         top: 0,
@@ -48,7 +49,13 @@ const Month = <I extends Item = Item>({ label, days, renderItem }: MonthProps<I>
               {day}
             </H3>
             <Flex column css={{ gap: '$controlPadding' }}>
-              {items.map((item) => renderItem(item))}
+              {items
+                .sort(
+                  (a, b) =>
+                    new Date(a.createdAt).getMilliseconds() -
+                    new Date(b.createdAt).getMilliseconds()
+                )
+                .map((item) => renderItem(item))}
             </Flex>
             <Flex flex="0" css={{ minWidth: 35 }} />
           </Flex>
@@ -76,9 +83,15 @@ export const Agenda = <I extends Item = Item>({
   //
   renderOnEveryDay = true,
 }: AgendaProps<I>) => {
+  useEffect(() => {
+    console.log(items)
+  }, [items])
+
   const tbdItems = useMemo(
     () => ({
-      [noTimeSubheader ?? '']: items?.filter((item) => !item.time?.start) ?? [],
+      [noTimeSubheader ?? '']: (items?.filter((item) => !item.time?.start) ?? []).sort(
+        (a, b) => new Date(a.createdAt).getMilliseconds() - new Date(b.createdAt).getMilliseconds()
+      ),
     }),
     [items, noTimeSubheader]
   )

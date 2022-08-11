@@ -88,6 +88,7 @@ export const AvatarGroup = ({ avatars, limit = 3, ...props }: AvatarGroupProps) 
       gap: '$small',
       alignItems: 'center',
     }}
+    flex="0"
   >
     <Flex
       css={{

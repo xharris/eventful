@@ -4,7 +4,8 @@ import { Eventful } from 'types'
 import express from 'express'
 import { checkSession } from './auth'
 
-const eventAggr: PipelineStage[] = [
+// new Types.ObjectId(req.session.user?._id)
+const eventAggr: (req: Express.Request) => PipelineStage[] = (req) => [
   {
     $lookup: {
       from: 'plans',
@@ -21,6 +22,86 @@ const eventAggr: PipelineStage[] = [
           },
         },
       ],
+    },
+  },
+  {
+    $match: {
+      $or: [
+        {
+          createdBy: new Types.ObjectId(req.session.user?._id),
+        },
+        {
+          'plans.who._id': new Types.ObjectId(req.session.user?._id),
+        },
+      ],
+    },
+  },
+  {
+    $unwind: {
+      path: '$plans',
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
+    $group: {
+      _id: '$_id',
+      event: {
+        $first: '$$ROOT',
+      },
+      plans: {
+        $addToSet: '$plans',
+      },
+      who: {
+        $addToSet: '$plans.who._id',
+      },
+      start: {
+        $min: '$plans.time.start',
+      },
+      end: {
+        $max: '$plans.time.end',
+      },
+    },
+  },
+  {
+    $replaceRoot: {
+      newRoot: {
+        $mergeObjects: [
+          '$event',
+          {
+            who: '$who',
+            plans: '$plans',
+            time: { start: '$start', end: '$end' },
+          },
+        ],
+      },
+    },
+  },
+  {
+    $set: {
+      who: {
+        $reduce: {
+          input: '$who',
+          initialValue: [],
+          in: {
+            $concatArrays: ['$$value', '$$this'],
+          },
+        },
+      },
+    },
+  },
+  {
+    $set: {
+      who: {
+        $setUnion: ['$who', ['$createdBy']],
+      },
+    },
+  },
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'who',
+      foreignField: '_id',
+      as: 'who',
     },
   },
 ]
@@ -47,14 +128,7 @@ export const options: Eventful.API.RouteOptions = {
           - where plan.event == eventId && plan.who.includes(session user)
           - where plan.event == eventId && plan.createdBy == session user
       */
-      const docEvents: Eventful.API.EventGet[] = await event.aggregate([
-        {
-          $match: {
-            createdBy: new Types.ObjectId(req.session.user?._id),
-          },
-        },
-        ...eventAggr,
-      ])
+      const docEvents: Eventful.API.EventGet[] = await event.aggregate(eventAggr(req))
       return res.send(docEvents)
     },
     get: async (req, res) => {
@@ -64,7 +138,7 @@ export const options: Eventful.API.RouteOptions = {
             _id: new Types.ObjectId(req.params.eventId),
           },
         },
-        ...eventAggr,
+        ...eventAggr(req),
       ])
       if (!docEvents.length) {
         return res.sendStatus(404)

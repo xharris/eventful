@@ -24,7 +24,7 @@ export const useEvents = () => {
   }
 }
 
-export const useEvent = ({ id }: { id?: string }) => {
+export const useEvent = ({ id }: { id?: Eventful.ID | string }) => {
   const query = useQuery<Eventful.API.EventGet>(
     ['event', { id }],
     () => api.get(`event/${id}`).then((res) => res.data),

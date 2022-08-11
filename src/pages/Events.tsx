@@ -4,16 +4,28 @@ import { Input } from 'src/components/Input'
 import { useEvents } from 'src/libs/event'
 import { FiPlus } from 'react-icons/fi'
 import { useMemo, useState } from 'react'
-import { H1, H3, H4 } from 'src/components/Header'
+import { H1, H3, H4, H5 } from 'src/components/Header'
 import { Eventful } from 'types'
 import { useNavigate } from 'react-router-dom'
 import { Agenda } from 'src/features/Agenda'
 import { useSession } from 'src/libs/session'
+import { Time } from 'src/components/Time'
+import { AvatarGroup } from 'src/components/Avatar'
 
 const Event = ({ event }: { event: Eventful.API.EventGet }) => (
   <LinkButton to={`/e/${event._id}`} css={{ width: '100%' }} variant="ghost">
     <Flex>
-      <H3>{event.name}</H3>
+      <Flex column css={{ alignItems: 'flex-start', gap: '$small' }}>
+        <H3>{event.name}</H3>
+        <H4>
+          <Time time={event.time} />
+        </H4>
+      </Flex>
+      <AvatarGroup
+        avatars={event.who.map((user) => ({
+          username: user.username,
+        }))}
+      />
     </Flex>
   </LinkButton>
 )
@@ -36,6 +48,7 @@ export const Events = () => {
         noTimeSubheader="TBD"
         noItemsText="No events yet... create one below!"
         renderItem={(event) => <Event key={event._id.toString()} event={event} />}
+        renderOnEveryDay={false}
       />
       <Flex
         css={{
