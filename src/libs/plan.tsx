@@ -45,6 +45,7 @@ export const CATEGORY_INFO: Record<number, CategoryInfo> = {
     fields: {
       location: true,
       who: true,
+      time: true,
     },
   },
   2: {
@@ -66,7 +67,6 @@ export const CATEGORY_INFO: Record<number, CategoryInfo> = {
     },
     fields: {
       location: true,
-      who: true,
       time: true,
     },
   },

@@ -83,10 +83,6 @@ export const Agenda = <I extends Item = Item>({
   //
   renderOnEveryDay = true,
 }: AgendaProps<I>) => {
-  useEffect(() => {
-    console.log(items)
-  }, [items])
-
   const tbdItems = useMemo(
     () => ({
       [noTimeSubheader ?? '']: items

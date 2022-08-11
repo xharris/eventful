@@ -120,7 +120,7 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
               <Input
                 name="location.address"
                 small
-                value={values.location?.address}
+                value={values.location?.address ?? ''}
                 placeholder={info.placeholder.location}
                 onChange={handleChange}
                 variant="underline"
@@ -212,7 +212,9 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
         <Empty plan={plan} info={info} onEdit={onEdit}>
           <Flex>
             <IconSide icon={plan.category !== CATEGORY.None ? info.icon : undefined}>
-              {info.fields.what && (
+              {(info.fields.what ||
+                plan.category === CATEGORY.Lodging ||
+                plan.category === CATEGORY.Meet) && (
                 <H4
                   clickable
                   onClick={() => onEdit()}
@@ -222,7 +224,11 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
                     color: !!plan.what?.length ? '$black' : '$disabled',
                   }}
                 >
-                  {plan.category === CATEGORY.Carpool ? `${plan.what} carpool` : plan.what}
+                  {plan.category === CATEGORY.Carpool
+                    ? `${plan.what} carpool`
+                    : plan.category === CATEGORY.Lodging || plan.category === CATEGORY.Meet
+                    ? plan.location?.label ?? plan.location?.address
+                    : plan.what}
                 </H4>
               )}
             </IconSide>

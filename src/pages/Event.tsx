@@ -1,45 +1,68 @@
 import { useParams } from 'react-router-dom'
-import { AddButton } from 'src/components/Button'
+import { AddButton, Button } from 'src/components/Button'
 import { Flex, HStack } from 'src/components/Flex'
-import { H1 } from 'src/components/Header'
+import { H1, H3 } from 'src/components/Header'
 import { Input } from 'src/components/Input'
 import { useEvent } from 'src/libs/event'
 import { useSession } from 'src/libs/session'
-import { FiFile } from 'react-icons/fi'
+import { FiFile, FiSave } from 'react-icons/fi'
 import { CATEGORY, CATEGORY_INFO, usePlans } from 'src/libs/plan'
 import { Agenda } from 'src/features/Agenda'
 import { Eventful } from 'types'
 import { useState } from 'react'
 import { Plan } from 'src/features/Plan'
 import { Icon, IconSide } from 'src/components/Icon'
+import { useFormik } from 'formik'
+import { Time } from 'src/components/Time'
 
 export const Event = () => {
   const { eventId } = useParams()
-  const { data: event } = useEvent({ id: eventId })
+  const { data: event, updateEvent } = useEvent({ id: eventId })
   const { session } = useSession()
   const { addPlan } = usePlans({ event: eventId })
   const [editing, setEditing] = useState<Eventful.ID>()
+  const { dirty, handleChange, submitForm } = useFormik<Eventful.API.EventUpdate>({
+    initialValues: {
+      name: event?.name ?? '',
+    },
+    enableReinitialize: true,
+    onSubmit: (values) => {
+      updateEvent(values)
+    },
+  })
 
   return (
     <Flex column fill css={{ alignItems: 'stretch' }}>
-      <Flex column flex="0" css={{ alignItems: 'flex-start' }}>
-        {session?._id.toString() === event?.createdBy?.toString() ? (
-          <Input
-            name="name"
-            defaultValue={event?.name}
-            onChange={(e) => console.log(e.target.value)}
-            variant="underline"
-            placeholder="Add name"
-            css={{ fontSize: '$6', flex: 1, minWidth: '50%' }}
-          />
-        ) : (
-          <H1
-            css={{
-              minWidth: '50%',
-            }}
-          >
-            {event?.name}
-          </H1>
+      <Flex flex="0" css={{ alignItems: 'center' }}>
+        <Flex column>
+          {session?._id.toString() === event?.createdBy?.toString() ? (
+            <Input
+              name="name"
+              defaultValue={event?.name}
+              onChange={handleChange}
+              variant="underline"
+              placeholder="Add name"
+              css={{ fontSize: '$6', flex: 1, minWidth: '50%' }}
+            />
+          ) : (
+            <H1
+              css={{
+                minWidth: '50%',
+              }}
+            >
+              {event?.name}
+            </H1>
+          )}
+          {event?.time.start || event?.time.end ? (
+            <Time time={event.time} css={{ fontSize: '$6' }} />
+          ) : (
+            <Flex css={{ fontSize: '$6' }}>TBD</Flex>
+          )}
+        </Flex>
+        {dirty && (
+          <Button onClick={() => submitForm()}>
+            <IconSide icon={FiSave}>Save</IconSide>
+          </Button>
         )}
       </Flex>
       <Flex

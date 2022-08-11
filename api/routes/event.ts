@@ -167,7 +167,6 @@ export const options: Eventful.API.RouteOptions = {
 export const router = express.Router()
 
 router.post<{ eventId: string }>('/event/:eventId/plans/add', checkSession, async (req, res) => {
-  console.log(req.session)
   const docPlan = await plan.create({
     who: [],
     category: req.body.category ?? 0,

@@ -30,6 +30,19 @@ export const useEvent = ({ id }: { id?: Eventful.ID | string }) => {
     () => api.get(`event/${id}`).then((res) => res.data),
     { enabled: !!id }
   )
+  const qc = useQueryClient()
 
-  return query
+  const muUpdateEvent = useMutation(
+    (body: Eventful.API.EventUpdate) => api.put(`event/${id}`, body),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries(['event', { id }])
+      },
+    }
+  )
+
+  return {
+    ...query,
+    updateEvent: muUpdateEvent.mutateAsync,
+  }
 }

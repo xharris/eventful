@@ -90,6 +90,8 @@ declare namespace Eventful {
       who: User[]
     }
 
+    interface EventUpdate extends Omit<Event, keyof Document> {}
+
     type EventAdd = Pick<Event, 'name'>
 
     interface PlanAdd extends Omit<Plan, keyof Document | 'event'> {
