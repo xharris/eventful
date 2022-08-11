@@ -75,7 +75,7 @@ interface AgendaProps<I extends Item> {
 }
 
 export const Agenda = <I extends Item = Item>({
-  items,
+  items = [],
   noTimeHeader,
   noTimeSubheader,
   noItemsText,
@@ -89,9 +89,12 @@ export const Agenda = <I extends Item = Item>({
 
   const tbdItems = useMemo(
     () => ({
-      [noTimeSubheader ?? '']: (items?.filter((item) => !item.time?.start) ?? []).sort(
-        (a, b) => new Date(a.createdAt).getMilliseconds() - new Date(b.createdAt).getMilliseconds()
-      ),
+      [noTimeSubheader ?? '']: items
+        .filter((item) => !item.time?.start)
+        .sort(
+          (a, b) =>
+            new Date(a.createdAt).getMilliseconds() - new Date(b.createdAt).getMilliseconds()
+        ),
     }),
     [items, noTimeSubheader]
   )
@@ -99,7 +102,7 @@ export const Agenda = <I extends Item = Item>({
   const datedItems = useMemo(
     () =>
       items
-        ?.filter((item) => !!item.time?.start)
+        .filter((item) => !!item.time?.start)
         .reduce((months, item) => {
           const start = moment(item.time?.start?.date)
           const end = moment(item.time?.end?.date ?? item.time?.start?.date)
@@ -125,9 +128,9 @@ export const Agenda = <I extends Item = Item>({
   return (
     <Flex
       column
-      css={{ overflow: 'auto', justifyContent: !items?.length ? 'center' : 'flex-start' }}
+      css={{ overflow: 'auto', justifyContent: !items.length ? 'center' : 'flex-start' }}
     >
-      {!!items?.length ? (
+      {!!items.length ? (
         <>
           {!!tbdItems[noTimeSubheader ?? ''].length && (
             <Month label={noTimeHeader} days={tbdItems} renderItem={renderItem} />
