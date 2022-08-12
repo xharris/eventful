@@ -10,6 +10,7 @@ export const useMessages = ({ event }: { event?: Eventful.ID }) => {
     () => api.get(`event/${event}/messages`).then((res) => res.data),
     {
       enabled: !!event,
+      staleTime: Infinity,
     }
   )
   const qc = useQueryClient()
@@ -21,8 +22,8 @@ export const useMessages = ({ event }: { event?: Eventful.ID }) => {
     'message:add',
     (message: Eventful.API.MessageGet) => {
       qc.setQueriesData<Eventful.API.MessageGet[]>(['messages', { event }], (old = []) => [
-        ...old,
         message,
+        ...old,
       ])
     },
     [qc, event]

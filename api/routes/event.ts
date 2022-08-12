@@ -205,5 +205,6 @@ router.get('/event/:eventId/messages', checkSession, async (req, res) => {
       event: req.params.eventId,
     })
     .populate('createdBy')
+    .sort({ createdAt: -1 })
   return res.send(docMessages)
 })

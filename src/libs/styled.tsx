@@ -64,6 +64,7 @@ export const { styled, css, config, keyframes } = createStitches({
       cardBg: '#ECEFF1',
     },
     shadows: {
+      none: '0px 0px 0px #BDBDBD',
       text: '-1px 0px 2px white, 1px 0px 2px white, 0px -1px 2px white, 0px 1px 2px white',
       card: '2px 2px 0px 0px #BDBDBD', //'0 0 3px 0px #BDBDBD',
       popoverTrigger: '0px 0px 1px #212121',

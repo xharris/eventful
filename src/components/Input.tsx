@@ -1,3 +1,6 @@
+import { ComponentProps } from '@stitches/react'
+import React, { forwardRef, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import reactTextareaAutosize from 'react-textarea-autosize'
 import { css, styled } from 'src/libs/styled'
 
 export const InputStyle = css({
@@ -39,3 +42,4 @@ export const InputStyle = css({
 })
 
 export const Input = styled('input', InputStyle)
+export const TextArea = styled(reactTextareaAutosize, InputStyle)

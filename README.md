@@ -8,7 +8,7 @@
 
 - [x] get api/events start/end dates from plans
 - [x] contact list on user page
-- [ ] simple chat window
+- [x] simple chat window
   - message
     - text (str)
     - replyTo (message.\_id)
