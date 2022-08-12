@@ -19,7 +19,7 @@ router.put('/message/:messageId', checkSession, async (req, res) => {
   if (!docMessage) {
     return res.sendStatus(404)
   }
-  req.io.to(`event/${docMessage.event}`).emit('message:add', docMessage)
+  req.io.to(`event/${docMessage.event}`).emit('message:edit', docMessage)
   return res.send(docMessage)
 })
 

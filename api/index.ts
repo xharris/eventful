@@ -64,11 +64,13 @@ io.on('connection', (socket) => {
       ...eventAggr(user),
     ])
     if (docEvent) {
+      console.log(socket.id, 'join', `event/${eventId}`)
       socket.join(`event/${eventId}`)
     }
   })
   socket.on('event:leave', (eventId) => {
-    if (!eventId) return
+    if (!eventId || !socket.rooms.has(`event/${eventId}`)) return
+    console.log(socket.id, 'leaves', `event/${eventId}`)
     socket.leave(`event/${eventId}`)
   })
 })

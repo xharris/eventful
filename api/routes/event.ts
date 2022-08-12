@@ -188,6 +188,14 @@ router.post('/event/:eventId/messages/add', checkSession, async (req, res) => {
     replyTo: req.body.replyTo,
     createdBy: req.session.user,
   })
+  message
+    .findById<Eventful.API.MessageGet>(docMessage._id)
+    .populate('createdBy')
+    .then((doc) => {
+      if (doc) {
+        req.io.to(`event/${docMessage.event}`).emit('message:add', doc)
+      }
+    })
   return res.send(docMessage)
 })
 

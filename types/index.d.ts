@@ -144,6 +144,7 @@ export interface ClientToServerEvents {
 
 export interface ServerToClientEvents {
   'message:add': (message: Eventful.API.MessageGet) => void
+  'message:edit': (message: Eventful.API.MessageGet) => void
   'message:delete': (message: Eventful.ID) => void
 }
 

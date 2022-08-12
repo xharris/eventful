@@ -33,7 +33,7 @@ export const Event = () => {
   })
 
   return (
-    <Flex column fill css={{ alignItems: 'stretch', overflow: 'hidden' }}>
+    <Flex column fill css={{ alignItems: 'stretch', overflow: 'hidden', padding: 2 }}>
       <Flex flex="0" css={{ alignItems: 'center' }}>
         <Flex column>
           {session?._id.toString() === event?.createdBy?.toString() ? (
