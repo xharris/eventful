@@ -24,10 +24,10 @@ const Month = <I extends Item = Item>({ label, days, renderItem }: MonthProps<I>
         marginLeft: '3rem',
         color: '#616161',
         background: 'linear-gradient(to bottom, $background 90%, transparent)',
-        zIndex: 1,
+        zIndex: 10,
         padding: '0.5rem 0',
         position: 'sticky',
-        top: 0,
+        top: -2,
       }}
     >
       {label}
@@ -124,7 +124,11 @@ export const Agenda = <I extends Item = Item>({
   return (
     <Flex
       column
-      css={{ overflow: 'auto', justifyContent: !items.length ? 'center' : 'flex-start' }}
+      css={{
+        padding: '2px 0px',
+        overflow: 'auto',
+        justifyContent: !items.length ? 'center' : 'flex-start',
+      }}
     >
       {!!items.length ? (
         <>

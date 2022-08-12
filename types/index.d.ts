@@ -2,6 +2,7 @@ import { RequestHandler } from 'express'
 import { SessionData } from 'express-session'
 import { Session } from 'inspector'
 import { Types } from 'mongoose'
+import { Server } from 'socket.io'
 
 declare namespace Eventful {
   export type ID = Types.ObjectId
@@ -68,6 +69,12 @@ declare namespace Eventful {
     user: ID
   }
 
+  interface Message extends Document {
+    text: string
+    event: ID
+    replyTo: ID
+  }
+
   namespace API {
     interface RouteOptions {
       route: {
@@ -107,6 +114,14 @@ declare namespace Eventful {
 
     interface LocationAdd extends Omit<Location, keyof Document> {}
 
+    interface MessageGet extends Message {
+      createdBy: User
+    }
+
+    interface MessageAdd extends Pick<Message, 'text' | 'replyTo'> {
+      replyTo?: Message['replyTo']
+    }
+
     interface LogInOptions {
       username: string
       password: string
@@ -122,14 +137,27 @@ declare namespace Eventful {
   }
 }
 
+export interface ClientToServerEvents {
+  'event:join': (event: Eventful.ID, user: Eventful.ID) => void
+  'event:leave': (event: Eventful.ID) => void
+}
+
+export interface ServerToClientEvents {
+  'message:add': (message: Eventful.API.MessageGet) => void
+  'message:delete': (message: Eventful.ID) => void
+}
+
 declare module 'express-session' {
   interface SessionData {
     user: Eventful.User
   }
 }
 
-declare module 'express' {
-  interface Request {
-    session: (Session & Partial<SessionData>) | null
+declare global {
+  namespace Express {
+    interface Request {
+      io: Server<ClientToServerEvents, ServerToClientEvents>
+      session: (Session & Partial<SessionData>) | null
+    }
   }
 }

@@ -4,10 +4,15 @@ import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
 import cookieSession from 'cookie-session'
 import { router } from './routes'
-import mongoose, { mongo } from 'mongoose'
+import mongoose from 'mongoose'
 import cors from 'cors'
 import morgan from 'morgan'
 import path from 'path'
+import { Server } from 'socket.io'
+import http from 'http'
+import { ClientToServerEvents, ServerToClientEvents } from 'types'
+import { event } from './models'
+import { eventAggr } from './routes/event'
 
 const PORT = process.env.PORT ?? 3000
 const DATABASE_URI = `${process.env.DATABASE_URI}/${process.env.DATABASE_NAME}`
@@ -30,6 +35,43 @@ app.use(
     secure: process.env.NODE_ENV === 'production',
   })
 )
+// database
+mongoose
+  .connect(DATABASE_URI)
+  .then(() => console.log(`Database connected to ${DATABASE_URI}`))
+  .catch(console.error)
+// socket
+const server = http.createServer(app)
+const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
+  cors: {
+    origin: true,
+    credentials: true,
+  },
+})
+app.use((req, _, next) => {
+  req.io = io
+  next()
+})
+io.on('connection', (socket) => {
+  socket.on('event:join', async (eventId, user) => {
+    if (!eventId && !user) return
+    const docEvent = await event.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(eventId),
+        },
+      },
+      ...eventAggr(user),
+    ])
+    if (docEvent) {
+      socket.join(`event/${eventId}`)
+    }
+  })
+  socket.on('event:leave', (eventId) => {
+    if (!eventId) return
+    socket.leave(`event/${eventId}`)
+  })
+})
 // routes
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../build')))
@@ -41,12 +83,7 @@ if (process.env.NODE_ENV === 'production') {
     res.sendFile(path.join(__dirname, '../build', 'index.html'), (err) => err && console.log(err))
   )
 }
-// database
-mongoose
-  .connect(DATABASE_URI)
-  .then(() => console.log(`Database connected to ${DATABASE_URI}`))
-  .catch(console.error)
 // server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`)
 })

@@ -1,11 +1,11 @@
-import { event, group, plan, location } from 'api/models'
+import { event, group, plan, location, message } from 'api/models'
 import { PipelineStage, Types } from 'mongoose'
 import { Eventful } from 'types'
 import express from 'express'
 import { checkSession } from './auth'
 
 // new Types.ObjectId(req.session.user?._id)
-const eventAggr: (req: Express.Request) => PipelineStage[] = (req) => [
+export const eventAggr: (user?: Eventful.ID) => PipelineStage[] = (user) => [
   {
     $lookup: {
       from: 'plans',
@@ -28,10 +28,10 @@ const eventAggr: (req: Express.Request) => PipelineStage[] = (req) => [
     $match: {
       $or: [
         {
-          createdBy: new Types.ObjectId(req.session.user?._id),
+          createdBy: new Types.ObjectId(user),
         },
         {
-          'plans.who._id': new Types.ObjectId(req.session.user?._id),
+          'plans.who._id': new Types.ObjectId(user),
         },
       ],
     },
@@ -128,7 +128,9 @@ export const options: Eventful.API.RouteOptions = {
           - where plan.event == eventId && plan.who.includes(session user)
           - where plan.event == eventId && plan.createdBy == session user
       */
-      const docEvents: Eventful.API.EventGet[] = await event.aggregate(eventAggr(req))
+      const docEvents: Eventful.API.EventGet[] = await event.aggregate(
+        eventAggr(req.session.user?._id)
+      )
       return res.send(docEvents)
     },
     get: async (req, res) => {
@@ -138,7 +140,7 @@ export const options: Eventful.API.RouteOptions = {
             _id: new Types.ObjectId(req.params.eventId),
           },
         },
-        ...eventAggr(req),
+        ...eventAggr(req.session.user?._id),
       ])
       if (!docEvents.length) {
         return res.sendStatus(404)
@@ -177,4 +179,23 @@ router.post<{ eventId: string }>('/event/:eventId/plans/add', checkSession, asyn
     event: new Types.ObjectId(req.params.eventId),
   })
   return res.send(docPlan)
+})
+
+router.post('/event/:eventId/messages/add', checkSession, async (req, res) => {
+  const docMessage = await message.create({
+    text: req.body.text,
+    event: req.params.eventId,
+    replyTo: req.body.replyTo,
+    createdBy: req.session.user,
+  })
+  return res.send(docMessage)
+})
+
+router.get('/event/:eventId/messages', checkSession, async (req, res) => {
+  const docMessages = await message
+    .find({
+      event: req.params.eventId,
+    })
+    .populate('createdBy')
+  return res.send(docMessages)
 })

@@ -14,6 +14,7 @@ import { Plan } from 'src/features/Plan'
 import { Icon, IconSide } from 'src/components/Icon'
 import { useFormik } from 'formik'
 import { Time } from 'src/components/Time'
+import { Chat } from 'src/features/Chat'
 
 export const Event = () => {
   const { eventId } = useParams()
@@ -32,7 +33,7 @@ export const Event = () => {
   })
 
   return (
-    <Flex column fill css={{ alignItems: 'stretch' }}>
+    <Flex column fill css={{ alignItems: 'stretch', overflow: 'hidden' }}>
       <Flex flex="0" css={{ alignItems: 'center' }}>
         <Flex column>
           {session?._id.toString() === event?.createdBy?.toString() ? (
@@ -67,6 +68,7 @@ export const Event = () => {
       </Flex>
       <Flex
         css={{
+          overflow: 'hidden',
           flexDirection: 'column',
           '@phablet': {
             flexDirection: 'row',
@@ -90,13 +92,14 @@ export const Event = () => {
             />
           )}
         />
-        <Flex></Flex>
+        <Chat event={event?._id} />
       </Flex>
       <Flex
         column
         css={{
           flex: 0,
           background: '$background',
+          padding: 5,
         }}
       >
         {session && (

@@ -13,7 +13,7 @@ import { Time } from 'src/components/Time'
 import { AvatarGroup } from 'src/components/Avatar'
 
 const Event = ({ event }: { event: Eventful.API.EventGet }) => (
-  <LinkButton to={`/e/${event._id}`} css={{ width: '100%' }} variant="ghost">
+  <LinkButton to={`/e/${event._id}`} css={{ width: '100%', padding: '0.3rem' }} variant="ghost">
     <Flex>
       <Flex column css={{ alignItems: 'flex-start', gap: '$small' }}>
         <H3>{event.name}</H3>
