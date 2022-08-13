@@ -3,7 +3,7 @@ import { fcmToken, notificationSetting } from './models'
 
 admin.initializeApp({
   credential: admin.credential.cert({
-    projectId: process.env.FIREBASE_PROJECT_ID,
+    projectId: process.env.FIREBASE_PROJECT_ID ?? 'empty',
     privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
   }),
@@ -16,6 +16,7 @@ const chunkArray = <T>(arr: T[], size: number) =>
     .map((_, i) => arr.slice(i * size, i * size + size))
 
 const instance = admin.messaging()
+
 export const messaging: Express.Request['fcm'] = {
   messaging: instance,
   send: async (setting, data) => {
