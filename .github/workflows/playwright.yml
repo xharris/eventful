@@ -16,12 +16,17 @@ jobs:
       SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
       REACT_APP_SOCKET_URL: ${{ secrets.REACT_APP_SOCKET_URL }}
       REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+      FIREBASE_PROJECT_ID: ''
+      FIREBASE_PRIVATE_KEY: ''
+      FIREBASE_CLIENT_EMAIL: ''
+      REACT_APP_FIREBASE_API_KEY: ''
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
+          node-version: 16
+          cache: 'yarn'
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
