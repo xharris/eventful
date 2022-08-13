@@ -4,6 +4,7 @@ import * as event from './event'
 import * as plan from './plan'
 import * as user from './user'
 import * as contact from './contact'
+import * as message from './message'
 import type { Eventful } from 'types'
 
 export const router = express.Router()
@@ -32,3 +33,4 @@ router.use(event.router)
 router.use(plan.router)
 router.use(contact.router)
 router.use(user.router)
+router.use(message.router)

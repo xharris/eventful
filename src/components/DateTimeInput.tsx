@@ -1,6 +1,6 @@
 import { ComponentProps } from '@stitches/react'
 import moment from 'moment'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { styled } from 'src/libs/styled'
 import { Eventful } from 'types'
 import { Flex } from './Flex'
@@ -31,7 +31,7 @@ export const DateTimeInput = ({
     defaultValue ? moment(defaultValue?.date).format('YYYY-MM-DD') : null
   )
   const [time, setTime] = useState<string | null>(
-    defaultValue ? moment(defaultValue?.date).format('HH:MM') : null
+    defaultValue ? moment(defaultValue?.date).format('HH:mm') : null
   )
   const [allday, setAllday] = useState(defaultValue?.allday)
 
@@ -42,7 +42,7 @@ export const DateTimeInput = ({
         onChange(
           _date
             ? {
-                date: moment([_date, _time ?? ''].join(' '), 'YYYY-MM-DD HH:MM').toDate(),
+                date: moment([_date, _time ?? ''].join(' '), 'YYYY-MM-DD HH:mm').toDate(),
                 allday: !_time,
               }
             : null

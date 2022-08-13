@@ -228,7 +228,9 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
                     ? `${plan.what} carpool`
                     : plan.category === CATEGORY.Lodging || plan.category === CATEGORY.Meet
                     ? plan.location?.label ?? plan.location?.address
-                    : plan.what}
+                    : !!plan.what?.length
+                    ? plan.what
+                    : 'Untitled plan'}
                 </H4>
               )}
             </IconSide>

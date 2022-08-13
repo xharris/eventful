@@ -85,8 +85,8 @@ export const TimeInput = ({
       </Flex>
       <Checkbox
         icon={{
-          true: <FiChevronUp />,
-          false: <FiChevronDown />,
+          true: FiChevronUp,
+          false: FiChevronDown,
         }}
         name={`${name}.allday`}
         checked={hasEnd}

@@ -8,11 +8,13 @@
 
 - [x] get api/events start/end dates from plans
 - [x] contact list on user page
-- [ ] simple chat window
+- [x] simple chat window
   - message
     - text (str)
     - replyTo (message.\_id)
 - agenda
+  - months are not in order
+  - show year next to month name
   - show old events, but scroll to current date
   - separate agendas for TBD and dated events? (two columns)
     - OR make TDB collapsible (might prefer this one)
