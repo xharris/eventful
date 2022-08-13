@@ -1,11 +1,13 @@
 import axios from 'axios'
 import { DependencyList, useEffect, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
-import { ReservedOrUserEventNames } from 'socket.io/dist/typed-events'
 import { ClientToServerEvents, ServerToClientEvents } from 'types'
 
 export const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL:
+    process.env.NODE_ENV === 'production'
+      ? `${window.location.protocol}//${window.location.host}${process.env.REACT_APP_API_URL}`
+      : process.env.REACT_APP_API_URL,
   withCredentials: true,
 })
 
