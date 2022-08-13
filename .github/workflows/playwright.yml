@@ -5,11 +5,12 @@ on:
   pull_request:
     branches: [main]
 jobs:
-  test:
+  playwright:
     timeout-minutes: 60
     runs-on: ubuntu-latest
 
     env:
+      CI: false
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
       SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
@@ -45,5 +46,5 @@ jobs:
         if: failure()
         with:
           name: e2e failed report
-          path: playwright-report/
+          path: test-results/**/trace.zip
           retention-days: 30
