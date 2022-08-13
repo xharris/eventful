@@ -4,10 +4,8 @@ import { io, Socket } from 'socket.io-client'
 import { ReservedOrUserEventNames } from 'socket.io/dist/typed-events'
 import { ClientToServerEvents, ServerToClientEvents } from 'types'
 
-axios.defaults.baseURL = process.env.REACT_APP_API_URL ?? '/'
-
 export const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL ?? '/api',
+  baseURL: process.env.REACT_APP_API_URL,
   withCredentials: true,
 })
 
