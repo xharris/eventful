@@ -13,7 +13,7 @@ export const Page = () => {
   return (
     <Container css={{ padding: '$root' }}>
       <Flex column fill>
-        <Flex row flex="0" css={{ justifyContent: 'space-between' }}>
+        <Flex className="page-header" row flex="0" css={{ justifyContent: 'space-between' }}>
           <Flex>
             <LinkButton to="/" variant="ghost">
               <FiHome />

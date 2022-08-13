@@ -1,0 +1,49 @@
+name: E2E Tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+      SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+      REACT_APP_SOCKET_URL: ${{ secrets.REACT_APP_SOCKET_URL }}
+      REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Build
+        run: yarn build
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.7.0
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.7.0
+        with:
+          mongodb-version: '5.0.2'
+          mongodb-port: 27017
+      - name: Run e2e tests
+        run: |
+          yarn start &
+          yarn test
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: e2e failed report
+          path: playwright-report/
+          retention-days: 30

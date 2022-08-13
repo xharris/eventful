@@ -17,11 +17,7 @@ export const User = () => {
 
   const navigate = useNavigate()
   const { data: user } = useUser({ username })
-  const {
-    data: contacts,
-    addContact,
-    removeContact,
-  } = useContacts({ user: isMe ? user?._id : undefined })
+  const { data: contacts, addContact, removeContact } = useContacts({ user: session?._id })
 
   return user ? (
     <Flex
@@ -52,14 +48,18 @@ export const User = () => {
         ) : (
           <Flex column>
             {session &&
-              (!contacts?.find((user) => user.username === username) ? (
-                <AddButton onClick={() => addContact(user._id)}>Add</AddButton>
+              contacts &&
+              (!contacts.find((user) => user.username === username) ? (
+                <AddButton onClick={() => addContact(user._id)} title="Add contact">
+                  Add
+                </AddButton>
               ) : (
                 <RemoveButton
                   onClick={() =>
                     window.confirm('Are you sure you want to remove this contact?') &&
                     removeContact(user._id)
                   }
+                  title="Remove contact"
                 >
                   Remove
                 </RemoveButton>

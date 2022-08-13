@@ -61,6 +61,7 @@ export const Avatar = ({
         ...css,
         backgroundColor: color,
       }}
+      data-testid="avatar"
     >
       {username?.slice(0, 2).toUpperCase() ?? ''}
     </Component>

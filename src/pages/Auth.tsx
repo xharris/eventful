@@ -51,6 +51,7 @@ export const Auth = () => {
             <Input
               name="username"
               placeholder="Username"
+              pattern="[a-zA-Z0-9.]+"
               onChange={handleChange}
               value={values.username}
             />
@@ -74,6 +75,7 @@ export const Auth = () => {
             <Input
               name="username"
               placeholder="Username"
+              pattern="[a-zA-Z0-9.]+"
               onChange={handleChange}
               value={values.username}
             />
