@@ -2,6 +2,7 @@ import { ReactNode, useCallback, useEffect, useState } from 'react'
 import { Eventful } from 'types'
 import { api } from './api'
 import { createStateContext, useMount } from 'react-use'
+import { getToken } from './notification'
 
 const [useSessionCtx, Provider] = createStateContext<Eventful.User | null>(null)
 

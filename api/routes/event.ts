@@ -1,4 +1,4 @@
-import { event, group, plan, location, message } from 'api/models'
+import { event, plan, location, message } from 'api/models'
 import { PipelineStage, Types } from 'mongoose'
 import { Eventful } from 'types'
 import express from 'express'
@@ -113,12 +113,6 @@ export const options: Eventful.API.RouteOptions = {
         name: req.body.name ?? 'new event',
         createdBy: req.session.user?._id,
       })
-      await group.create({
-        name: 'root',
-        event: docEvent,
-        isRoot: true,
-        createdBy: req.session.user?._id,
-      })
       return res.send(docEvent)
     },
     getAll: async (req, res) => {
@@ -194,6 +188,24 @@ router.post('/event/:eventId/messages/add', checkSession, async (req, res) => {
     .then((doc) => {
       if (doc) {
         req.io.to(`event/${docMessage.event}`).emit('message:add', doc)
+        return event.findById(docMessage.event)
+      }
+    })
+    .then((docEvent) => {
+      if (docEvent) {
+        req.fcm.send(
+          {
+            refModel: 'events',
+            ref: docMessage.event,
+            key: 'message:add',
+          },
+          {
+            notification: {
+              title: docEvent.name,
+              body: docMessage.text,
+            },
+          }
+        )
       }
     })
   return res.send(docMessage)

@@ -1,5 +1,5 @@
 import { ComponentProps } from '@stitches/react'
-import { HTMLProps, useState } from 'react'
+import { HTMLProps, useEffect, useState } from 'react'
 import { styled } from 'src/libs/styled'
 import { Flex } from './Flex'
 import { FiCheckSquare, FiSquare } from 'react-icons/fi'
@@ -26,6 +26,7 @@ const Label = styled('label', {
     userSelect: 'none',
   },
   '& > span': {
+    lineHeight: '14px',
     whiteSpace: 'nowrap',
   },
   variants: {
@@ -39,6 +40,11 @@ const Label = styled('label', {
         borderColor: '$controlBorder',
       },
     },
+    small: {
+      true: {
+        padding: '$small',
+      },
+    },
   },
 })
 
@@ -47,21 +53,35 @@ interface Props extends HTMLProps<HTMLInputElement> {
   icon?: { true: IconType; false: IconType }
   square?: number | string | true
   variant?: ComponentProps<typeof Label>['variant']
+  small?: ComponentProps<typeof Label>['small']
 }
 
 const Component = ({
   label,
   icon = { true: FiCheckSquare, false: FiSquare },
-  checked,
+  checked = false,
   onChange,
   square,
   variant = 'ghost',
+  small,
+  defaultChecked,
   ...props
 }: Props) => {
   const [value, setValue] = useState(checked)
 
+  useEffect(() => {
+    if (defaultChecked != null) {
+      setValue(defaultChecked)
+    }
+  }, [defaultChecked])
+
   return (
-    <Label className="checkbox" css={{ padding: square ? 0 : '$controlPadding' }} variant={variant}>
+    <Label
+      className="checkbox"
+      css={{ padding: square ? 0 : '$controlPadding' }}
+      variant={variant}
+      small={small}
+    >
       <input
         {...props}
         type="checkbox"

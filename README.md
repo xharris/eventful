@@ -6,18 +6,21 @@
 
 # ToDo
 
-- [x] get api/events start/end dates from plans
-- [x] contact list on user page
-- [x] simple chat window
-  - message
-    - text (str)
-    - replyTo (message.\_id)
 - agenda
-  - months are not in order
-  - show year next to month name
-  - show old events, but scroll to current date
-  - separate agendas for TBD and dated events? (two columns)
+  - [x] months are not in order
+  - [x] show year next to month name
+  - [ ] show old events, but scroll to current date
+  - [x] separate agendas for TBD and dated events? (two columns)
     - OR make TDB collapsible (might prefer this one)
+- notifications
+  - api/fcm: refresh registration token for user
+    - check if all of this users registered tokens are still valid
+  - req.messaging
+    - send(refModel, ref, data)
+    - addToken(token, userId)
+    - (DO LATER) subTopic(topic, userId)
+    - (DO LATER) unsubTopic
+    - (DO LATER) sendToTopic(topic)
 
 # Nice features
 

@@ -3,7 +3,7 @@ import moment from 'moment'
 import { ReactNode, useEffect, useMemo } from 'react'
 import { Checkbox } from 'src/components/Checkbox'
 import { Flex } from 'src/components/Flex'
-import { H1, H2, H3 } from 'src/components/Header'
+import { H1, H2, H3, H4 } from 'src/components/Header'
 import { Eventful } from 'types'
 
 // TODO: show past days with less opacity
@@ -60,10 +60,10 @@ interface MonthProps<I extends Item> {
 }
 
 const Month = <I extends Item = Item>({ label, days, renderItem }: MonthProps<I>) => (
-  <Flex column flex="0">
-    <H2
+  <Flex column flex="0" css={{ gap: '$small' }}>
+    <H3
       css={{
-        marginLeft: '3rem',
+        textAlign: 'center',
         color: '#616161',
         background: 'linear-gradient(to bottom, $background 90%, transparent)',
         zIndex: 10,
@@ -73,32 +73,30 @@ const Month = <I extends Item = Item>({ label, days, renderItem }: MonthProps<I>
       }}
     >
       {label}
-    </H2>
-    <Flex column>
-      <Flex column>
-        {days.map((day) => (
-          <Flex key={day.day} flex="0" css={{ position: 'relative', alignItems: 'flex-start' }}>
-            <H3
-              css={{
-                color: '$disabled',
-                position: 'sticky',
-                left: 0,
-                top: 0,
-                padding: '0.2rem 0',
-                minWidth: 35,
-              }}
-            >
-              {day.day}
-            </H3>
-            <Flex column css={{ gap: '$controlPadding' }}>
-              {day.items.map((item) => (
-                <Flex key={item._id.toString()}>{renderItem(item)}</Flex>
-              ))}
-            </Flex>
-            <Flex flex="0" css={{ minWidth: 35 }} />
+    </H3>
+    <Flex column css={{ gap: '$small' }}>
+      {days.map((day) => (
+        <Flex key={day.day} flex="0" css={{ position: 'relative', alignItems: 'flex-start' }}>
+          <H4
+            css={{
+              color: '$disabled',
+              position: 'sticky',
+              left: 0,
+              top: 0,
+              padding: '0.25rem 0',
+              minWidth: 35,
+            }}
+          >
+            {day.day}
+          </H4>
+          <Flex column css={{ gap: '$small' }}>
+            {day.items.map((item) => (
+              <Flex key={item._id.toString()}>{renderItem(item)}</Flex>
+            ))}
           </Flex>
-        ))}
-      </Flex>
+          <Flex flex="0" css={{ minWidth: 35 }} />
+        </Flex>
+      ))}
     </Flex>
   </Flex>
 )
@@ -202,6 +200,7 @@ export const Agenda = <I extends Item = Item>({
         padding: '2px 0px',
         overflow: 'auto',
         justifyContent: !items.length ? 'center' : 'flex-start',
+        gap: '$small',
       }}
     >
       {!!items.length && (
@@ -241,9 +240,9 @@ export const Agenda = <I extends Item = Item>({
           }}
         >
           {datedItems.map((year) => (
-            <Flex key={year.year} column className="years">
+            <Flex key={year.year} column className="years" css={{ gap: '$small' }}>
               {showYearSeparator && <Year label={year.year} />}
-              <Flex column className="months">
+              <Flex column className="months" css={{ gap: '$small' }}>
                 {year.months.map((month) => (
                   <Month
                     key={month.month}

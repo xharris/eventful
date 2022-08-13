@@ -1,5 +1,7 @@
 import { RequestHandler } from 'express'
 import { SessionData } from 'express-session'
+import { Messaging } from 'firebase-admin/lib/messaging/messaging'
+import { BatchResponse, MessagingPayload } from 'firebase-admin/lib/messaging/messaging-api'
 import { Session } from 'inspector'
 import { Types } from 'mongoose'
 import { Server } from 'socket.io'
@@ -38,13 +40,6 @@ declare namespace Eventful {
     name: string
   }
 
-  interface Group extends Document {
-    name: string
-    category: CATEGORY
-    event: ID
-    isRoot: boolean
-  }
-
   interface Plan extends Document {
     event: ID
     category: CATEGORY
@@ -73,6 +68,21 @@ declare namespace Eventful {
     text: string
     event: ID
     replyTo: ID
+  }
+
+  interface NotificationSetting extends Document {
+    /** describes notification trigger */
+    key: 'message:add'
+    /** ID of source */
+    ref: ID
+    /** source of notification */
+    refModel: 'events' | 'users' | 'plans'
+    createdBy: ID
+  }
+
+  interface FcmToken extends Document {
+    token: string
+    createdBy: ID
   }
 
   namespace API {
@@ -163,6 +173,14 @@ declare global {
   namespace Express {
     interface Request {
       io: Server<ClientToServerEvents, ServerToClientEvents>
+      fcm: {
+        messaging: Messaging
+        send: (
+          setting: Pick<Eventful.NotificationSetting, 'key' | 'refModel' | 'ref'>,
+          data: MessagingPayload
+        ) => Promise<BatchResponse[]>
+        addToken: (token: string, user: Eventful.ID) => Promise<Eventful.FcmToken>
+      }
       session: (Session & Partial<SessionData>) | null
     }
   }

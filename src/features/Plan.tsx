@@ -32,19 +32,15 @@ const Empty = ({ plan, info, onEdit, children }: EmptyProps) => {
   )
 
   return isEmpty ? (
-    <H4
+    <H5
       clickable
       onClick={() => onEdit()}
       css={{
         fontStyle: 'italic',
-        color: '$disabled',
-        '&:hover': {
-          textDecorationColor: '$disabled',
-        },
       }}
     >
-      {`${info.label} plan...`}
-    </H4>
+      {`Untitled ${info.label.toLowerCase()}`}
+    </H5>
   ) : (
     <>{children}</>
   )
@@ -88,7 +84,7 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
     <Flex
       column
       css={{
-        padding: '$controlPadding',
+        padding: '$small',
         gap: '$small',
         border: '1px solid $controlBorder',
         borderRadius: '$control',
@@ -215,13 +211,14 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
               {(info.fields.what ||
                 plan.category === CATEGORY.Lodging ||
                 plan.category === CATEGORY.Meet) && (
-                <H4
+                <H5
                   clickable
                   onClick={() => onEdit()}
                   css={{
                     flex: 1,
                     fontStyle: !!plan.what?.length ? 'normal' : 'italic',
                     color: !!plan.what?.length ? '$black' : '$disabled',
+                    fontWeight: 500,
                   }}
                 >
                   {plan.category === CATEGORY.Carpool
@@ -231,7 +228,7 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
                     : !!plan.what?.length
                     ? plan.what
                     : 'Untitled plan'}
-                </H4>
+                </H5>
               )}
             </IconSide>
             {info.fields.who && (

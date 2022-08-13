@@ -13,6 +13,7 @@ import http from 'http'
 import { ClientToServerEvents, ServerToClientEvents } from 'types'
 import { event } from './models'
 import { eventAggr } from './routes/event'
+import { messaging } from './fcm'
 
 const PORT = process.env.PORT ?? 3000
 const DATABASE_URI = `${process.env.DATABASE_URI}/${process.env.DATABASE_NAME}`
@@ -50,6 +51,7 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
 })
 app.use((req, _, next) => {
   req.io = io
+  req.fcm = messaging
   next()
 })
 io.on('connection', (socket) => {

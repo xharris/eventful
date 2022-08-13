@@ -22,8 +22,8 @@ const Event = ({ event }: { event: Eventful.API.EventGet }) => (
     variant="ghost"
   >
     <Flex>
-      <Flex column css={{ alignItems: 'flex-start', gap: '$small' }}>
-        <H3>{event.name}</H3>
+      <Flex css={{ alignItems: 'center' }}>
+        <H4 css={{ fontWeight: 600 }}>{event.name}</H4>
         <H4>
           <Time time={event.time} />
         </H4>

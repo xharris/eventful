@@ -1,11 +1,11 @@
 import { useParams } from 'react-router-dom'
 import { AddButton, Button } from 'src/components/Button'
 import { Flex, HStack } from 'src/components/Flex'
-import { H1, H3 } from 'src/components/Header'
+import { H1, H2, H4, H5, H6 } from 'src/components/Header'
 import { Input } from 'src/components/Input'
 import { useEvent } from 'src/libs/event'
 import { useSession } from 'src/libs/session'
-import { FiFile, FiSave } from 'react-icons/fi'
+import { FiFile, FiSave, FiBell } from 'react-icons/fi'
 import { CATEGORY, CATEGORY_INFO, usePlans } from 'src/libs/plan'
 import { Agenda } from 'src/features/Agenda'
 import { Eventful } from 'types'
@@ -15,6 +15,9 @@ import { Icon, IconSide } from 'src/components/Icon'
 import { useFormik } from 'formik'
 import { Time } from 'src/components/Time'
 import { Chat } from 'src/features/Chat'
+import { Popover, PopoverContent, PopoverTrigger } from 'src/components/Popover'
+import { Checkbox } from 'src/components/Checkbox'
+import { useNotifications, useNotification } from 'src/libs/notification'
 
 export const Event = () => {
   const { eventId } = useParams()
@@ -31,6 +34,12 @@ export const Event = () => {
       updateEvent(values)
     },
   })
+  const { enable, disable, isEnabled, ...notificationsQuery } = useNotifications()
+  useNotification({
+    ref: event?._id,
+    refModel: 'events',
+    key: 'message:add',
+  })
 
   return (
     <Flex column fill css={{ alignItems: 'stretch', overflow: 'hidden', padding: 2 }}>
@@ -43,27 +52,58 @@ export const Event = () => {
               onChange={handleChange}
               variant="underline"
               placeholder="Add name"
-              css={{ fontSize: '$6', flex: 1, minWidth: '50%' }}
+              css={{ fontSize: '$7', flex: 1, minWidth: '50%' }}
             />
           ) : (
-            <H1
+            <H2
               css={{
                 minWidth: '50%',
               }}
             >
               {event?.name}
-            </H1>
+            </H2>
           )}
-          {event?.time.start || event?.time.end ? (
-            <Time time={event.time} css={{ fontSize: '$6' }} />
-          ) : (
-            <Flex css={{ fontSize: '$6' }}>TBD</Flex>
-          )}
+          {event?.time.start || event?.time.end ? <Time time={event.time} /> : <H6>TBD</H6>}
         </Flex>
         {dirty && (
           <Button onClick={() => submitForm()}>
             <IconSide icon={FiSave}>Save</IconSide>
           </Button>
+        )}
+        {event && notificationsQuery.isFetched && (
+          <Popover>
+            <PopoverTrigger clickable>
+              <Icon icon={FiBell} size={20} subtle />
+            </PopoverTrigger>
+            <PopoverContent>
+              <Flex column css={{ gap: '$small' }}>
+                <H4 underline>Notifications</H4>
+                <H5 bold>Chat</H5>
+                <Checkbox
+                  label="new message"
+                  small
+                  defaultChecked={isEnabled({
+                    key: 'message:add',
+                    refModel: 'events',
+                    ref: event._id,
+                  })}
+                  onChange={(e) =>
+                    e.currentTarget.checked
+                      ? enable({
+                          key: 'message:add',
+                          refModel: 'events',
+                          ref: event._id,
+                        })
+                      : disable({
+                          key: 'message:add',
+                          refModel: 'events',
+                          ref: event._id,
+                        })
+                  }
+                />
+              </Flex>
+            </PopoverContent>
+          </Popover>
         )}
       </Flex>
       <Flex

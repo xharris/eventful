@@ -1,9 +1,9 @@
 import { ComponentProps } from '@stitches/react'
 import moment from 'moment'
-import { useMemo } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { Eventful } from 'types'
 import { Flex } from './Flex'
-import { H5 } from './Header'
+import { H5, H6 } from './Header'
 
 interface TimeProps extends ComponentProps<typeof Flex> {
   time: Eventful.Time

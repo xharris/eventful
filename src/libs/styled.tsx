@@ -47,6 +47,7 @@ export const { styled, css, config, keyframes } = createStitches({
       4: '3rem',
       5: '2.4rem',
       6: '1.5rem',
+      7: '1.25rem',
       control: '0.8rem',
       small: '0.7rem',
     },
