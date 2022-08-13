@@ -13,6 +13,8 @@
     - text (str)
     - replyTo (message.\_id)
 - agenda
+  - months are not in order
+  - show year next to month name
   - show old events, but scroll to current date
   - separate agendas for TBD and dated events? (two columns)
     - OR make TDB collapsible (might prefer this one)

@@ -23,7 +23,7 @@ export const useMessages = ({ event }: { event?: Eventful.ID }) => {
     (message: Eventful.API.MessageGet) => {
       qc.setQueriesData<Eventful.API.MessageGet[]>(['messages', { event }], (old = []) => [
         message,
-        ...old,
+        ...old.filter((msg) => msg._id !== message._id),
       ])
     },
     [qc, event]
@@ -60,29 +60,12 @@ export const useMessages = ({ event }: { event?: Eventful.ID }) => {
     }
   }, [connected, event, session, socket])
 
-  // useEffect(() => {
-  //   socket.on('connect', () => {
-  //     setConnected(true)
-  //   })
-  //   socket.on('disconnect', () => {
-  //     setConnected(false)
-  //   })
-  //   socket.on('message:add', (message) => {
-  //     console.log('add', message)
-  //   })
-  //   socket.on('message:delete', (id) => {
-  //     console.log('delete', id)
-  //   })
-  //   return () => {
-  //     socket.off('connect')
-  //     socket.off('disconnect')
-  //     socket.off('message:add')
-  //     socket.off('message:delete')
-  //   }
-  // }, [qc])
-
   const muAddMessage = useMutation((body: Eventful.API.MessageAdd) =>
     api.post(`event/${event}/messages/add`, body)
+  )
+
+  const muUpdateMessage = useMutation((body: Eventful.API.MessageEdit) =>
+    api.put(`message/${body._id}`, body)
   )
 
   const muDeleteMessage = useMutation((id: Eventful.ID) => api.delete(`message/${id}`))
@@ -90,6 +73,7 @@ export const useMessages = ({ event }: { event?: Eventful.ID }) => {
   return {
     ...query,
     addMessage: muAddMessage.mutateAsync,
+    updateMessage: muUpdateMessage.mutateAsync,
     deleteMessage: muDeleteMessage.mutateAsync,
   }
 }

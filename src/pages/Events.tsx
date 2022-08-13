@@ -13,7 +13,14 @@ import { Time } from 'src/components/Time'
 import { AvatarGroup } from 'src/components/Avatar'
 
 const Event = ({ event }: { event: Eventful.API.EventGet }) => (
-  <LinkButton to={`/e/${event._id}`} css={{ width: '100%', padding: '0.3rem' }} variant="ghost">
+  <LinkButton
+    to={`/e/${event._id}`}
+    linkProps={{
+      style: { width: '100%' },
+    }}
+    css={{ padding: '0.3rem', width: '100%' }}
+    variant="ghost"
+  >
     <Flex>
       <Flex column css={{ alignItems: 'flex-start', gap: '$small' }}>
         <H3>{event.name}</H3>
@@ -41,19 +48,21 @@ export const Events = () => {
   const placeholder = useMemo(() => placeholders[rand], [rand])
 
   return session ? (
-    <Flex column fill css={{ gap: 0 }}>
+    <Flex column fill css={{ gap: 0, overflow: 'hidden' }}>
       <Agenda
         items={events}
         noTimeHeader="Still planning"
         noTimeSubheader="TBD"
         noItemsText="No events yet... create one below!"
-        renderItem={(event) => <Event key={event._id.toString()} event={event} />}
+        renderItem={(event) => <Event event={event} />}
         renderOnEveryDay={false}
       />
       <Flex
         css={{
           flex: 0,
           paddingBottom: '$root',
+          paddingLeft: '$small',
+          paddingRight: '$small',
           background: '$background',
         }}
       >

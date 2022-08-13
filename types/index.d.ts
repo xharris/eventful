@@ -115,10 +115,15 @@ declare namespace Eventful {
     interface LocationAdd extends Omit<Location, keyof Document> {}
 
     interface MessageGet extends Message {
+      replyTo?: Message & { createdBy: User }
       createdBy: User
     }
 
     interface MessageAdd extends Pick<Message, 'text' | 'replyTo'> {
+      replyTo?: Message['replyTo']
+    }
+
+    interface MessageEdit extends Pick<Message, '_id' | 'text' | 'replyTo'> {
       replyTo?: Message['replyTo']
     }
 

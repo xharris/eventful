@@ -1,6 +1,6 @@
 import { ComponentProps } from '@stitches/react'
 import { HTMLProps } from 'react'
-import { FiMinus, FiPlus } from 'react-icons/fi'
+import { FiMinus, FiPlus, FiX } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 import { styled } from 'src/libs/styled'
 import { Flex } from './Flex'
@@ -21,6 +21,10 @@ export const Component = styled('button', {
   justifyContent: 'center',
   '> svg': {
     fontSize: '1rem',
+  },
+  '&:disabled': {
+    cursor: 'default',
+    color: '$disabled',
   },
   [CHILD_N_ICON]: {
     transition: 'all ease-in-out 0.1s',
@@ -93,10 +97,11 @@ export const Button = ({ square, css, ...props }: ButtonProps) => (
 
 interface LinkButtonProps extends ButtonProps {
   to: string
+  linkProps?: Omit<ComponentProps<typeof Link>, 'to'>
 }
 
-export const LinkButton = ({ to, ...props }: LinkButtonProps) => (
-  <Link to={to}>
+export const LinkButton = ({ to, linkProps, ...props }: LinkButtonProps) => (
+  <Link to={to} {...linkProps}>
     <Button {...props} />
   </Link>
 )
@@ -149,6 +154,32 @@ export const RemoveButton = ({ css, children, square, ...props }: ButtonProps) =
       }}
     >
       <FiMinus />
+    </Flex>
+  </Button>
+)
+
+export const CancelButton = ({ css, children, square, ...props }: ButtonProps) => (
+  <Button
+    css={{
+      ...css,
+      position: 'relative',
+    }}
+    square={square}
+    {...props}
+  >
+    {children}
+    <Flex
+      className="add-icon"
+      css={{
+        position: 'absolute',
+        right: -5,
+        bottom: -5,
+        borderRadius: '100%',
+        background: '$controlBackground',
+        color: '#616161',
+      }}
+    >
+      <FiX />
     </Flex>
   </Button>
 )
