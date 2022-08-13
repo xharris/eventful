@@ -44,9 +44,12 @@ jobs:
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.7.0
         with:
-          mongodb-version: '5.0.2'
+          mongodb-version: '5.0.9'
           mongodb-port: 27017
       - name: Run e2e tests
+        env:
+          CI: true
+          NODE_ENV: production
         run: |
           yarn start &
           yarn test
