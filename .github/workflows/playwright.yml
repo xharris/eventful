@@ -18,6 +18,7 @@ jobs:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
       SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+      REACT_APP_URL: 'http://localhost:3001'
       REACT_APP_SOCKET_URL: 'http://localhost:3000'
       REACT_APP_API_URL: 'http://localhost:3000/api'
       FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
