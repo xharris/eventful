@@ -65,8 +65,11 @@ export const VStack = styled(Flex, {
 })
 
 export const Container = styled(Flex, {
-  maxWidth: '800px',
-  width: '80%',
+  width: '100%',
+  '@tablet': {
+    width: '80%',
+    maxWidth: '$Tablet',
+  },
   height: '100%',
   margin: '0 auto',
 })

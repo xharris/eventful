@@ -99,7 +99,7 @@ export const Message = ({ message }: MessageProps) => {
       >
         <Flex column css={{ gap: '$small' }}>
           {message?.replyTo && (
-            <Flex css={{ marginLeft: 36, alignItems: 'center', gap: '$small' }}>
+            <Flex css={{ opacity: 0.5, marginLeft: 36, alignItems: 'center', gap: '$small' }}>
               <Icon icon={FiCornerUpLeft} />
               <H6 css={{ fontWeight: 500 }}>{message?.replyTo.createdBy.username}</H6>
               <H6>{message?.replyTo.text}</H6>
@@ -236,11 +236,19 @@ interface ChatProps {
 }
 
 export const Chat = ({ event }: ChatProps) => {
-  const { data: messages, addMessage } = useMessages({ event })
+  const { data: messages } = useMessages({ event })
 
   return (
     <ChatCtxProvider>
-      <Flex column="reverse" css={{ padding: '0 $small', overflowY: 'auto', gap: '$small' }}>
+      <Flex
+        column="reverse"
+        css={{
+          height: '100%',
+          padding: '0 $small',
+          overflowY: 'auto',
+          gap: '$small',
+        }}
+      >
         <ChatInput event={event} />
         <Flex column="reverse" css={{ gap: '$small' }}>
           {messages?.map((message) => (

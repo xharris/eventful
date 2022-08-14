@@ -84,6 +84,7 @@ export const Events = () => {
           onClick={() =>
             createEvent({ name: newEventValue }).then((res) => navigate(`/e/${res.data._id}`))
           }
+          title="Add event"
         >
           <FiPlus />
         </Button>

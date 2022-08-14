@@ -5,7 +5,7 @@ import { H1, H2, H4, H5, H6 } from 'src/components/Header'
 import { Input } from 'src/components/Input'
 import { useEvent } from 'src/libs/event'
 import { useSession } from 'src/libs/session'
-import { FiFile, FiSave, FiBell } from 'react-icons/fi'
+import { FiFile, FiSave, FiBell, FiCalendar, FiMessageSquare } from 'react-icons/fi'
 import { CATEGORY, CATEGORY_INFO, usePlans } from 'src/libs/plan'
 import { Agenda } from 'src/features/Agenda'
 import { Eventful } from 'types'
@@ -18,12 +18,47 @@ import { Chat } from 'src/features/Chat'
 import { Popover, PopoverContent, PopoverTrigger } from 'src/components/Popover'
 import { Checkbox } from 'src/components/Checkbox'
 import { useNotifications, useNotification } from 'src/libs/notification'
+import { useMediaQuery } from 'src/libs/styled'
+import * as Tabs from 'src/components/VerticalTabs'
+
+const PlanControls = ({ event }: { event?: Eventful.ID }) => {
+  const { session } = useSession()
+  const { addPlan } = usePlans({ event })
+
+  return session ? (
+    <Flex css={{ flex: 0, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <AddButton
+        variant="ghost"
+        css={{ display: 'flex', gap: 4, alignItems: 'center' }}
+        onClick={() =>
+          addPlan({
+            category: 0,
+          })
+        }
+      >
+        <FiFile />
+        {CATEGORY_INFO[0].label}
+      </AddButton>
+      {Object.entries(CATEGORY_INFO)
+        .filter(([key]) => parseInt(key) != CATEGORY.None)
+        .map(([key, cat]) => (
+          <AddButton
+            key={key}
+            variant="outline"
+            css={{ display: 'flex', gap: 4, alignItems: 'center' }}
+            onClick={() => addPlan({ category: parseInt(key) })}
+          >
+            <IconSide icon={cat.icon}>{cat.label}</IconSide>
+          </AddButton>
+        ))}
+    </Flex>
+  ) : null
+}
 
 export const Event = () => {
   const { eventId } = useParams()
   const { data: event, updateEvent } = useEvent({ id: eventId })
   const { session } = useSession()
-  const { addPlan } = usePlans({ event: eventId })
   const [editing, setEditing] = useState<Eventful.ID>()
   const { dirty, handleChange, submitForm } = useFormik<Eventful.API.EventUpdate>({
     initialValues: {
@@ -40,6 +75,7 @@ export const Event = () => {
     refModel: 'events',
     key: 'message:add',
   })
+  const isSmall = useMediaQuery({ maxSize: 'Tablet' })
 
   return (
     <Flex column fill css={{ alignItems: 'stretch', overflow: 'hidden', padding: 2 }}>
@@ -106,87 +142,84 @@ export const Event = () => {
           </Popover>
         )}
       </Flex>
-      <Flex
-        css={{
-          overflow: 'hidden',
-          flexDirection: 'column',
-          '@tablet': {
-            flexDirection: 'row',
-          },
-        }}
-      >
-        <Agenda
-          items={event?.plans}
-          noTimeHeader="Plans"
-          noItemsText={`No plans yet...${session ? ' create some below!' : ''}`}
-          renderOnEveryDay={false}
-          showYearSeparator={false}
-          renderItem={(plan) => (
-            <Plan
-              key={plan._id.toString()}
-              plan={plan}
-              editing={editing === plan._id}
-              onEdit={() => {
-                setEditing(plan._id)
-              }}
-              onClose={() => setEditing(undefined)}
+      {isSmall ? (
+        <Tabs.Root defaultValue="agenda">
+          <Tabs.List css={{ gap: '$small' }}>
+            <Tabs.Trigger value="agenda">
+              <Button square={34} variant="ghost">
+                <Icon icon={FiCalendar} size={18} />
+              </Button>
+            </Tabs.Trigger>
+            <Tabs.Trigger value="chat">
+              <Button square={34} variant="ghost">
+                <Icon icon={FiMessageSquare} size={18} />
+              </Button>
+            </Tabs.Trigger>
+          </Tabs.List>
+          <Tabs.Separator />
+          <Tabs.Content value="agenda">
+            <PlanControls event={event?._id} />
+            <Agenda
+              items={event?.plans}
+              noTimeHeader="Plans"
+              noItemsText={`No plans yet...`}
+              renderOnEveryDay={false}
+              showYearSeparator={false}
+              renderItem={(plan) => (
+                <Plan
+                  key={plan._id.toString()}
+                  plan={plan}
+                  editing={editing === plan._id}
+                  onEdit={() => {
+                    setEditing(plan._id)
+                  }}
+                  onClose={() => setEditing(undefined)}
+                />
+              )}
             />
-          )}
-        />
-        <Chat event={event?._id} />
-      </Flex>
-      <Flex
-        column
-        css={{
-          flex: 0,
-          background: '$background',
-          padding: 5,
-        }}
-      >
-        {session && (
-          <Flex css={{ justifyContent: 'space-between' }}>
-            <HStack>
-              <AddButton
-                variant="filled"
-                css={{ display: 'flex', gap: 4, alignItems: 'center' }}
-                onClick={() =>
-                  addPlan({
-                    category: 0,
-                  })
-                }
-              >
-                <FiFile />
-                {CATEGORY_INFO[0].label}
-              </AddButton>
-            </HStack>
-            <HStack>
-              {Object.entries(CATEGORY_INFO)
-                .filter(([key]) => parseInt(key) != CATEGORY.None)
-                .map(([key, cat]) => (
-                  <AddButton
-                    key={key}
-                    variant="outline"
-                    css={{ display: 'flex', gap: 4, alignItems: 'center' }}
-                    onClick={() => addPlan({ category: parseInt(key) })}
-                  >
-                    <IconSide icon={cat.icon}>{cat.label}</IconSide>
-                  </AddButton>
-                ))}
-              {/* <Input
-              name="name"
-              placeholder="Search..."
-              value={newPlanText}
-              onChange={(e) => setNewPlanText(e.target.value)}
-              css={{
-                flex: 1,
-                fontSize: '0.75rem',
-                height: '1rem',
-              }}
-            /> */}
-            </HStack>
+          </Tabs.Content>
+          <Tabs.Content value="chat">
+            <Chat event={event?._id} />
+          </Tabs.Content>
+        </Tabs.Root>
+      ) : (
+        <Flex
+          column
+          css={{
+            overflow: 'hidden',
+            background: '$background',
+            padding: 5,
+            height: '100%',
+          }}
+        >
+          <PlanControls event={event?._id} />
+          <Flex
+            css={{
+              overflow: 'hidden',
+            }}
+          >
+            <Agenda
+              items={event?.plans}
+              noTimeHeader="Plans"
+              noItemsText={`No plans yet...`}
+              renderOnEveryDay={false}
+              showYearSeparator={false}
+              renderItem={(plan) => (
+                <Plan
+                  key={plan._id.toString()}
+                  plan={plan}
+                  editing={editing === plan._id}
+                  onEdit={() => {
+                    setEditing(plan._id)
+                  }}
+                  onClose={() => setEditing(undefined)}
+                />
+              )}
+            />
+            <Chat event={event?._id} />
           </Flex>
-        )}
-      </Flex>
+        </Flex>
+      )}
     </Flex>
   )
 }

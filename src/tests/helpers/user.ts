@@ -36,6 +36,7 @@ export class User {
     await page.fill('[placeholder="Confirm password"]', user.password)
     await page.click('button:has-text("Sign up")')
     await page.waitForLoadState('networkidle')
+
     return user
   }
 

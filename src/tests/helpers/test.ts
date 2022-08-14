@@ -2,11 +2,15 @@
 import { Dialog, test as base, Page, Browser, Response, Locator } from '@playwright/test'
 import { cleanDB } from './db'
 import { User } from './user'
+import { Event } from './event'
+import { Plan } from './plan'
 import { PageWrapper } from './page'
 
 export type BasicOptions = {
   wrapper: PageWrapper
   user: User
+  event: Event
+  plan: Plan
   beforeAfter: void
   acceptConfirm: (dlg: Dialog) => Promise<void>
   denyConfirm: (dlg: Dialog) => Promise<void>
@@ -28,6 +32,8 @@ export const initPage = async (browser: Browser): Promise<IinitPage> => {
     page,
     wrapper,
     user: new User(page, context),
+    event: new Event(page),
+    plan: new Plan(page),
     acceptConfirm: async (dlg: Dialog) => await dlg.accept(),
     denyConfirm: async (dlg: Dialog) => await dlg.dismiss(),
     goToHome: () => goToHome({ page }),
@@ -41,6 +47,8 @@ export const getElementRect = async (locator: Locator) =>
 export const basicTest = base.extend<BasicOptions>({
   wrapper: async ({ page }, use) => await use(new PageWrapper(page)),
   user: async ({ page, context }, use) => await use(new User(page, context)),
+  event: async ({ page }, use) => await use(new Event(page)),
+  plan: async ({ page }, use) => await use(new Plan(page)),
   acceptConfirm: async ({}, use) => {
     await use(async (dlg: Dialog) => {
       await dlg.accept()

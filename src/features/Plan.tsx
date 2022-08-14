@@ -54,7 +54,7 @@ interface PlanProps {
 }
 
 export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
-  const { updatePlan, deletePlan } = usePlans({ event: plan.event.toString() })
+  const { updatePlan, deletePlan } = usePlans({ event: plan.event })
   const { handleChange, setFieldValue, resetForm, values, dirty, submitForm } =
     useFormik<Eventful.API.PlanEdit>({
       initialValues: {
@@ -76,8 +76,19 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
   const { data: event } = useEvent({ id: plan.event })
 
   const whoOptions = useMemo(
-    () => [...(contacts ?? []), session].filter((user) => user != null) as Eventful.User[],
+    () => [...(contacts ?? []), ...(session ? [session] : [])],
     [contacts, session]
+  )
+  const whoAll = useMemo(
+    () => [...(contacts ?? []), ...(session ? [session] : []), ...(event?.who ?? [])],
+    [contacts, session, event]
+  )
+  const whoFixed = useMemo(
+    () =>
+      whoAll
+        .filter((user) => !whoOptions.some((user2) => user._id === user2._id))
+        .map((user) => user._id),
+    [whoAll, whoOptions]
   )
 
   return (
@@ -96,6 +107,7 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
           opacity: 1,
         },
       }}
+      data-testid="plan"
     >
       {editing && session ? (
         <>
@@ -138,18 +150,20 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
             <IconSide icon={FiUsers} subtle>
               <UserSelect
                 name="who"
-                users={event?.who ?? []}
+                users={whoAll}
                 options={whoOptions}
-                value={event?.who?.filter((user) => values.who?.some((id) => id === user._id))}
+                fixedUsers={whoFixed}
+                value={
+                  values.who?.map(
+                    (id) => whoAll.find((user2) => user2._id === id) as Eventful.User
+                  ) ?? []
+                }
                 onChange={(users) =>
                   setFieldValue(
                     'who',
                     users.map((user) => user._id)
                   )
                 }
-                fixedUsers={event?.who
-                  ?.filter((user) => !whoOptions.some((user2) => user2._id === user._id))
-                  .map((user) => user._id)}
               />
             </IconSide>
           )}
@@ -159,6 +173,7 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
                 onClick={() => (dirty ? submitForm() : onClose())}
                 variant={dirty ? 'filled' : 'ghost'}
                 color={dirty ? 'success' : undefined}
+                title="Save plan"
                 square
               >
                 {dirty ? <FiSave /> : <FiArrowLeft />}

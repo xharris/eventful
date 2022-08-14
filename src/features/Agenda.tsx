@@ -35,6 +35,7 @@ interface YearProps {
 
 const Year = ({ label }: YearProps) => (
   <Flex
+    flex="0"
     css={{
       alignItems: 'center',
     }}
@@ -94,7 +95,7 @@ const Month = <I extends Item = Item>({ label, days, renderItem }: MonthProps<I>
               <Flex key={item._id.toString()}>{renderItem(item)}</Flex>
             ))}
           </Flex>
-          <Flex flex="0" css={{ minWidth: 35 }} />
+          <Flex flex="0" css={{ minWidth: '$small' }} />
         </Flex>
       ))}
     </Flex>

@@ -184,6 +184,10 @@ router.post('/event/:eventId/messages/add', checkSession, async (req, res) => {
   })
   message
     .findById<Eventful.API.MessageGet>(docMessage._id)
+    .populate({
+      path: 'replyTo',
+      populate: { path: 'createdBy' },
+    })
     .populate('createdBy')
     .then((doc) => {
       if (doc) {

@@ -83,7 +83,7 @@ export const CATEGORY_INFO: Record<number, CategoryInfo> = {
   // }
 }
 
-export const usePlans = ({ event }: { event?: string }) => {
+export const usePlans = ({ event }: { event?: Eventful.ID }) => {
   const qc = useQueryClient()
 
   const muAddPlan = useMutation(
