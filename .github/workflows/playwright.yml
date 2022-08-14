@@ -34,8 +34,7 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-      # - name: Build
-      #   run: yarn build
+
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.7.0
       - name: Install Playwright Browsers
@@ -49,9 +48,7 @@ jobs:
       - name: Run e2e tests
         env:
           CI: true
-        run: |
-          yarn test:server &
-          yarn test
+        run: yarn test
 
       - uses: actions/upload-artifact@v2
         if: failure()

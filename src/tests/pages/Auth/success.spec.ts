@@ -3,7 +3,7 @@ import { basicTest } from 'src/tests/helpers/test'
 import { User, getAvatarSelector } from 'src/tests/helpers/user'
 
 basicTest.describe('Auth - Sucessful', () => {
-  basicTest('sign up', async ({ page, user }) => {
+  basicTest.only('sign up', async ({ page, user }) => {
     const u1 = await user.signup()
     await expect(page.locator(getAvatarSelector(u1))).toBeVisible()
   })
