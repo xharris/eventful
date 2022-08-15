@@ -26,7 +26,6 @@ router.use(
       sameSite: 'none',
     },
     store,
-    resave: true,
     saveUninitialized: false,
   })
 )
