@@ -1,6 +1,5 @@
 import 'dotenv/config'
 import express from 'express'
-import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
 import { router } from './routes'
 import mongoose from 'mongoose'
@@ -25,14 +24,6 @@ app.use(
 )
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-// app.use(
-//   cookieSession({
-//     name: 'authorization',
-//     secret: process.env.SESSION_SECRET as string,
-//     secure: process.env.NODE_ENV === 'production',
-//     sameSite: 'none',
-//   })
-// )
 // database
 mongoose
   .connect(DATABASE_URI)
