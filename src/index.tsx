@@ -21,11 +21,11 @@ reportWebVitals()
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker
-    .register('./firebase-messaging-sw.js')
+    .register('/firebase-messaging-sw.js')
     .then(function (registration) {
       console.log('Registration was successful: ', registration)
     })
     .catch(function (e) {
-      console.error('Registration has filed', e)
+      console.error('Registration has failed', e)
     })
 }

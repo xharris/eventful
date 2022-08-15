@@ -13,6 +13,7 @@ import { event } from './models'
 import { eventAggr } from './routes/event'
 import { messaging } from './fcm'
 import { PORT, DATABASE_URI } from './config'
+import { parse } from 'url'
 
 const app = express()
 // middleware
@@ -71,9 +72,16 @@ if (process.env.NODE_ENV === 'production') {
 app.use(morgan('tiny'))
 app.use('/api', router)
 if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) =>
+  app.get('*', (req, res) => {
+    const pathName = parse(req.url).pathname
+    if (pathName?.endsWith('.js')) {
+      res.writeHead(200, {
+        'Service-Worker-Allowed': '/',
+        'Content-Type': 'application/javascript',
+      })
+    }
     res.sendFile(path.join(__dirname, '../build', 'index.html'), (err) => err && console.log(err))
-  )
+  })
 }
 // server
 server.listen(PORT, () => {
