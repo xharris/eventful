@@ -9,7 +9,7 @@
     "start": "cross-env NODE_ENV=production yarn run api",
     "rs:start": "react-scripts start",
     "build": "react-scripts build",
-    "postbuild": "ts-node postbuild.ts",
+    "postbuild": "ts-node scripts/postbuild.ts",
     "test": "playwright test",
     "test:debug": "playwright test --debug --project=firefox",
     "test:server": "cross-env NODE_ENV=test BROWSER=none yarn run dev",

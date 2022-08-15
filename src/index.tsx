@@ -16,13 +16,18 @@ root.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals()
+
+const fbaseConfig = new URLSearchParams({
+  REACT_APP_FIREBASE_API_KEY: process.env.REACT_APP_FIREBASE_API_KEY,
+}).toString()
+
 serviceWorkerRegistration.register({
-  file: 'firebase-messaging-sw.js',
+  file: `firebase-messaging-sw.js?${fbaseConfig}`,
 })
 
 // if ('serviceWorker' in navigator) {
 //   navigator.serviceWorker
-//     .register('/firebase-messaging-sw.js')
+//     .register(`/firebase-messaging-sw.js?${fbaseConfig}`)
 //     .then(function (registration) {
 //       console.log('Registration was successful: ', registration)
 //     })

@@ -73,13 +73,13 @@ app.use(morgan('tiny'))
 app.use('/api', router)
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
-    const pathName = parse(req.url).pathname
-    if (pathName?.endsWith('.js')) {
-      res.writeHead(200, {
-        'Service-Worker-Allowed': '/',
-        'Content-Type': 'application/javascript',
-      })
-    }
+    // const pathName = parse(req.url).pathname
+    // if (pathName?.endsWith('.js')) {
+    //   res.writeHead(200, {
+    //     'Service-Worker-Allowed': '/',
+    //     'Content-Type': 'application/javascript',
+    //   })
+    // }
     res.sendFile(path.join(__dirname, '../build', 'index.html'), (err) => err && console.log(err))
   })
 }

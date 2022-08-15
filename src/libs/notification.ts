@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { initializeApp } from 'firebase/app'
-import { getMessaging, getToken } from 'firebase/messaging'
+import { getMessaging, getToken, onMessage } from 'firebase/messaging'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Eventful } from 'types'
 import { api } from './api'
@@ -15,6 +15,7 @@ const app = initializeApp({
   storageBucket: 'eventful-870ba.appspot.com',
   messagingSenderId: '79944665764',
 })
+const messaging = getMessaging(app)
 
 const requestPermission = () =>
   new Promise<void>((res, rej) => {
@@ -23,8 +24,10 @@ const requestPermission = () =>
         return rej()
       }
       try {
-        const messaging = getMessaging(app)
-        getToken(messaging).then((token) => {
+        getToken(messaging, {
+          vapidKey:
+            'BOsvUqDTpR9npcwBxTCO2UGGQbOgt2sG2O9oUKubQhQw8mGqC8Leh-ihNSjhvqG_9q-jYfthin5Vw8PdCYOEBBk',
+        }).then((token) => {
           console.log('token', token)
           if (!token) {
             return rej()
@@ -65,6 +68,15 @@ export const useNotification = ({
       requestPermission()
     }
   }, [ns])
+
+  useEffect(() => {
+    const unsub = onMessage(messaging, (payload) => {
+      console.log('foreground message', payload)
+    })
+    return () => {
+      unsub()
+    }
+  }, [])
 
   return {
     ...query,

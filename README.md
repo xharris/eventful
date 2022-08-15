@@ -64,6 +64,12 @@
     - below it, show all plans that occur on that date
 - Contact
 
+# Service Worker http
+
+- firefox
+
+  `devtools.serviceWorkers.testing.enabled = true`
+
 # Running tests
 
 Inside that directory, you can run several commands:

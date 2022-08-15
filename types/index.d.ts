@@ -176,6 +176,21 @@ declare module 'express-session' {
 }
 
 declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      NODE_ENV: 'development' | 'production' | 'test'
+      DATABASE_URI: string
+      DATABASE_NAME: string
+      SESSION_SECRET: string
+      REACT_APP_SOCKET_URL: string
+      REACT_APP_API_URL: string
+      FIREBASE_PROJECT_ID: string
+      FIREBASE_PRIVATE_KEY: string
+      FIREBASE_CLIENT_EMAIL: string
+      REACT_APP_FIREBASE_API_KEY: string
+    }
+  }
+
   namespace Express {
     interface Request {
       io: Server<ClientToServerEvents, ServerToClientEvents>

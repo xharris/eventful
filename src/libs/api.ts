@@ -3,11 +3,13 @@ import { DependencyList, useEffect, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { ClientToServerEvents, ServerToClientEvents } from 'types'
 
+const { NODE_ENV, REACT_APP_API_URL } = process.env
+
 export const api = axios.create({
   baseURL:
-    process.env.NODE_ENV === 'production'
-      ? `${window.location.protocol}//${window.location.host}${process.env.REACT_APP_API_URL}`
-      : process.env.REACT_APP_API_URL,
+    NODE_ENV === 'production'
+      ? `${window.location.protocol}//${window.location.host}${REACT_APP_API_URL}`
+      : REACT_APP_API_URL,
   withCredentials: true,
 })
 
