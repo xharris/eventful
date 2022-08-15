@@ -18,13 +18,14 @@ reportWebVitals()
 // serviceWorkerRegistration.register({
 //   file: 'firebase-messaging-sw.js',
 // })
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker
-    .register('./firebase-messaging-sw.js')
-    .then(function (registration) {
-      console.log('Registration was successful: ', registration)
-    })
-    .catch(function (e) {
-      console.error('Registration has filed', e)
-    })
-}
+
+// if ('serviceWorker' in navigator) {
+//   navigator.serviceWorker
+//     .register('./firebase-messaging-sw.js')
+//     .then(function (registration) {
+//       console.log('Registration was successful: ', registration)
+//     })
+//     .catch(function (e) {
+//       console.error('Registration has filed', e)
+//     })
+// }
