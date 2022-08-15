@@ -25,7 +25,7 @@ router.use(
     //   secure: IS_PRODUCTION,
     //   sameSite: 'none',
     // },
-    // store,
+    store,
     // saveUninitialized: false,
   })
 )
