@@ -26,7 +26,8 @@ router.use(
     //   sameSite: 'none',
     // },
     store,
-    // saveUninitialized: false,
+    resave: false,
+    saveUninitialized: false,
   })
 )
 store.on('error', console.log)

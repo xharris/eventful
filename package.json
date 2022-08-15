@@ -7,13 +7,15 @@
   },
   "scripts": {
     "start": "cross-env NODE_ENV=production yarn run api",
+    "rs:start": "react-scripts start",
     "build": "react-scripts build",
+    "postbuild": "ts-node postbuild.ts",
     "test": "playwright test",
     "test:debug": "playwright test --debug --project=firefox",
     "test:server": "cross-env NODE_ENV=test BROWSER=none yarn run dev",
     "eject": "react-scripts eject",
     "api": "nodemon --config nodemon.json api/index.ts",
-    "dev": "concurrently -n api,web \"cross-env PORT=3000 yarn run api\" \"cross-env PORT=3001 react-scripts start\""
+    "dev": "concurrently -n api,web \"cross-env PORT=3000 yarn run api\" \"cross-env PORT=3001 yarn run rs:start\""
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.0",
