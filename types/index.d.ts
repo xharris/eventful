@@ -181,7 +181,9 @@ declare global {
         ) => Promise<BatchResponse[]>
         addToken: (token: string, user: Eventful.ID) => Promise<Eventful.FcmToken>
       }
-      session: (Session & Partial<SessionData>) | null
+      session: {
+        user?: Eventful.User
+      }
     }
   }
 }

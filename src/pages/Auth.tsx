@@ -54,6 +54,7 @@ export const Auth = () => {
               pattern="[a-zA-Z0-9.]+"
               onChange={handleChange}
               value={values.username}
+              autoCapitalize="none"
             />
             <Input
               name="password"

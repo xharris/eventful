@@ -34,6 +34,7 @@ app.use(
     name: 'session',
     secret: process.env.SESSION_SECRET as string,
     secure: process.env.NODE_ENV === 'production',
+    sameSite: 'none',
   })
 )
 // database

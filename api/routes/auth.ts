@@ -1,4 +1,4 @@
-import express, { RequestHandler } from 'express'
+import express, { Request, RequestHandler, Response } from 'express'
 import { user } from '../models'
 import bcrypt from 'bcrypt'
 import { Eventful } from 'types'
@@ -17,12 +17,14 @@ export const checkSession: RequestHandler = (req, res, next) => {
   }
 }
 
-const newSession = (req: Express.Request, user: Eventful.User, remember?: boolean) => {
+const newSession = (req: Request, res: Response, user: Eventful.User, remember?: boolean) => {
   req.session.user = user
   if (remember) {
     req.sessionOptions.expires = new Date(Date.now() + REMEMBER_TIME)
     req.sessionOptions.maxAge = REMEMBER_TIME
   }
+
+  // res.cookie('auth', )
 }
 
 const destroySession = (req: Express.Request) => {
@@ -48,7 +50,7 @@ router.post('/signup', async (req, res) => {
     username: req.body.username,
     password: hashedPassword,
   })
-  newSession(req, docUser, req.body.remember)
+  newSession(req, res, docUser, req.body.remember)
   return res.status(200).send(docUser)
 })
 
@@ -63,7 +65,7 @@ router.post('/login', async (req, res) => {
   if (!(await bcrypt.compare(req.body.password, docUser.password))) {
     return res.sendStatus(401)
   }
-  newSession(req, docUser, req.body.remember)
+  newSession(req, res, docUser, req.body.remember)
   return res.status(200).send(docUser)
 })
 
