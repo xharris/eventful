@@ -33,6 +33,7 @@ router.use(
 store.on('error', console.log)
 
 export const checkSession: RequestHandler = (req, res, next) => {
+  console.log(IS_PRODUCTION, req.session)
   if (!req.session.user) {
     res.status(401).send('UNAUTHORIZED')
   } else {
