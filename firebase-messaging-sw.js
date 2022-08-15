@@ -2,6 +2,7 @@ self.onerror = (e) => console.error(e)
 
 // import { initializeApp } from 'firebase/app'
 // import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw'
+// import '../sw-env'
 
 // const app = initializeApp({
 //   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -26,7 +27,7 @@ self.onerror = (e) => console.error(e)
 
 importScripts('https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js')
 importScripts('https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js')
-importScripts('../sw-env.js')
+importScripts('/../sw-env.js')
 
 firebase.initializeApp({
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
