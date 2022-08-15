@@ -2,7 +2,6 @@ import 'dotenv/config'
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
-import cookieSession from 'cookie-session'
 import { router } from './routes'
 import mongoose from 'mongoose'
 import cors from 'cors'
@@ -14,9 +13,7 @@ import { ClientToServerEvents, ServerToClientEvents } from 'types'
 import { event } from './models'
 import { eventAggr } from './routes/event'
 import { messaging } from './fcm'
-
-const PORT = process.env.PORT ?? 3000
-const DATABASE_URI = `${process.env.DATABASE_URI}/${process.env.DATABASE_NAME}`
+import { PORT, DATABASE_URI } from './config'
 
 const app = express()
 // middleware
@@ -28,15 +25,14 @@ app.use(
 )
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(cookieParser())
-app.use(
-  cookieSession({
-    name: 'session',
-    secret: process.env.SESSION_SECRET as string,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'none',
-  })
-)
+// app.use(
+//   cookieSession({
+//     name: 'authorization',
+//     secret: process.env.SESSION_SECRET as string,
+//     secure: process.env.NODE_ENV === 'production',
+//     sameSite: 'none',
+//   })
+// )
 // database
 mongoose
   .connect(DATABASE_URI)

@@ -2,12 +2,35 @@ import express, { Request, RequestHandler, Response } from 'express'
 import { user } from '../models'
 import bcrypt from 'bcrypt'
 import { Eventful } from 'types'
+import session from 'express-session'
+import ConnectMongo from 'connect-mongodb-session'
+import { DATABASE_URI, IS_PRODUCTION } from 'api/config'
 
+const MongoDBStore = ConnectMongo(session)
+
+const store = new MongoDBStore({
+  uri: DATABASE_URI,
+  collection: 'sessions',
+})
 // 3 months
 const REMEMBER_TIME = 1000 * 60 * 60 * 24 * 90
 const EXPIRE_TIME = 0
 
 const router = express.Router()
+
+router.use(
+  session({
+    secret: process.env.SESSION_SECRET as string,
+    cookie: {
+      secure: IS_PRODUCTION,
+      sameSite: 'none',
+    },
+    store,
+    resave: true,
+    saveUninitialized: false,
+  })
+)
+store.on('error', console.log)
 
 export const checkSession: RequestHandler = (req, res, next) => {
   if (!req.session.user) {
@@ -17,21 +40,16 @@ export const checkSession: RequestHandler = (req, res, next) => {
   }
 }
 
-const newSession = (req: Request, res: Response, user: Eventful.User, remember?: boolean) => {
+const newSession = (req: Request, user: Eventful.User, remember?: boolean) => {
   req.session.user = user
   if (remember) {
-    req.sessionOptions.expires = new Date(Date.now() + REMEMBER_TIME)
-    req.sessionOptions.maxAge = REMEMBER_TIME
+    req.session.cookie.expires = new Date(Date.now() + REMEMBER_TIME)
+    req.session.cookie.maxAge = REMEMBER_TIME
   }
-
-  // res.cookie('auth', )
 }
 
-const destroySession = (req: Express.Request) => {
-  req.sessionOptions.expires = new Date(Date.now() + EXPIRE_TIME)
-  req.sessionOptions.maxAge = EXPIRE_TIME
-  // @ts-expect-error
-  req.session = null
+const destroySession = (req: Request) => {
+  req.session.destroy(console.log)
 }
 
 router.post('/signup', async (req, res) => {
@@ -50,7 +68,7 @@ router.post('/signup', async (req, res) => {
     username: req.body.username,
     password: hashedPassword,
   })
-  newSession(req, res, docUser, req.body.remember)
+  newSession(req, docUser, req.body.remember)
   return res.status(200).send(docUser)
 })
 
@@ -65,7 +83,7 @@ router.post('/login', async (req, res) => {
   if (!(await bcrypt.compare(req.body.password, docUser.password))) {
     return res.sendStatus(401)
   }
-  newSession(req, res, docUser, req.body.remember)
+  newSession(req, docUser, req.body.remember)
   return res.status(200).send(docUser)
 })
 
