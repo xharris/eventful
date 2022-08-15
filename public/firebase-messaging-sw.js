@@ -1,12 +1,9 @@
-import { initializeApp } from 'firebase/app'
-import { initializeApp } from 'firebase/app'
-import { getMessaging } from 'firebase/messaging/sw'
+// import { initializeApp } from 'firebase/app'"
+// import { getMessaging } from 'firebase/messaging/sw'"
+importScripts('https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js')
+importScripts('https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js')
 
-// Initialize the Firebase app in the service worker by passing in
-// your app's Firebase config object.
-// https://firebase.google.com/docs/web/setup#config-object
-
-const app = initializeApp({
+firebase.initializeApp({
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: 'eventful-870ba.firebaseapp.com',
   projectId: 'eventful-870ba',
@@ -15,6 +12,4 @@ const app = initializeApp({
   appId: '1:79944665764:web:cc722d5d8f9ca080bfb431',
 })
 
-// Retrieve an instance of Firebase Messaging so that it can handle background
-// messages.
-const messaging = getMessaging(firebaseApp)
+const messaging = firebase.messaging()

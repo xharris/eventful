@@ -208,6 +208,11 @@ router.post('/event/:eventId/messages/add', checkSession, async (req, res) => {
               title: docEvent.name,
               body: docMessage.text,
             },
+            webpush: {
+              fcmOptions: {
+                link: `${req.get('host')}/e/${docMessage.event}`,
+              },
+            },
           }
         )
       }

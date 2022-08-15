@@ -1,7 +1,13 @@
 import { RequestHandler } from 'express'
 import { SessionData } from 'express-session'
 import { Messaging } from 'firebase-admin/lib/messaging/messaging'
-import { BatchResponse, MessagingPayload } from 'firebase-admin/lib/messaging/messaging-api'
+import {
+  AndroidConfig,
+  ApnsConfig,
+  BatchResponse,
+  MessagingPayload,
+  WebpushConfig,
+} from 'firebase-admin/lib/messaging/messaging-api'
 import { Session } from 'inspector'
 import { Types } from 'mongoose'
 import { Server } from 'socket.io'
@@ -177,7 +183,11 @@ declare global {
         messaging: Messaging
         send: (
           setting: Pick<Eventful.NotificationSetting, 'key' | 'refModel' | 'ref'>,
-          data: MessagingPayload
+          data: MessagingPayload & {
+            webpush?: WebpushConfig
+            android?: AndroidConfig
+            apns?: ApnsConfig
+          }
         ) => Promise<BatchResponse[]>
         addToken: (token: string, user: Eventful.ID) => Promise<Eventful.FcmToken>
       }
