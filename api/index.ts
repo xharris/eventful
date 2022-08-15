@@ -12,8 +12,8 @@ import { ClientToServerEvents, ServerToClientEvents } from 'types'
 import { event } from './models'
 import { eventAggr } from './routes/event'
 import { messaging } from './fcm'
+import * as notification from './notification'
 import { PORT, DATABASE_URI } from './config'
-import { parse } from 'url'
 
 const app = express()
 // middleware
@@ -43,6 +43,7 @@ app.use((req, _, next) => {
   req.fcm = messaging
   next()
 })
+app.use(notification.router)
 io.on('connection', (socket) => {
   socket.on('event:join', async (eventId, user) => {
     if (!eventId && !user) return
@@ -58,6 +59,17 @@ io.on('connection', (socket) => {
       console.log(socket.id, 'join', `event/${eventId}`)
       socket.join(`event/${eventId}`)
     }
+  })
+  socket.on('room:join', async ({ key, ref, refModel }) => {
+    const roomid = `${refModel}:${key}/${ref}`
+    console.log(socket.id, 'join', roomid)
+    socket.join(roomid)
+  })
+  socket.on('room:leave', ({ key, ref, refModel }) => {
+    const roomid = `${refModel}:${key}/${ref}`
+    if (!socket.rooms.has(roomid)) return
+    console.log(socket.id, 'leaves', roomid)
+    socket.leave(roomid)
   })
   socket.on('event:leave', (eventId) => {
     if (!eventId || !socket.rooms.has(`event/${eventId}`)) return

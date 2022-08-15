@@ -32,6 +32,12 @@ declare namespace Eventful {
     start?: TimePart
     end?: TimePart
   }
+  type NotificationPayload = MessagingPayload & {
+    data?: MessagingPayload['data'] & { createdBy?: string }
+    webpush?: WebpushConfig
+    android?: AndroidConfig
+    apns?: ApnsConfig
+  }
 
   interface Document {
     _id: ID
@@ -161,12 +167,15 @@ declare namespace Eventful {
 export interface ClientToServerEvents {
   'event:join': (event: Eventful.ID, user: Eventful.ID) => void
   'event:leave': (event: Eventful.ID) => void
+  'room:join': (info: Pick<Eventful.NotificationSetting, 'key' | 'refModel' | 'ref'>) => void
+  'room:leave': (info: Pick<Eventful.NotificationSetting, 'key' | 'refModel' | 'ref'>) => void
 }
 
 export interface ServerToClientEvents {
   'message:add': (message: Eventful.API.MessageGet) => void
   'message:edit': (message: Eventful.API.MessageGet) => void
   'message:delete': (message: Eventful.ID) => void
+  notification: (payload: Eventful.NotificationPayload) => void
 }
 
 declare module 'express-session' {
@@ -198,16 +207,18 @@ declare global {
         messaging: Messaging
         send: (
           setting: Pick<Eventful.NotificationSetting, 'key' | 'refModel' | 'ref'>,
-          data: MessagingPayload & {
-            webpush?: WebpushConfig
-            android?: AndroidConfig
-            apns?: ApnsConfig
-          }
+          data: Eventful.NotificationPayload
         ) => Promise<BatchResponse[]>
         addToken: (token: string, user: Eventful.ID) => Promise<Eventful.FcmToken>
       }
       session: {
         user?: Eventful.User
+      }
+      notification: {
+        send: (
+          setting: Pick<Eventful.NotificationSetting, 'key' | 'refModel' | 'ref'>,
+          data: Eventful.NotificationPayload
+        ) => Promise<void>
       }
     }
   }

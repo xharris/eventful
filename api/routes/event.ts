@@ -189,28 +189,32 @@ router.post('/event/:eventId/messages/add', checkSession, async (req, res) => {
       populate: { path: 'createdBy' },
     })
     .populate('createdBy')
-    .then((doc) => {
+    .then(async (doc) => {
       if (doc) {
         req.io.to(`event/${docMessage.event}`).emit('message:add', doc)
-        return event.findById(docMessage.event)
+        return Promise.resolve([doc, await event.findById(docMessage.event)] as [
+          Eventful.API.MessageGet,
+          Eventful.API.EventGet
+        ])
       }
+      return Promise.resolve([])
     })
-    .then((docEvent) => {
-      if (docEvent) {
-        req.fcm.send(
+    .then(([docMessage2, docEvent]) => {
+      if (docMessage2 && docEvent) {
+        req.notification.send(
           {
             refModel: 'events',
-            ref: docMessage.event,
+            ref: docMessage2.event,
             key: 'message:add',
           },
           {
             notification: {
               title: docEvent.name,
-              body: docMessage.text,
+              body: `${docMessage2.createdBy.username}: ${docMessage2.text}`,
             },
             webpush: {
               fcmOptions: {
-                link: `${req.get('host')}/e/${docMessage.event}`,
+                link: `${req.get('host')}/e/${docMessage2.event}`,
               },
             },
           }
