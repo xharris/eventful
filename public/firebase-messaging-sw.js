@@ -5,11 +5,11 @@ import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw'
 
 const app = initializeApp({
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: 'eventful-870ba.firebaseapp.com',
+  appId: '1:79944665764:web:cc722d5d8f9ca080bfb431',
   projectId: 'eventful-870ba',
+  authDomain: 'eventful-870ba.firebaseapp.com',
   storageBucket: 'eventful-870ba.appspot.com',
   messagingSenderId: '79944665764',
-  appId: '1:79944665764:web:cc722d5d8f9ca080bfb431',
 })
 
 const messaging = getMessaging(app)

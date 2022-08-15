@@ -1,10 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { initializeApp } from 'firebase/app'
 import { getMessaging, getToken } from 'firebase/messaging'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Eventful } from 'types'
 import { api } from './api'
 
 export { getToken } from 'firebase/messaging'
+
+const app = initializeApp({
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  appId: '1:79944665764:web:cc722d5d8f9ca080bfb431',
+  projectId: 'eventful-870ba',
+  authDomain: 'eventful-870ba.firebaseapp.com',
+  storageBucket: 'eventful-870ba.appspot.com',
+  messagingSenderId: '79944665764',
+})
 
 const requestPermission = () =>
   new Promise<void>((res, rej) => {
@@ -13,7 +23,7 @@ const requestPermission = () =>
         return rej()
       }
       try {
-        const messaging = getMessaging()
+        const messaging = getMessaging(app)
         getToken(messaging).then((token) => {
           if (!token) {
             return rej()
