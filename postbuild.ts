@@ -13,10 +13,12 @@ const process = {
   env: ${JSON.stringify(proc, null, 2)}
 }`
 
-copyFile('firebase-messaging-sw.js', join('build', 'firebase-messaging-sw.js'))
-  .then(() => readFile(join('build', 'firebase-messaging-sw.js'), 'utf-8'))
-  .then((contents) =>
-    writeFile(join('build', 'firebase-messaging-sw.js'), `${config}\n\n${contents}`, 'utf-8')
-  )
+writeFile('sw-env.js', config)
+
+// copyFile('firebase-messaging-sw.js', join('build', 'firebase-messaging-sw.js'))
+//   .then(() => readFile(join('build', 'firebase-messaging-sw.js'), 'utf-8'))
+//   .then((contents) =>
+//     writeFile(join('build', 'firebase-messaging-sw.js'), `${config}\n\n${contents}`, 'utf-8')
+//   )
 
 export default {}
