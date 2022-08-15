@@ -21,12 +21,12 @@ const router = express.Router()
 router.use(
   session({
     secret: process.env.SESSION_SECRET as string,
-    cookie: {
-      secure: IS_PRODUCTION,
-      sameSite: 'none',
-    },
-    store,
-    saveUninitialized: false,
+    // cookie: {
+    //   secure: IS_PRODUCTION,
+    //   sameSite: 'none',
+    // },
+    // store,
+    // saveUninitialized: false,
   })
 )
 store.on('error', console.log)
