@@ -13,10 +13,11 @@ self.addEventListener('fetch', () => {
     authDomain: 'eventful-870ba.firebaseapp.com',
     storageBucket: 'eventful-870ba.appspot.com',
     messagingSenderId: '79944665764',
-    ...self.firebaseConfig,
+    apiKey: self.firebaseConfig.REACT_APP_FIREBASE_API_KEY,
   })
 
   const messaging = firebase.messaging()
+  messaging.usePublicVapidKey(self.firebaseConfig.REACT_APP_VAPID_KEY)
 
   messaging.onBackgroundMessage((payload) => {
     console.log('Received background message ', payload)

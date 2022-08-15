@@ -17,13 +17,9 @@ root.render(
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals()
 
-const fbaseConfig = new URLSearchParams({
-  REACT_APP_FIREBASE_API_KEY: process.env.REACT_APP_FIREBASE_API_KEY,
-}).toString()
-
-serviceWorkerRegistration.register({
-  file: `firebase-messaging-sw.js?${fbaseConfig}`,
-})
+// serviceWorkerRegistration.register({
+//   file: `firebase-messaging-sw.js?${fbaseConfig}`,
+// })
 
 // if ('serviceWorker' in navigator) {
 //   navigator.serviceWorker

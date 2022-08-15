@@ -5,6 +5,12 @@ import { useCallback, useEffect, useMemo } from 'react'
 import { Eventful } from 'types'
 import { api } from './api'
 
+const fbaseConfig = new URLSearchParams({
+  REACT_APP_VAPID_KEY:
+    'BOsvUqDTpR9npcwBxTCO2UGGQbOgt2sG2O9oUKubQhQw8mGqC8Leh-ihNSjhvqG_9q-jYfthin5Vw8PdCYOEBBk',
+  REACT_APP_FIREBASE_API_KEY: process.env.REACT_APP_FIREBASE_API_KEY,
+}).toString()
+
 export { getToken } from 'firebase/messaging'
 
 const app = initializeApp({
@@ -24,18 +30,27 @@ const requestPermission = () =>
         return rej()
       }
       try {
-        getToken(messaging, {
-          vapidKey:
-            'BOsvUqDTpR9npcwBxTCO2UGGQbOgt2sG2O9oUKubQhQw8mGqC8Leh-ihNSjhvqG_9q-jYfthin5Vw8PdCYOEBBk',
-        }).then((token) => {
-          console.log('token', token)
-          if (!token) {
-            return rej()
-          }
-          api.post('fcm', { token }).then(() => {
-            res()
+        navigator.serviceWorker
+          .register(`firebase-messaging-sw.js?${fbaseConfig}`, {
+            scope: '/',
+            updateViaCache: 'none',
           })
-        })
+          .then((registration) =>
+            getToken(messaging, {
+              vapidKey:
+                'BOsvUqDTpR9npcwBxTCO2UGGQbOgt2sG2O9oUKubQhQw8mGqC8Leh-ihNSjhvqG_9q-jYfthin5Vw8PdCYOEBBk',
+              serviceWorkerRegistration: registration,
+            })
+          )
+          .then((token) => {
+            console.log('token', token)
+            if (!token) {
+              return rej()
+            }
+            api.post('fcm', { token }).then(() => {
+              res()
+            })
+          })
       } catch (e) {
         if (e instanceof Error) {
           console.log(e.message)
