@@ -3,10 +3,10 @@ import { AddButton, Button } from 'src/components/Button'
 import { Flex, HStack } from 'src/components/Flex'
 import { H1, H2, H4, H5, H6 } from 'src/components/Header'
 import { Input } from 'src/components/Input'
-import { useEvent } from 'src/libs/event'
-import { useSession } from 'src/libs/session'
+import { useEvent } from 'src/eventfulLib/event'
+import { useSession } from 'src/eventfulLib/session'
 import { FiFile, FiSave, FiBell, FiCalendar, FiMessageSquare } from 'react-icons/fi'
-import { CATEGORY, CATEGORY_INFO, usePlans } from 'src/libs/plan'
+import { CATEGORY, CATEGORY_INFO, usePlans } from 'src/eventfulLib/plan'
 import { Agenda } from 'src/features/Agenda'
 import { Eventful } from 'types'
 import { useState } from 'react'
@@ -17,9 +17,10 @@ import { Time } from 'src/components/Time'
 import { Chat } from 'src/features/Chat'
 import { Popover, PopoverContent, PopoverTrigger } from 'src/components/Popover'
 import { Checkbox } from 'src/components/Checkbox'
-import { useNotifications, useNotification } from 'src/libs/notification'
+import { useNotifications, useNotification } from 'src/eventfulLib/notification'
 import { useMediaQuery } from 'src/libs/styled'
 import * as Tabs from 'src/components/VerticalTabs'
+import { CATEGORY_ICON } from 'src/libs/plan'
 
 const PlanControls = ({ event }: { event?: Eventful.ID }) => {
   const { session } = useSession()
@@ -48,7 +49,7 @@ const PlanControls = ({ event }: { event?: Eventful.ID }) => {
             css={{ display: 'flex', gap: 4, alignItems: 'center' }}
             onClick={() => addPlan({ category: parseInt(key) })}
           >
-            <IconSide icon={cat.icon}>{cat.label}</IconSide>
+            <IconSide icon={CATEGORY_ICON[parseInt(key)]}>{cat.label}</IconSide>
           </AddButton>
         ))}
     </Flex>

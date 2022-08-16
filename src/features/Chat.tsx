@@ -3,7 +3,7 @@ import { Button, CancelButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { Icon } from 'src/components/Icon'
 import { TextArea } from 'src/components/Input'
-import { useMessages } from 'src/libs/message'
+import { useMessages } from 'src/eventfulLib/message'
 import { Eventful } from 'types'
 import { FiCornerUpLeft, FiEdit2, FiSend } from 'react-icons/fi'
 import { H5, H6 } from 'src/components/Header'
@@ -11,7 +11,7 @@ import { Avatar } from 'src/components/Avatar'
 import { css, keyframes } from 'src/libs/styled'
 import type * as Stitches from '@stitches/react'
 import { createStateContext } from 'react-use'
-import { useSession } from 'src/libs/session'
+import { useSession } from 'src/eventfulLib/session'
 
 const newTextMessage = (height: number) =>
   keyframes({

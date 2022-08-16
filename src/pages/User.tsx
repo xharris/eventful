@@ -6,9 +6,9 @@ import { AddButton, Button, RemoveButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { H1, H2, H3, H4, H5, H6 } from 'src/components/Header'
 import { Icon } from 'src/components/Icon'
-import { useContacts } from 'src/libs/contact'
-import { useSession } from 'src/libs/session'
-import { useUser } from 'src/libs/user'
+import { useContacts } from 'src/eventfulLib/contact'
+import { useSession } from 'src/eventfulLib/session'
+import { useUser } from 'src/eventfulLib/user'
 
 export const User = () => {
   const { username } = useParams()

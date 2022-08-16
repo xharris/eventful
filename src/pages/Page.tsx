@@ -1,7 +1,7 @@
 import { Link, Outlet } from 'react-router-dom'
 import { Button, LinkButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
-import { useSession } from 'src/libs/session'
+import { useSession } from 'src/eventfulLib/session'
 import { FiHome } from 'react-icons/fi'
 import { Container } from 'src/components/Flex'
 import { useEffect } from 'react'

@@ -6,17 +6,18 @@ import { Button } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { H4, H5, H6 } from 'src/components/Header'
 import { IconSide } from 'src/components/Icon'
-import { CategoryInfo, usePlans, CATEGORY_INFO, CATEGORY } from 'src/libs/plan'
+import { CategoryInfo, usePlans, CATEGORY_INFO, CATEGORY } from 'src/eventfulLib/plan'
 import { Eventful } from 'types'
 import { TimeInput } from './TimeInput'
 import { UserSelect } from './UserSelect'
 import { Input } from 'src/components/Input'
 import { Select } from 'src/components/Select'
-import { useContacts } from 'src/libs/contact'
-import { useSession } from 'src/libs/session'
+import { useContacts } from 'src/eventfulLib/contact'
+import { useSession } from 'src/eventfulLib/session'
 import { Avatar, AvatarGroup } from 'src/components/Avatar'
 import { Popover, PopoverContent, PopoverTrigger } from 'src/components/Popover'
-import { useEvent } from 'src/libs/event'
+import { useEvent } from 'src/eventfulLib/event'
+import { CATEGORY_ICON } from 'src/libs/plan'
 
 interface EmptyProps {
   info: CategoryInfo
@@ -71,6 +72,8 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
       },
     })
   const info = useMemo(() => CATEGORY_INFO[values.category ?? plan.category], [plan, values])
+  const icon = useMemo(() => CATEGORY_ICON[values.category ?? plan.category], [plan, values])
+
   const { session } = useSession()
   const { data: contacts } = useContacts({ user: session?._id })
   const { data: event } = useEvent({ id: plan.event })
@@ -112,7 +115,7 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
       {editing && session ? (
         <>
           {info.fields.what && (
-            <IconSide icon={info.icon}>
+            <IconSide icon={icon}>
               <Input
                 name="what"
                 small
@@ -222,7 +225,7 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
       ) : (
         <Empty plan={plan} info={info} onEdit={onEdit}>
           <Flex>
-            <IconSide icon={plan.category !== CATEGORY.None ? info.icon : undefined}>
+            <IconSide icon={plan.category !== CATEGORY.None ? icon : undefined}>
               {(info.fields.what ||
                 plan.category === CATEGORY.Lodging ||
                 plan.category === CATEGORY.Meet) && (
