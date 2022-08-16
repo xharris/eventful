@@ -1,3 +1,6 @@
 [submodule "types"]
 	path = types
 	url = https://github.com/xharris/eventfulTypes.git
+[submodule "src/libs"]
+	path = src/libs
+	url = https://github.com/xharris/eventfulLib.git
