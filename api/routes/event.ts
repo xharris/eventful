@@ -3,6 +3,7 @@ import { PipelineStage, Types } from 'mongoose'
 import { Eventful } from 'types'
 import express from 'express'
 import { checkSession } from './auth'
+import { planAggr, planNotify } from './plan'
 
 // new Types.ObjectId(req.session.user?._id)
 export const eventAggr: (user?: Eventful.ID) => PipelineStage[] = (user) => [
@@ -12,16 +13,7 @@ export const eventAggr: (user?: Eventful.ID) => PipelineStage[] = (user) => [
       localField: '_id',
       foreignField: 'event',
       as: 'plans',
-      pipeline: [
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'who',
-            foreignField: '_id',
-            as: 'who',
-          },
-        },
-      ],
+      pipeline: planAggr() as PipelineStage.Lookup['$lookup']['pipeline'],
     },
   },
   {
@@ -172,6 +164,7 @@ router.post<{ eventId: string }>('/event/:eventId/plans/add', checkSession, asyn
     createdBy: req.session.user,
     event: new Types.ObjectId(req.params.eventId),
   })
+  planNotify(req, 'plan:add', docPlan._id, 'added')
   return res.send(docPlan)
 })
 
