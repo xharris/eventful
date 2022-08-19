@@ -9,6 +9,7 @@ const style = css({
   variants: {
     clickable: {
       true: {
+        textDecorationColor: '$disabled',
         '&:hover': {
           textDecorationColor: '$black',
           cursor: 'pointer',
@@ -19,6 +20,16 @@ const style = css({
       true: {
         fontStyle: 'italic',
         opacity: 0.75,
+      },
+    },
+    bold: {
+      true: {
+        fontWeight: 600,
+      },
+    },
+    underline: {
+      true: {
+        textDecorationColor: '$black',
       },
     },
   },

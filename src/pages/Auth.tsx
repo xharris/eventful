@@ -7,8 +7,8 @@ import { Checkbox } from 'src/components/Checkbox'
 import { Flex } from 'src/components/Flex'
 import { H1 } from 'src/components/Header'
 import { Input } from 'src/components/Input'
-import { api } from 'src/libs/api'
-import { useSession } from 'src/libs/session'
+import { api } from 'src/eventfulLib/api'
+import { useSession } from 'src/eventfulLib/session'
 import { Eventful } from 'types'
 
 export const Auth = () => {
@@ -51,8 +51,10 @@ export const Auth = () => {
             <Input
               name="username"
               placeholder="Username"
+              pattern="[a-zA-Z0-9.]+"
               onChange={handleChange}
               value={values.username}
+              autoCapitalize="none"
             />
             <Input
               name="password"
@@ -74,6 +76,7 @@ export const Auth = () => {
             <Input
               name="username"
               placeholder="Username"
+              pattern="[a-zA-Z0-9.]+"
               onChange={handleChange}
               value={values.username}
             />

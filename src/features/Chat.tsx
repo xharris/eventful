@@ -3,7 +3,7 @@ import { Button, CancelButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { Icon } from 'src/components/Icon'
 import { TextArea } from 'src/components/Input'
-import { useMessages } from 'src/libs/message'
+import { useMessages } from 'src/eventfulLib/message'
 import { Eventful } from 'types'
 import { FiCornerUpLeft, FiEdit2, FiSend } from 'react-icons/fi'
 import { H5, H6 } from 'src/components/Header'
@@ -11,7 +11,7 @@ import { Avatar } from 'src/components/Avatar'
 import { css, keyframes } from 'src/libs/styled'
 import type * as Stitches from '@stitches/react'
 import { createStateContext } from 'react-use'
-import { useSession } from 'src/libs/session'
+import { useSession } from 'src/eventfulLib/session'
 
 const newTextMessage = (height: number) =>
   keyframes({
@@ -99,7 +99,7 @@ export const Message = ({ message }: MessageProps) => {
       >
         <Flex column css={{ gap: '$small' }}>
           {message?.replyTo && (
-            <Flex css={{ marginLeft: 36, alignItems: 'center', gap: '$small' }}>
+            <Flex css={{ opacity: 0.5, marginLeft: 36, alignItems: 'center', gap: '$small' }}>
               <Icon icon={FiCornerUpLeft} />
               <H6 css={{ fontWeight: 500 }}>{message?.replyTo.createdBy.username}</H6>
               <H6>{message?.replyTo.text}</H6>
@@ -236,11 +236,19 @@ interface ChatProps {
 }
 
 export const Chat = ({ event }: ChatProps) => {
-  const { data: messages, addMessage } = useMessages({ event })
+  const { data: messages } = useMessages({ event })
 
   return (
     <ChatCtxProvider>
-      <Flex column="reverse" css={{ padding: '0 $small', overflowY: 'auto', gap: '$small' }}>
+      <Flex
+        column="reverse"
+        css={{
+          height: '100%',
+          padding: '0 $small',
+          overflowY: 'auto',
+          gap: '$small',
+        }}
+      >
         <ChatInput event={event} />
         <Flex column="reverse" css={{ gap: '$small' }}>
           {messages?.map((message) => (

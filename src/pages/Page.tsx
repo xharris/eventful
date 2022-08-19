@@ -1,7 +1,7 @@
 import { Link, Outlet } from 'react-router-dom'
 import { Button, LinkButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
-import { useSession } from 'src/libs/session'
+import { useSession } from 'src/eventfulLib/session'
 import { FiHome } from 'react-icons/fi'
 import { Container } from 'src/components/Flex'
 import { useEffect } from 'react'
@@ -13,7 +13,7 @@ export const Page = () => {
   return (
     <Container css={{ padding: '$root' }}>
       <Flex column fill>
-        <Flex row flex="0" css={{ justifyContent: 'space-between' }}>
+        <Flex className="page-header" row flex="0" css={{ justifyContent: 'space-between' }}>
           <Flex>
             <LinkButton to="/" variant="ghost">
               <FiHome />

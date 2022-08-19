@@ -6,17 +6,18 @@ import { Button } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { H4, H5, H6 } from 'src/components/Header'
 import { IconSide } from 'src/components/Icon'
-import { CategoryInfo, usePlans, CATEGORY_INFO, CATEGORY } from 'src/libs/plan'
+import { CategoryInfo, usePlans, CATEGORY_INFO, CATEGORY } from 'src/eventfulLib/plan'
 import { Eventful } from 'types'
 import { TimeInput } from './TimeInput'
 import { UserSelect } from './UserSelect'
 import { Input } from 'src/components/Input'
 import { Select } from 'src/components/Select'
-import { useContacts } from 'src/libs/contact'
-import { useSession } from 'src/libs/session'
+import { useContacts } from 'src/eventfulLib/contact'
+import { useSession } from 'src/eventfulLib/session'
 import { Avatar, AvatarGroup } from 'src/components/Avatar'
 import { Popover, PopoverContent, PopoverTrigger } from 'src/components/Popover'
-import { useEvent } from 'src/libs/event'
+import { useEvent } from 'src/eventfulLib/event'
+import { CATEGORY_ICON } from 'src/libs/plan'
 
 interface EmptyProps {
   info: CategoryInfo
@@ -32,19 +33,15 @@ const Empty = ({ plan, info, onEdit, children }: EmptyProps) => {
   )
 
   return isEmpty ? (
-    <H4
+    <H5
       clickable
       onClick={() => onEdit()}
       css={{
         fontStyle: 'italic',
-        color: '$disabled',
-        '&:hover': {
-          textDecorationColor: '$disabled',
-        },
       }}
     >
-      {`${info.label} plan...`}
-    </H4>
+      {`Untitled ${info.label.toLowerCase()}`}
+    </H5>
   ) : (
     <>{children}</>
   )
@@ -58,7 +55,7 @@ interface PlanProps {
 }
 
 export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
-  const { updatePlan, deletePlan } = usePlans({ event: plan.event.toString() })
+  const { updatePlan, deletePlan } = usePlans({ event: plan.event })
   const { handleChange, setFieldValue, resetForm, values, dirty, submitForm } =
     useFormik<Eventful.API.PlanEdit>({
       initialValues: {
@@ -75,20 +72,33 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
       },
     })
   const info = useMemo(() => CATEGORY_INFO[values.category ?? plan.category], [plan, values])
+  const icon = useMemo(() => CATEGORY_ICON[values.category ?? plan.category], [plan, values])
+
   const { session } = useSession()
   const { data: contacts } = useContacts({ user: session?._id })
   const { data: event } = useEvent({ id: plan.event })
 
   const whoOptions = useMemo(
-    () => [...(contacts ?? []), session].filter((user) => user != null) as Eventful.User[],
+    () => [...(contacts ?? []), ...(session ? [session] : [])],
     [contacts, session]
+  )
+  const whoAll = useMemo(
+    () => [...(contacts ?? []), ...(session ? [session] : []), ...(event?.who ?? [])],
+    [contacts, session, event]
+  )
+  const whoFixed = useMemo(
+    () =>
+      whoAll
+        .filter((user) => !whoOptions.some((user2) => user._id === user2._id))
+        .map((user) => user._id),
+    [whoAll, whoOptions]
   )
 
   return (
     <Flex
       column
       css={{
-        padding: '$controlPadding',
+        padding: '$small',
         gap: '$small',
         border: '1px solid $controlBorder',
         borderRadius: '$control',
@@ -100,11 +110,12 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
           opacity: 1,
         },
       }}
+      data-testid="plan"
     >
       {editing && session ? (
         <>
           {info.fields.what && (
-            <IconSide icon={info.icon}>
+            <IconSide icon={icon}>
               <Input
                 name="what"
                 small
@@ -142,18 +153,20 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
             <IconSide icon={FiUsers} subtle>
               <UserSelect
                 name="who"
-                users={event?.who ?? []}
+                users={whoAll}
                 options={whoOptions}
-                value={event?.who?.filter((user) => values.who?.some((id) => id === user._id))}
+                fixedUsers={whoFixed}
+                value={
+                  values.who?.map(
+                    (id) => whoAll.find((user2) => user2._id === id) as Eventful.User
+                  ) ?? []
+                }
                 onChange={(users) =>
                   setFieldValue(
                     'who',
                     users.map((user) => user._id)
                   )
                 }
-                fixedUsers={event?.who
-                  ?.filter((user) => !whoOptions.some((user2) => user2._id === user._id))
-                  .map((user) => user._id)}
               />
             </IconSide>
           )}
@@ -163,6 +176,7 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
                 onClick={() => (dirty ? submitForm() : onClose())}
                 variant={dirty ? 'filled' : 'ghost'}
                 color={dirty ? 'success' : undefined}
+                title="Save plan"
                 square
               >
                 {dirty ? <FiSave /> : <FiArrowLeft />}
@@ -211,17 +225,18 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
       ) : (
         <Empty plan={plan} info={info} onEdit={onEdit}>
           <Flex>
-            <IconSide icon={plan.category !== CATEGORY.None ? info.icon : undefined}>
+            <IconSide icon={plan.category !== CATEGORY.None ? icon : undefined}>
               {(info.fields.what ||
                 plan.category === CATEGORY.Lodging ||
                 plan.category === CATEGORY.Meet) && (
-                <H4
+                <H5
                   clickable
                   onClick={() => onEdit()}
                   css={{
                     flex: 1,
                     fontStyle: !!plan.what?.length ? 'normal' : 'italic',
                     color: !!plan.what?.length ? '$black' : '$disabled',
+                    fontWeight: 500,
                   }}
                 >
                   {plan.category === CATEGORY.Carpool
@@ -231,7 +246,7 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
                     : !!plan.what?.length
                     ? plan.what
                     : 'Untitled plan'}
-                </H4>
+                </H5>
               )}
             </IconSide>
             {info.fields.who && (

@@ -1,14 +1,14 @@
 import { Button, LinkButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { Input } from 'src/components/Input'
-import { useEvents } from 'src/libs/event'
+import { useEvents } from 'src/eventfulLib/event'
 import { FiPlus } from 'react-icons/fi'
 import { useMemo, useState } from 'react'
 import { H1, H3, H4, H5 } from 'src/components/Header'
 import { Eventful } from 'types'
 import { useNavigate } from 'react-router-dom'
 import { Agenda } from 'src/features/Agenda'
-import { useSession } from 'src/libs/session'
+import { useSession } from 'src/eventfulLib/session'
 import { Time } from 'src/components/Time'
 import { AvatarGroup } from 'src/components/Avatar'
 
@@ -22,8 +22,8 @@ const Event = ({ event }: { event: Eventful.API.EventGet }) => (
     variant="ghost"
   >
     <Flex>
-      <Flex column css={{ alignItems: 'flex-start', gap: '$small' }}>
-        <H3>{event.name}</H3>
+      <Flex css={{ alignItems: 'center' }}>
+        <H4 css={{ fontWeight: 600 }}>{event.name}</H4>
         <H4>
           <Time time={event.time} />
         </H4>
@@ -84,6 +84,7 @@ export const Events = () => {
           onClick={() =>
             createEvent({ name: newEventValue }).then((res) => navigate(`/e/${res.data._id}`))
           }
+          title="Add event"
         >
           <FiPlus />
         </Button>

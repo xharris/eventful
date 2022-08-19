@@ -24,3 +24,9 @@ yarn-error.log*
 
 .env
 .env.production
+.env.test
+*-firebase-adminsdk-*.json
+/test-results/
+/playwright-report/
+/playwright/.cache/
+sw-env.js

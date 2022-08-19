@@ -6,18 +6,21 @@
 
 # ToDo
 
-- [x] get api/events start/end dates from plans
-- [x] contact list on user page
-- [x] simple chat window
-  - message
-    - text (str)
-    - replyTo (message.\_id)
 - agenda
-  - months are not in order
-  - show year next to month name
-  - show old events, but scroll to current date
-  - separate agendas for TBD and dated events? (two columns)
+  - [x] months are not in order
+  - [x] show year next to month name
+  - [ ] show old events, but scroll to current date
+  - [x] separate agendas for TBD and dated events? (two columns)
     - OR make TDB collapsible (might prefer this one)
+- notifications
+  - api/fcm: refresh registration token for user
+    - check if all of this users registered tokens are still valid
+  - req.messaging
+    - send(refModel, ref, data)
+    - addToken(token, userId)
+    - (DO LATER) subTopic(topic, userId)
+    - (DO LATER) unsubTopic
+    - (DO LATER) sendToTopic(topic)
 
 # Nice features
 
@@ -60,3 +63,43 @@
   - list of dates with events for each date
     - below it, show all plans that occur on that date
 - Contact
+
+# Service Worker http
+
+- firefox
+
+  `devtools.serviceWorkers.testing.enabled = true`
+
+# Running tests
+
+Inside that directory, you can run several commands:
+
+`yarn playwright test`
+
+    Runs the end-to-end tests.
+
+`yarn playwright test --project=chromium`
+
+    Runs the tests only on Desktop Chrome.
+
+`yarn playwright test example`
+
+    Runs the tests in a specific file.
+
+`yarn playwright test --debug`
+
+    Runs the tests in debug mode.
+
+`yarn playwright codegen`
+
+    Auto generate tests with Codegen.
+
+We suggest that you begin by typing: `yarn playwright test`
+
+And check out the following files:
+
+- .\src\tests\example.spec.ts - Example end-to-end test
+- .\tests-examples\demo-todo-app.spec.ts - Demo Todo App end-to-end tests
+- .\playwright.config.ts - Playwright Test configuration
+
+Visit https://playwright.dev/docs/intro for more information. ✨

@@ -3,6 +3,13 @@ import { MultiValue } from 'react-select'
 import { Select } from 'src/components/Select'
 import { Eventful } from 'types'
 
+const noRepeats = <I extends {} = { _id: Eventful.ID },>(items: I[], key?: keyof I) =>
+    items.reduce((arr, item) => 
+    arr.some(item2 => item2[key ?? '_id' as keyof I] === item[key ?? '_id' as keyof I])
+      ? arr 
+      : [...arr, item]
+  , [] as I[])
+
 type Item = {
   value: Eventful.ID
   label: string
@@ -23,9 +30,9 @@ interface UserSelectProps extends Omit<ComponentProps<typeof Select<Item, true>>
 
 export const UserSelect = ({
   name,
-  users,
+  users: _users,
   options: _options,
-  value,
+  value: _value,
   defaultValue = [],
   onChange,
   fixedUsers,
@@ -38,25 +45,44 @@ export const UserSelect = ({
     }))
   )
 
+  const users = useMemo(() => 
+    noRepeats(_users)
+  , [_users])
+
   const options: Item[] = useMemo(() => 
-    users.filter(user => 
-      !_options || _options.some(user2 => user2._id === user._id)  
-    ).map((user) => ({
+    noRepeats([
+      ...users,
+      ..._options ?? []
+    ]).map((user) => ({
       value: user._id,
       label: user.username,
       isFixed: !fixedUsers?.includes(user._id)
     }))
   , [users, _options, fixedUsers])
 
+
   const fixedItems: Item[] = useMemo(() => 
     users
-    .filter(user => fixedUsers?.includes(user._id) && value?.some(user2 => user2._id === user._id))
+    .filter(user => fixedUsers?.includes(user._id) && _value?.some(user2 => user2._id === user._id))
     .map(user => ({
       value: user._id,
       label: user.username,
       isFixed: fixedUsers?.includes(user._id)
     }))
-  , [users, fixedUsers, value])
+  , [users, fixedUsers, _value])
+
+  const value = useMemo(
+    () => 
+      noRepeats<Item>([
+        ...fixedItems,
+        ..._value?.map((user) => ({
+          value: user._id,
+          label: user.username,
+          isFixed: fixedUsers?.includes(user._id)
+        })) ?? selected
+      ], 'value')
+      , [_value, selected, fixedUsers]
+  )
 
   return (
     <Select<Item, true>
@@ -64,15 +90,7 @@ export const UserSelect = ({
       name={name}
       isMulti
       value={
-        [
-          ...fixedItems,
-          ...value?.filter(user => !fixedItems.some(user2 => user2.value === user._id))
-          .map((user) => ({
-            value: user._id,
-            label: user.username,
-            isFixed: fixedUsers?.includes(user._id)
-          })) ?? selected
-        ]
+        value
       }
       options={options}
       onChange={(newItems) => {

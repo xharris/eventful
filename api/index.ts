@@ -1,8 +1,6 @@
 import 'dotenv/config'
 import express from 'express'
-import cookieParser from 'cookie-parser'
 import bodyParser from 'body-parser'
-import cookieSession from 'cookie-session'
 import { router } from './routes'
 import mongoose from 'mongoose'
 import cors from 'cors'
@@ -13,9 +11,9 @@ import http from 'http'
 import { ClientToServerEvents, ServerToClientEvents } from 'types'
 import { event } from './models'
 import { eventAggr } from './routes/event'
-
-const PORT = process.env.PORT ?? 3000
-const DATABASE_URI = `${process.env.DATABASE_URI}/${process.env.DATABASE_NAME}`
+import { messaging } from './fcm'
+import * as notification from './notification'
+import { PORT, DATABASE_URI } from './config'
 
 const app = express()
 // middleware
@@ -27,14 +25,6 @@ app.use(
 )
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(cookieParser())
-app.use(
-  cookieSession({
-    name: 'session',
-    secret: process.env.SESSION_SECRET as string,
-    secure: process.env.NODE_ENV === 'production',
-  })
-)
 // database
 mongoose
   .connect(DATABASE_URI)
@@ -50,8 +40,10 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
 })
 app.use((req, _, next) => {
   req.io = io
+  req.fcm = messaging
   next()
 })
+app.use(notification.router)
 io.on('connection', (socket) => {
   socket.on('event:join', async (eventId, user) => {
     if (!eventId && !user) return
@@ -68,6 +60,17 @@ io.on('connection', (socket) => {
       socket.join(`event/${eventId}`)
     }
   })
+  socket.on('room:join', async ({ key, ref, refModel }) => {
+    const roomid = `${refModel}:${key}/${ref}`
+    console.log(socket.id, 'join', roomid)
+    socket.join(roomid)
+  })
+  socket.on('room:leave', ({ key, ref, refModel }) => {
+    const roomid = `${refModel}:${key}/${ref}`
+    if (!socket.rooms.has(roomid)) return
+    console.log(socket.id, 'leaves', roomid)
+    socket.leave(roomid)
+  })
   socket.on('event:leave', (eventId) => {
     if (!eventId || !socket.rooms.has(`event/${eventId}`)) return
     console.log(socket.id, 'leaves', `event/${eventId}`)
@@ -81,9 +84,16 @@ if (process.env.NODE_ENV === 'production') {
 app.use(morgan('tiny'))
 app.use('/api', router)
 if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) =>
+  app.get('*', (req, res) => {
+    // const pathName = parse(req.url).pathname
+    // if (pathName?.endsWith('.js')) {
+    //   res.writeHead(200, {
+    //     'Service-Worker-Allowed': '/',
+    //     'Content-Type': 'application/javascript',
+    //   })
+    // }
     res.sendFile(path.join(__dirname, '../build', 'index.html'), (err) => err && console.log(err))
-  )
+  })
 }
 // server
 server.listen(PORT, () => {

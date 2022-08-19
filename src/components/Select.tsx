@@ -1,6 +1,7 @@
 import { css, styled } from 'src/libs/styled'
 import ReactSelect, { components } from 'react-select'
 import { ComponentProps } from 'react'
+import { Flex } from './Flex'
 
 export const selectCss = css({
   flex: 1,
@@ -36,9 +37,14 @@ interface Option  {
 interface ISelectProps<O extends Option, isMulti extends boolean = false> extends ComponentProps<typeof ReactSelect<O, isMulti>> {}
 
 export const Select = <O extends Option, isMulti extends boolean = false>({ ...props }: ISelectProps<O, isMulti>) => {
-  return <ReactSelect<O, isMulti> {...props} 
-    components={{
-      MultiValueRemove: (props) => props.data.isFixed ? null : <components.MultiValueRemove {...props} />
-    }}
-  className={selectCss()} classNamePrefix='rs' />
+  return (
+  <Flex data-testid="select">
+    <ReactSelect<O, isMulti> {...props} 
+      components={{
+        MultiValueRemove: (props) => props.data.isFixed ? null : <components.MultiValueRemove {...props} />
+      }}
+      className={selectCss()} classNamePrefix='rs' 
+    />
+  </Flex>
+  )
 }

@@ -1,8 +1,9 @@
-import { event, group, plan, location, message } from 'api/models'
+import { event, plan, location, message } from 'api/models'
 import { PipelineStage, Types } from 'mongoose'
 import { Eventful } from 'types'
 import express from 'express'
 import { checkSession } from './auth'
+import { planAggr, planNotify } from './plan'
 
 // new Types.ObjectId(req.session.user?._id)
 export const eventAggr: (user?: Eventful.ID) => PipelineStage[] = (user) => [
@@ -12,16 +13,7 @@ export const eventAggr: (user?: Eventful.ID) => PipelineStage[] = (user) => [
       localField: '_id',
       foreignField: 'event',
       as: 'plans',
-      pipeline: [
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'who',
-            foreignField: '_id',
-            as: 'who',
-          },
-        },
-      ],
+      pipeline: planAggr() as PipelineStage.Lookup['$lookup']['pipeline'],
     },
   },
   {
@@ -113,12 +105,6 @@ export const options: Eventful.API.RouteOptions = {
         name: req.body.name ?? 'new event',
         createdBy: req.session.user?._id,
       })
-      await group.create({
-        name: 'root',
-        event: docEvent,
-        isRoot: true,
-        createdBy: req.session.user?._id,
-      })
       return res.send(docEvent)
     },
     getAll: async (req, res) => {
@@ -178,6 +164,7 @@ router.post<{ eventId: string }>('/event/:eventId/plans/add', checkSession, asyn
     createdBy: req.session.user,
     event: new Types.ObjectId(req.params.eventId),
   })
+  planNotify(req, 'plan:add', docPlan._id, 'added')
   return res.send(docPlan)
 })
 
@@ -190,10 +177,41 @@ router.post('/event/:eventId/messages/add', checkSession, async (req, res) => {
   })
   message
     .findById<Eventful.API.MessageGet>(docMessage._id)
+    .populate({
+      path: 'replyTo',
+      populate: { path: 'createdBy' },
+    })
     .populate('createdBy')
-    .then((doc) => {
+    .then(async (doc) => {
       if (doc) {
         req.io.to(`event/${docMessage.event}`).emit('message:add', doc)
+        return Promise.resolve([doc, await event.findById(docMessage.event)] as [
+          Eventful.API.MessageGet,
+          Eventful.API.EventGet
+        ])
+      }
+      return Promise.resolve([])
+    })
+    .then(([docMessage2, docEvent]) => {
+      if (docMessage2 && docEvent) {
+        req.notification.send(
+          {
+            refModel: 'events',
+            ref: docMessage2.event,
+            key: 'message:add',
+          },
+          {
+            notification: {
+              title: docEvent.name,
+              body: `${docMessage2.createdBy.username}: ${docMessage2.text}`,
+            },
+            webpush: {
+              fcmOptions: {
+                link: `${req.get('host')}/e/${docMessage2.event}`,
+              },
+            },
+          }
+        )
       }
     })
   return res.send(docMessage)

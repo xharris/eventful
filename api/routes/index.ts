@@ -5,6 +5,8 @@ import * as plan from './plan'
 import * as user from './user'
 import * as contact from './contact'
 import * as message from './message'
+import * as notificationSetting from './notificationSetting'
+import * as fcm from './fcm'
 import type { Eventful } from 'types'
 
 export const router = express.Router()
@@ -34,3 +36,5 @@ router.use(plan.router)
 router.use(contact.router)
 router.use(user.router)
 router.use(message.router)
+router.use(notificationSetting.router)
+router.use(fcm.router)

@@ -6,9 +6,9 @@ import { AddButton, Button, RemoveButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { H1, H2, H3, H4, H5, H6 } from 'src/components/Header'
 import { Icon } from 'src/components/Icon'
-import { useContacts } from 'src/libs/contact'
-import { useSession } from 'src/libs/session'
-import { useUser } from 'src/libs/user'
+import { useContacts } from 'src/eventfulLib/contact'
+import { useSession } from 'src/eventfulLib/session'
+import { useUser } from 'src/eventfulLib/user'
 
 export const User = () => {
   const { username } = useParams()
@@ -17,11 +17,7 @@ export const User = () => {
 
   const navigate = useNavigate()
   const { data: user } = useUser({ username })
-  const {
-    data: contacts,
-    addContact,
-    removeContact,
-  } = useContacts({ user: isMe ? user?._id : undefined })
+  const { data: contacts, addContact, removeContact } = useContacts({ user: session?._id })
 
   return user ? (
     <Flex
@@ -52,14 +48,18 @@ export const User = () => {
         ) : (
           <Flex column>
             {session &&
-              (!contacts?.find((user) => user.username === username) ? (
-                <AddButton onClick={() => addContact(user._id)}>Add</AddButton>
+              contacts &&
+              (!contacts.find((user) => user.username === username) ? (
+                <AddButton onClick={() => addContact(user._id)} title="Add contact">
+                  Add
+                </AddButton>
               ) : (
                 <RemoveButton
                   onClick={() =>
                     window.confirm('Are you sure you want to remove this contact?') &&
                     removeContact(user._id)
                   }
+                  title="Remove contact"
                 >
                   Remove
                 </RemoveButton>

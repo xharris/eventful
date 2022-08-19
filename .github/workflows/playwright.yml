@@ -1,0 +1,62 @@
+name: E2E Tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  playwright:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    env:
+      CI: false
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+      SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+      REACT_APP_URL: 'http://localhost:3001'
+      REACT_APP_SOCKET_URL: 'http://localhost:3000'
+      REACT_APP_API_URL: 'http://localhost:3000/api'
+      FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+      FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+      REACT_APP_FIREBASE_API_KEY: ${{ secrets.REACT_APP_FIREBASE_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT }}
+          submodules: recursive
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.7.0
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.7.0
+        with:
+          mongodb-version: '5.0.9'
+          mongodb-port: 27017
+      - name: Run e2e tests
+        env:
+          CI: true
+        run: yarn test
+
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: e2e failed report
+          path: test-results/**/trace.zip
+          retention-days: 30

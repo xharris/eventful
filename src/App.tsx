@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { SessionProvider, useSession } from './libs/session'
+import { SessionProvider, useSession } from './eventfulLib/session'
 import { globalStyles } from './libs/styled'
 import { Auth } from './pages/Auth'
 import { Event } from './pages/Event'
