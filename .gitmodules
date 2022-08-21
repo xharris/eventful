@@ -1,6 +1,6 @@
 [submodule "types"]
 	path = types
-	url = git@github.com:xharris/eventfulTypes.git
+	url = git+ssh://git@github.com:xharris/eventfulTypes.git
 [submodule "src/eventfulLib"]
 	path = src/eventfulLib
-	url = git@github.com:xharris/eventfulLib.git
+	url = git+ssh://git@github.com:xharris/eventfulLib.git
