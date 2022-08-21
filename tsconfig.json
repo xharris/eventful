@@ -17,7 +17,7 @@
     "jsx": "react-jsx",
     "baseUrl": "."
   },
-  "include": ["**/*.js", "**/*.ts", "**/*.jsx", "**/*.tsx"],
+  "include": ["**/*.js", "**/*.ts", "**/*.jsx", "**/*.tsx", "**/*.d.ts"],
   "ts-node": {
     "require": ["tsconfig-paths/register"]
   }

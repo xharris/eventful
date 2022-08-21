@@ -15,6 +15,10 @@ router.put('/message/:messageId', checkSession, async (req, res) => {
       req.body,
       { new: true }
     )
+    .populate({
+      path: 'replyTo',
+      populate: { path: 'createdBy' },
+    })
     .populate('createdBy')
   if (!docMessage) {
     return res.sendStatus(404)
