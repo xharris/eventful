@@ -1,8 +1,23 @@
 import { plan } from 'api/models'
 import express, { Request, Response } from 'express'
 import { PipelineStage, Types } from 'mongoose'
-import { getTitle } from 'src/eventfulLib/plan'
 import { Eventful } from 'types'
+
+export const CATEGORY = {
+  None: 0,
+  Lodging: 1,
+  Carpool: 2,
+  Meet: 3,
+}
+
+export const getTitle = (plan: Eventful.Plan) =>
+  plan.category === CATEGORY.Carpool
+    ? `${plan.what} carpool`
+    : plan.category === CATEGORY.Lodging || plan.category === CATEGORY.Meet
+    ? plan.location?.label ?? plan.location?.address
+    : !!plan.what?.length
+    ? plan.what
+    : 'Untitled plan'
 
 export const router = express.Router()
 

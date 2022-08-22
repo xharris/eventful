@@ -30,3 +30,5 @@ yarn-error.log*
 /playwright-report/
 /playwright/.cache/
 sw-env.js
+
+**/out
