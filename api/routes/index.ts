@@ -12,7 +12,7 @@ import type { Eventful } from 'types'
 export const router = express.Router()
 
 router.get('/', (req, res) => {
-  res.send('API is running')
+  res.status(200).send('API is running')
 })
 
 router.use(auth)
