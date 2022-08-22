@@ -7,8 +7,8 @@
   },
   "scripts": {
     "start": "cross-env NODE_ENV=production yarn run api",
+    "build": "react-scripts build",
     "rs:start": "react-scripts start",
-    "dev:build": "react-scripts build",
     "postbuild": "ts-node scripts/postbuild.ts",
     "test": "playwright test",
     "test:debug": "playwright test --debug --project=firefox",
