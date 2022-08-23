@@ -1,3 +1,4 @@
+// deprecated - no longer needed. submodules appear to work now.
 // retrieves eventfulTypes and eventfulLibs
 import { copy, remove } from 'fs-extra'
 import { exec } from 'child_process'

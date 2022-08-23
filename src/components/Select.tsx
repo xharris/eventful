@@ -11,40 +11,47 @@ export const selectCss = css({
     fontSize: '$control',
     borderRadius: '$control',
     padding: '0 $controlPadding',
-    minHeight: '32px'
+    minHeight: '32px',
   },
   '.rs__indicators': {
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   '.rs__indicator': {
     padding: 0,
   },
   '.rs__indicator-separator': {
-    display: 'none'
+    display: 'none',
   },
   '.rs__indicator > svg': {
     width: '$control',
-    height: "$control"
-  }
+    height: '$control',
+  },
 })
 
-interface Option  {
-  value: unknown 
+interface Option {
+  value: unknown
   label: string
   isFixed?: boolean
 }
 
-interface ISelectProps<O extends Option, isMulti extends boolean = false> extends ComponentProps<typeof ReactSelect<O, isMulti>> {}
+interface ISelectProps<O extends Option, isMulti extends boolean = false>
+  extends ComponentProps<typeof ReactSelect<O, isMulti>> {}
 
-export const Select = <O extends Option, isMulti extends boolean = false>({ ...props }: ISelectProps<O, isMulti>) => {
+export const Select = <O extends Option, isMulti extends boolean = false>({
+  ...props
+}: ISelectProps<O, isMulti>) => {
   return (
-  <Flex data-testid="select">
-    <ReactSelect<O, isMulti> {...props} 
-      components={{
-        MultiValueRemove: (props) => props.data.isFixed ? null : <components.MultiValueRemove {...props} />
-      }}
-      className={selectCss()} classNamePrefix='rs' 
-    />
-  </Flex>
+    <Flex data-testid="select">
+      <ReactSelect<O, isMulti>
+        menuPortalTarget={document.body}
+        {...props}
+        components={{
+          MultiValueRemove: (props) =>
+            props.data.isFixed ? null : <components.MultiValueRemove {...props} />,
+        }}
+        className={selectCss()}
+        classNamePrefix="rs"
+      />
+    </Flex>
   )
 }
