@@ -2,7 +2,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "outDir": "../out",
+    "outDir": "../out/api",
     "noEmit": false,
     "baseUrl": "..",
     "paths": {

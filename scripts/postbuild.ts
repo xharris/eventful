@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { move } from 'fs-extra'
+import { move, remove } from 'fs-extra'
 import { copyFile, writeFile, readFile } from 'fs/promises'
 import { join } from 'path'
 
@@ -7,7 +7,9 @@ import { replaceTscAliasPaths } from 'tsc-alias'
 
 replaceTscAliasPaths({
   configFile: 'api/tsconfig.json',
-}).then(() => move('build', 'out/build'))
+})
+  .then(() => remove('out/ui'))
+  .then(() => move('build', 'out/ui'))
 
 // const keys = ['REACT_APP_FIREBASE_API_KEY']
 

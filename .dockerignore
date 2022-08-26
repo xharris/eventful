@@ -1,3 +1,6 @@
 node_modules
+out
+build
 .github
 .git
+.env

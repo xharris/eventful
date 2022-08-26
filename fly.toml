@@ -12,6 +12,7 @@ processes = []
   PORT = "8080"
   FIREBASE_PROJECT_ID = "eventful-870ba"
   DATABASE_NAME = "eventful"
+  REACT_APP_API_URL = "/api"
 
 [experimental]
   allowed_public_ports = []
