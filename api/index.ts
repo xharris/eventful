@@ -85,7 +85,7 @@ app.use(morgan('tiny'))
 app.use('/api', router)
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../build', 'index.html'), (err) => err && console.log(err))
+    res.sendFile(path.join(__dirname, 'build', 'index.html'), (err) => err && console.log(err))
   })
 }
 // server

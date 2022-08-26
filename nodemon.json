@@ -2,7 +2,8 @@
   "ignore": ["**/*.test.ts", "**/*.spec.ts", ".git", "node_modules"],
   "watch": ["api", "types", "tsconfig.json"],
   "execMap": {
-    "ts": "ts-node"
+    "ts": "ts-node",
+    "js": "node"
   },
   "ext": "ts, js"
 }
