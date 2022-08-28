@@ -21,13 +21,13 @@ export const getTitle = (plan: Eventful.Plan) =>
 
 export const router = express.Router()
 
-export const planNotify = (
+export const planNotify = async (
   req: Request,
   key: Eventful.NotificationSetting['key'],
   id: Eventful.ID,
   desc?: string
 ) => {
-  plan
+  await plan
     .aggregate([
       {
         $match: {
@@ -38,7 +38,7 @@ export const planNotify = (
     ])
     .then((docs) => req.io.to(`event/${docs[0].event}`).emit(key, docs[0]))
   if (desc) {
-    plan
+    await plan
       .findById<Eventful.Plan & { event: Eventful.Event }>(id)
       .populate('event')
       .then(
@@ -110,7 +110,7 @@ router.put<{ planId: string }>('/plan/:planId', async (req, res) => {
 })
 
 router.delete('/plan/:planId', async (req, res) => {
+  await planNotify(req, 'plan:delete', new Types.ObjectId(req.params.planId))
   const docPlan = await plan.findOneAndDelete({ _id: req.params.planId })
-  planNotify(req, 'plan:delete', new Types.ObjectId(req.params.planId))
   return res.send(docPlan)
 })
