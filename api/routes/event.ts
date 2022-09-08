@@ -96,6 +96,11 @@ export const eventAggr: (user?: Eventful.ID) => PipelineStage[] = (user) => [
       as: 'who',
     },
   },
+  // {
+  //   $sort: {
+  //     'plans.time.start.date': -1,
+  //   },
+  // },
 ]
 
 export const options: Eventful.API.RouteOptions = {
@@ -162,7 +167,7 @@ router.post<{ eventId: string }>('/event/:eventId/plans/add', checkSession, asyn
     what: req.body.what ?? '',
     location: req.body.location,
     createdBy: req.session.user,
-    event: new Types.ObjectId(req.params.eventId),
+    event: req.params.eventId,
   })
   planNotify(req, 'plan:add', docPlan._id, 'added')
   return res.send(docPlan)
