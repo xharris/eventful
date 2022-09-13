@@ -72,6 +72,12 @@
 
 # Running tests
 
+Dont forget to create an `.env.test` and add
+
+```
+BASE_URL=http://localhost:3001
+```
+
 Inside that directory, you can run several commands:
 
 `yarn playwright test`

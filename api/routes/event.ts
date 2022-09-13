@@ -96,6 +96,11 @@ export const eventAggr: (user?: Eventful.ID) => PipelineStage[] = (user) => [
       as: 'who',
     },
   },
+  {
+    $sort: {
+      'time.start.date': 1,
+    },
+  },
 ]
 
 export const options: Eventful.API.RouteOptions = {

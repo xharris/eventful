@@ -110,7 +110,7 @@ export const Message = ({ message }: MessageProps) => {
               username={message?.createdBy.username}
               to={`/u/${message?.createdBy.username}`}
             />
-            <H5 css={{ whiteSpace: 'pre', flex: 1 }}>{message?.text}</H5>
+            <H5 css={{ whiteSpace: 'pre-wrap', flex: 1 }}>{message?.text}</H5>
             <Flex className="controls" flex="0" css={{ gap: '$small' }}>
               {session?._id === message?.createdBy._id && (
                 <Button
