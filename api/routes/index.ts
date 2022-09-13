@@ -7,6 +7,7 @@ import * as contact from './contact'
 import * as message from './message'
 import * as notificationSetting from './notificationSetting'
 import * as fcm from './fcm'
+import * as ping from './ping'
 import type { Eventful } from 'types'
 
 export const router = express.Router()
@@ -38,3 +39,4 @@ router.use(user.router)
 router.use(message.router)
 router.use(notificationSetting.router)
 router.use(fcm.router)
+router.use(ping.router)
