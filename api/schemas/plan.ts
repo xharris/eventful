@@ -11,6 +11,7 @@ export default new Schema<Eventful.Plan>(
     location: Location,
     time: Time,
     who: { type: [Schema.Types.ObjectId], ref: 'users', default: [] },
+    note: String,
     createdBy: { type: Schema.Types.ObjectId, ref: 'users', required: true },
   },
   { timestamps: true }

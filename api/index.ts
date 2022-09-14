@@ -28,7 +28,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 // database
 mongoose
   .connect(DATABASE_URI)
-  .then(() => console.log(`Database connected to ${DATABASE_URI}`))
+  .then(() => console.log(`Database connected to ${DATABASE_URI.replace(/:(\w+)\@/i, ':***@')}`))
   .catch(console.error)
 // socket
 const server = http.createServer(app)
@@ -79,13 +79,13 @@ io.on('connection', (socket) => {
 })
 // routes
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../build')))
+  app.use(express.static(path.join(__dirname, '../ui')))
 }
 app.use(morgan('tiny'))
 app.use('/api', router)
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../build', 'index.html'), (err) => err && console.log(err))
+    res.sendFile(path.join(__dirname, '../ui', 'index.html'), (err) => err && console.log(err))
   })
 }
 // server

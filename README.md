@@ -6,6 +6,14 @@
 
 # ToDo
 
+- adding another contact
+  - [ ] user search
+  - [?] create contactLink (lasts 24h - 1wk)
+  - [?] display QR code on screen
+- invite setting
+
+  - [ ] who can invite me: anyone, my contacts
+
 - agenda
   - [x] months are not in order
   - [x] show year next to month name
@@ -25,7 +33,8 @@
 # Nice features
 
 - [ ] very simple, mini calendar showing busy/free dates. also shown on event page to show when plans are.
-- [ ] notifications
+- [x] notifications
+- [?] attach images to plan
 
 # Revisit Later
 

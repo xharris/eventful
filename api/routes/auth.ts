@@ -78,10 +78,10 @@ router.post('/login', async (req, res) => {
   }
   const docUser = await user.findOne({ username: req.body.username })
   if (!docUser) {
-    return res.sendStatus(404)
+    return res.status(404).send('USER_NOT_FOUND')
   }
   if (!(await bcrypt.compare(req.body.password, docUser.password))) {
-    return res.sendStatus(401)
+    return res.status(401).send('INVALID_CREDS')
   }
   newSession(req, docUser, req.body.remember)
   return res.status(200).send(docUser)

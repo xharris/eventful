@@ -7,6 +7,7 @@ import { Event } from './pages/Event'
 import { Events } from './pages/Events'
 import { Page } from './pages/Page'
 import { User } from './pages/User'
+import { UserSearch } from './pages/UserSearch'
 
 const qc = new QueryClient()
 
@@ -27,6 +28,9 @@ function App() {
             <Route path="/" element={<Page />}>
               <Route index element={<Navigate to="/events" />} />
               <Route path="events" element={<Events />} />
+              <Route path="users">
+                <Route path="search" element={<UserSearch />} />
+              </Route>
               <Route path="e">
                 <Route path=":eventId" element={<Event />} />
               </Route>
@@ -34,7 +38,7 @@ function App() {
                 <Route path=":username" element={<User />} />
               </Route>
             </Route>
-            <Route path="auth" element={<Auth />} />
+            <Route path="auth" element={<Auth />} />+
           </Routes>
         </BrowserRouter>
       </SessionProvider>

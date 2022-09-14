@@ -6,17 +6,19 @@
     "node": "16.x"
   },
   "scripts": {
-    "start": "cross-env NODE_ENV=production yarn run api",
-    "build": "yarn run web:build",
+    "start": "cross-env NODE_ENV=production NODE_OPTIONS=--max_old_space_size=2560 yarn run api:js",
+    "build": "yarn run web:build && yarn run api:build",
     "test": "playwright test",
     "eject": "react-scripts eject",
+    "deps": "ts-node scripts/getdeps.ts",
     "api:build": "tsc -b",
     "web:build": "react-scripts build",
     "rs:start": "react-scripts start",
     "postbuild": "ts-node scripts/postbuild.ts",
-    "test:debug": "playwright test --debug --project=firefox",
+    "test:debug": "playwright test --debug --project=chromium",
     "test:server": "cross-env NODE_ENV=test BROWSER=none yarn run dev",
     "api": "nodemon --config nodemon.json api/index.ts",
+    "api:js": "nodemon --config nodemon.json out/api/index.js",
     "dev": "concurrently -n api,web \"yarn run dev:api\" \"yarn run dev:web\"",
     "dev:api": "cross-env PORT=3000 yarn run api",
     "dev:web": "cross-env PORT=3001 yarn run rs:start"
@@ -94,12 +96,15 @@
     "@types/cookie-session": "^2.0.44",
     "@types/cors": "^2.8.12",
     "@types/express-session": "^1.17.5",
+    "@types/fs-extra": "^9.0.13",
     "@types/morgan": "^1.9.3",
     "@types/react-textarea-autosize": "^8.0.0",
     "concurrently": "^7.3.0",
     "cross-env": "^7.0.3",
+    "fs-extra": "^10.1.0",
     "nodemon": "^2.0.19",
     "ts-node": "^10.9.1",
+    "tsc-alias": "^1.7.0",
     "tsconfig-paths": "^4.1.0"
   }
 }

@@ -20,7 +20,7 @@ export class User {
     this.context = context
   }
 
-  async signup() {
+  async signup(remember = true) {
     const { page, context } = this
     const user = generate.user()
     await context.setGeolocation({
@@ -34,13 +34,18 @@ export class User {
     await page.fill('[placeholder="Username"]', user.username)
     await page.fill('[placeholder="Password"]', user.password)
     await page.fill('[placeholder="Confirm password"]', user.password)
+    if (remember) {
+      await page.check('.checkbox:has([name="remember"])')
+    } else {
+      await page.uncheck('.checkbox:has([name="remember"])')
+    }
     await page.click('button:has-text("Sign up")')
     await page.waitForLoadState('networkidle')
 
     return user
   }
 
-  async login({ username, password }: UserObject) {
+  async login({ username, password }: UserObject, remember = true) {
     const { page, context } = this
     await context.setGeolocation({
       longitude: 40.75808762313903,
@@ -51,6 +56,11 @@ export class User {
     await page.click('text=Log in')
     await page.fill('[placeholder="Username"]', username)
     await page.fill('[placeholder="Password"]', password)
+    if (remember) {
+      await page.check('.checkbox:has([name="remember"])')
+    } else {
+      await page.uncheck('.checkbox:has([name="remember"])')
+    }
     await page.click('button:has-text("Log in")')
     await page.waitForLoadState('networkidle')
   }
@@ -70,14 +80,17 @@ export class User {
   async addContact({ username }: UserObject) {
     const { page } = this
 
-    await page.goto(`/u/${username}`)
-    await page.waitForLoadState('networkidle')
+    await page.click('.page-header button[title="User search"]')
+    await page.fill('[name="query"]', username)
+    await page.click(getAvatarSelector({ username }))
     await page.click('button[title="Add contact"]')
   }
 
   async view({ username }: UserObject) {
     const { page } = this
 
-    await page.goto(`/u/${username}`)
+    await page.click('.page-header button[title="User search"]')
+    await page.fill('[name="query"]', username)
+    await page.click(getAvatarSelector({ username }))
   }
 }

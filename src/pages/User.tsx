@@ -1,3 +1,4 @@
+import { useFormik } from 'formik'
 import { useEffect, useMemo } from 'react'
 import { FiMinus } from 'react-icons/fi'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -6,9 +7,12 @@ import { AddButton, Button, RemoveButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { H1, H2, H3, H4, H5, H6 } from 'src/components/Header'
 import { Icon } from 'src/components/Icon'
+import { Select } from 'src/components/Select'
 import { useContacts } from 'src/eventfulLib/contact'
 import { useSession } from 'src/eventfulLib/session'
+import { useSettings } from 'src/eventfulLib/setting'
 import { useUser } from 'src/eventfulLib/user'
+import { Eventful } from 'types'
 
 export const User = () => {
   const { username } = useParams()
@@ -18,6 +22,28 @@ export const User = () => {
   const navigate = useNavigate()
   const { data: user } = useUser({ username })
   const { data: contacts, addContact, removeContact } = useContacts({ user: session?._id })
+  const { data: settings, setSettings } = useSettings()
+
+  const { setFieldValue, values, dirty, resetForm, submitForm } =
+    useFormik<Eventful.API.SettingsGet>({
+      initialValues: settings ?? {},
+      enableReinitialize: true,
+      onSubmit: (values) => {
+        setSettings(values).then(() => resetForm())
+      },
+    })
+
+  const searchVisOptions: { value: Eventful.API.SettingsGet['searchVisibility']; label: string }[] =
+    [
+      {
+        value: 'any',
+        label: 'Anyone',
+      },
+      {
+        value: 'contacts',
+        label: 'Contacts',
+      },
+    ]
 
   return user ? (
     <Flex
@@ -44,6 +70,22 @@ export const User = () => {
             >
               Log out
             </Button>
+            <Flex>
+              <H3>Account visibility:</H3>
+              <Select
+                defaultValue={
+                  values.searchVisibility
+                    ? searchVisOptions.find((opt) => opt.value === values.searchVisibility)
+                    : {
+                        value: 'any',
+                        label: 'Anyone',
+                      }
+                }
+                onChange={(v) => v && setFieldValue('searchVisibility', v.value)}
+                options={searchVisOptions}
+              />
+            </Flex>
+            {dirty && <Button onClick={submitForm}>Save</Button>}
           </Flex>
         ) : (
           <Flex column>
