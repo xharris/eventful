@@ -15,7 +15,7 @@
     "web:build": "react-scripts build",
     "rs:start": "react-scripts start",
     "postbuild": "ts-node scripts/postbuild.ts",
-    "test:debug": "playwright test --debug --project=firefox",
+    "test:debug": "playwright test --debug --project=chromium",
     "test:server": "cross-env NODE_ENV=test BROWSER=none yarn run dev",
     "api": "nodemon --config nodemon.json api/index.ts",
     "api:js": "nodemon --config nodemon.json out/api/index.js",

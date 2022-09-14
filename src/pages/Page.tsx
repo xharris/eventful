@@ -15,10 +15,10 @@ export const Page = () => {
       <Flex column fill>
         <Flex className="page-header" row flex="0" css={{ justifyContent: 'space-between' }}>
           <Flex>
-            <LinkButton to="/" variant="ghost">
+            <LinkButton to="/" variant="ghost" title="Home">
               <FiHome />
             </LinkButton>
-            <LinkButton to="/users/search" variant="ghost">
+            <LinkButton to="/users/search" variant="ghost" title="User search">
               <FiUsers />
             </LinkButton>
           </Flex>
