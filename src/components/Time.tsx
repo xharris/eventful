@@ -9,7 +9,7 @@ interface TimeProps extends ComponentProps<typeof Flex> {
   time: Eventful.Time
 }
 
-const calenarFormat = {
+const calendarFormat = {
   lastDay: '[Yesterday]',
   sameDay: '[Today]',
   nextDay: '[Tomorrow]',
@@ -26,14 +26,19 @@ const calendarFormatTime = {
   sameElse: 'L',
 }
 
+export const formatStart = (time: Eventful.Time) =>
+  time.start
+    ? moment(time.start.date).calendar(time.start?.allday ? calendarFormat : calendarFormatTime)
+    : null
+
 export const Time = ({ time, css, ...props }: TimeProps) => {
   const str = useMemo(() => {
     const start = time.start ? moment(time.start.date) : null
     const end = time.end ? moment(time.end.date) : null
 
     return [
-      start?.calendar(time.start?.allday ? calenarFormat : calendarFormatTime),
-      end?.calendar(time.end?.allday ? calenarFormat : calendarFormatTime),
+      start?.calendar(time.start?.allday ? calendarFormat : calendarFormatTime),
+      end?.calendar(time.end?.allday ? calendarFormat : calendarFormatTime),
     ]
       .filter((t) => t)
       .join(' - ')

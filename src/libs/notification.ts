@@ -34,6 +34,10 @@ export const showLocalNotification = (payload: Eventful.NotificationPayload) =>
     body: payload.notification?.body,
   })
 
+export const cancelAllScheduledNotifications = () => Promise.resolve()
+
+export const scheduleNotification = (_: any) => Promise.resolve()
+
 export const useMessaging = () => {
   // useEffect(() => {
   //   messaging()
