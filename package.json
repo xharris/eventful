@@ -101,6 +101,8 @@
     "@types/react-textarea-autosize": "^8.0.0",
     "concurrently": "^7.3.0",
     "cross-env": "^7.0.3",
+    "expo": "^46.0.10",
+    "expo-notifications": "^0.16.1",
     "fs-extra": "^10.1.0",
     "nodemon": "^2.0.19",
     "ts-node": "^10.9.1",
