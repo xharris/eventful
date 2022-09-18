@@ -14,7 +14,7 @@ import { eventAggr } from './routes/event'
 import { messaging } from './fcm'
 import * as notification from './notification'
 import { PORT, DATABASE_URI } from './config'
-import ratelimit from 'express-rate-limit'
+import { limiter } from './util'
 
 const app = express()
 // middleware
@@ -27,7 +27,7 @@ app.use(
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(
-  ratelimit({
+  limiter({
     windowMs: 1000,
     max: 20,
     standardHeaders: true,

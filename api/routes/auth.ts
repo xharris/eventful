@@ -5,10 +5,9 @@ import { Eventful } from 'types'
 import session from 'express-session'
 import ConnectMongo from 'connect-mongodb-session'
 import { DATABASE_URI, IS_PRODUCTION } from 'api/config'
-import ratelimit from 'express-rate-limit'
-import { cleanUser } from 'api/util'
+import { cleanUser, limiter } from 'api/util'
 
-const limiter = ratelimit({
+const rlimit = limiter({
   windowMs: 2 * 60 * 1000,
   max: 6,
   standardHeaders: true,
@@ -62,7 +61,7 @@ const destroySession = (req: Request) => {
   req.session.destroy(console.log)
 }
 
-router.post('/signup', limiter, async (req, res) => {
+router.post('/signup', rlimit, async (req, res) => {
   if (!req.body.username || !req.body.password || !req.body.confirm_password) {
     return res.status(400).send('INVALID_INPUT')
   }
@@ -82,7 +81,7 @@ router.post('/signup', limiter, async (req, res) => {
   return res.status(200).send(docUser)
 })
 
-router.post('/login', limiter, async (req, res) => {
+router.post('/login', rlimit, async (req, res) => {
   if (!req.body.username || !req.body.password) {
     return res.status(400).send('INVALID_CREDS')
   }
