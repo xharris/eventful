@@ -14,6 +14,7 @@ import { eventAggr } from './routes/event'
 import { messaging } from './fcm'
 import * as notification from './notification'
 import { PORT, DATABASE_URI } from './config'
+import ratelimit from 'express-rate-limit'
 
 const app = express()
 // middleware
@@ -25,6 +26,14 @@ app.use(
 )
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(
+  ratelimit({
+    windowMs: 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+)
 // database
 mongoose
   .connect(DATABASE_URI)
