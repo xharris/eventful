@@ -1,4 +1,5 @@
 import { contact, reminder, user, userSetting } from 'api/models'
+import { cleanUser } from 'api/util'
 import express, { Request, RequestHandler, Response } from 'express'
 import { Schema, Types } from 'mongoose'
 import { Eventful } from 'types'
@@ -27,6 +28,7 @@ router.get('/user/:userId', async (req, res) => {
   if (!docUser) {
     return res.sendStatus(404)
   }
+  cleanUser(docUser)
   return res.send(docUser)
 })
 
@@ -96,6 +98,11 @@ router.get('/users/search/:username', checkSession, async (req, res) => {
           $regex: req.params.username,
           $options: 'i',
         },
+      },
+    },
+    {
+      $project: {
+        password: 0,
       },
     },
     {

@@ -94,6 +94,13 @@ export const eventAggr: (user?: Eventful.ID) => PipelineStage[] = (user) => [
       localField: 'who',
       foreignField: '_id',
       as: 'who',
+      pipeline: [
+        {
+          $project: {
+            password: 0,
+          },
+        },
+      ],
     },
   },
   {

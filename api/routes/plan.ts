@@ -73,6 +73,13 @@ export const planAggr: () => PipelineStage[] = () => [
       localField: 'who',
       foreignField: '_id',
       as: 'who',
+      pipeline: [
+        {
+          $project: {
+            password: 0,
+          },
+        },
+      ],
     },
   },
 ]

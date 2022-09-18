@@ -6,6 +6,7 @@ import session from 'express-session'
 import ConnectMongo from 'connect-mongodb-session'
 import { DATABASE_URI, IS_PRODUCTION } from 'api/config'
 import ratelimit from 'express-rate-limit'
+import { cleanUser } from 'api/util'
 
 const limiter = ratelimit({
   windowMs: 2 * 60 * 1000,
@@ -93,6 +94,7 @@ router.post('/login', limiter, async (req, res) => {
     return res.status(401).send('INVALID_CREDS')
   }
   newSession(req, docUser, req.body.remember)
+  cleanUser(docUser)
   return res.status(200).send(docUser)
 })
 
