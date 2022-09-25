@@ -3,7 +3,7 @@ import moment from 'moment'
 import { ReactNode, useMemo } from 'react'
 import { Eventful } from 'types'
 import { Flex } from './Flex'
-import { H5, H6 } from './Header'
+import { H5, H6 } from './Typography'
 
 interface TimeProps extends ComponentProps<typeof Flex> {
   time: Eventful.Time

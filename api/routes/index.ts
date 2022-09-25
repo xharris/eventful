@@ -8,6 +8,7 @@ import * as message from './message'
 import * as notificationSetting from './notificationSetting'
 import * as fcm from './fcm'
 import * as feedback from './feedback'
+import * as tag from './tag'
 import type { Eventful } from 'types'
 export const router = express.Router()
 
@@ -39,3 +40,4 @@ router.use(message.router)
 router.use(notificationSetting.router)
 router.use(fcm.router)
 router.use(feedback.router)
+router.use(tag.router)

@@ -9,6 +9,18 @@ router.use((req, _, next) => {
       ...data.data,
       ...(req.session.user ? { createdBy: req.session.user._id.toString() } : {}),
     }
+    data.notification = {
+      title: data.general.title,
+      body: data.general.body,
+      ...data.notification,
+    }
+    data.webpush = {
+      fcmOptions: {
+        link: data.general.url,
+        ...data.webpush?.fcmOptions,
+      },
+      ...data.webpush,
+    }
     await req.fcm.send(setting, data)
     const { ref, key, refModel } = setting
     req.io.to(`${refModel}:${key}/${ref}`).emit('notification', data)

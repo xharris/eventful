@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { AddButton, Button } from 'src/components/Button'
 import { Flex, HStack } from 'src/components/Flex'
-import { H1, H2, H4, H5, H6 } from 'src/components/Header'
+import { H1, H2, H4, H5, H6 } from 'src/components/Typography'
 import { Input } from 'src/components/Input'
 import { useEvent } from 'src/eventfulLib/event'
 import { useSession } from 'src/eventfulLib/session'
@@ -21,6 +21,7 @@ import { useNotifications, useNotification } from 'src/eventfulLib/notification'
 import { useMediaQuery } from 'src/libs/styled'
 import * as Tabs from 'src/components/VerticalTabs'
 import { CATEGORY_ICON } from 'src/libs/plan'
+import * as Dialog from '@radix-ui/react-dialog'
 
 const PlanControls = ({ event }: { event?: Eventful.ID }) => {
   const { session } = useSession()
@@ -64,6 +65,7 @@ export const Event = () => {
   const { dirty, handleChange, submitForm } = useFormik<Eventful.API.EventUpdate>({
     initialValues: {
       name: event?.name ?? '',
+      tags: [],
     },
     enableReinitialize: true,
     onSubmit: (values) => {
@@ -77,150 +79,184 @@ export const Event = () => {
     key: 'message:add',
   })
   const isSmall = useMediaQuery({ maxSize: 'Tablet' })
+  const [showPlanAddModal, setShowPlanAddModal] = useState(false)
 
   return (
-    <Flex column fill css={{ alignItems: 'stretch', overflow: 'hidden', padding: 2 }}>
-      <Flex flex="0" css={{ alignItems: 'center' }}>
-        <Flex column css={{ gap: '$small' }}>
-          {session?._id.toString() === event?.createdBy?.toString() ? (
-            <Input
-              name="name"
-              defaultValue={event?.name}
-              onChange={handleChange}
-              variant="underline"
-              placeholder="Add name"
-              css={{ fontSize: '$7', flex: 1, minWidth: '50%' }}
-            />
-          ) : (
-            <H2
-              css={{
-                minWidth: '50%',
-              }}
-            >
-              {event?.name}
-            </H2>
+    <Dialog.Root open={showPlanAddModal} onOpenChange={setShowPlanAddModal}>
+      <Flex column fill css={{ alignItems: 'stretch', overflow: 'hidden', padding: 2 }}>
+        <Flex flex="0" css={{ alignItems: 'center' }}>
+          <Flex column css={{ gap: '$small' }}>
+            {session?._id.toString() === event?.createdBy?.toString() ? (
+              <Input
+                name="name"
+                defaultValue={event?.name}
+                onChange={handleChange}
+                variant="underline"
+                placeholder="Add name"
+                css={{ fontSize: '$7', flex: 1, minWidth: '50%' }}
+              />
+            ) : (
+              <H2
+                css={{
+                  minWidth: '50%',
+                }}
+              >
+                {event?.name}
+              </H2>
+            )}
+            {event?.time.start || event?.time.end ? <Time time={event.time} /> : <H6>TBD</H6>}
+          </Flex>
+          {dirty && (
+            <Button onClick={() => submitForm()}>
+              <IconSide icon={FiSave}>Save</IconSide>
+            </Button>
           )}
-          {event?.time.start || event?.time.end ? <Time time={event.time} /> : <H6>TBD</H6>}
+          {event && notificationsQuery.isFetched && (
+            <Popover>
+              <PopoverTrigger clickable>
+                <Icon icon={FiBell} size={20} subtle />
+              </PopoverTrigger>
+              <PopoverContent>
+                <Flex column css={{ gap: '$small' }}>
+                  <H4 underline>Notifications</H4>
+                  <H5 bold>Chat</H5>
+                  <Checkbox
+                    label="new message"
+                    small
+                    defaultChecked={isEnabled({
+                      key: 'message:add',
+                      refModel: 'events',
+                      ref: event._id,
+                    })}
+                    onChange={(e) =>
+                      e.currentTarget.checked
+                        ? enable({
+                            key: 'message:add',
+                            refModel: 'events',
+                            ref: event._id,
+                          })
+                        : disable({
+                            key: 'message:add',
+                            refModel: 'events',
+                            ref: event._id,
+                          })
+                    }
+                  />
+                </Flex>
+              </PopoverContent>
+            </Popover>
+          )}
         </Flex>
-        {dirty && (
-          <Button onClick={() => submitForm()}>
-            <IconSide icon={FiSave}>Save</IconSide>
-          </Button>
-        )}
-        {event && notificationsQuery.isFetched && (
-          <Popover>
-            <PopoverTrigger clickable>
-              <Icon icon={FiBell} size={20} subtle />
-            </PopoverTrigger>
-            <PopoverContent>
-              <Flex column css={{ gap: '$small' }}>
-                <H4 underline>Notifications</H4>
-                <H5 bold>Chat</H5>
-                <Checkbox
-                  label="new message"
-                  small
-                  defaultChecked={isEnabled({
-                    key: 'message:add',
-                    refModel: 'events',
-                    ref: event._id,
-                  })}
-                  onChange={(e) =>
-                    e.currentTarget.checked
-                      ? enable({
-                          key: 'message:add',
-                          refModel: 'events',
-                          ref: event._id,
-                        })
-                      : disable({
-                          key: 'message:add',
-                          refModel: 'events',
-                          ref: event._id,
-                        })
-                  }
-                />
-              </Flex>
-            </PopoverContent>
-          </Popover>
-        )}
-      </Flex>
-      {isSmall ? (
-        <Tabs.Root defaultValue="agenda">
-          <Tabs.List css={{ gap: '$small' }}>
-            <Tabs.Trigger value="agenda">
-              <Button square={34} variant="ghost">
-                <Icon icon={FiCalendar} size={18} />
-              </Button>
-            </Tabs.Trigger>
-            <Tabs.Trigger value="chat">
-              <Button square={34} variant="ghost">
-                <Icon icon={FiMessageSquare} size={18} />
-              </Button>
-            </Tabs.Trigger>
-          </Tabs.List>
-          <Tabs.Separator />
-          <Tabs.Content value="agenda">
-            <PlanControls event={event?._id} />
-            <Agenda
-              items={event?.plans}
-              noTimeHeader="Plans"
-              noItemsText={`No plans yet...`}
-              renderOnEveryDay={false}
-              showYearSeparator={false}
-              renderItem={(plan) => (
-                <Plan
-                  key={plan._id.toString()}
-                  plan={plan}
-                  editing={editing === plan._id}
-                  onEdit={() => {
-                    setEditing(plan._id)
-                  }}
-                  onClose={() => setEditing(undefined)}
-                />
-              )}
-            />
-          </Tabs.Content>
-          <Tabs.Content value="chat">
-            <Chat event={event?._id} />
-          </Tabs.Content>
-        </Tabs.Root>
-      ) : (
-        <Flex
-          column
-          css={{
-            overflow: 'hidden',
-            background: '$background',
-            padding: 5,
-            height: '100%',
-          }}
-        >
-          <PlanControls event={event?._id} />
+        {isSmall ? (
+          <Tabs.Root defaultValue="agenda">
+            <Tabs.List css={{ gap: '$small' }}>
+              <Tabs.Trigger value="agenda">
+                <Button square={34} variant="ghost">
+                  <Icon icon={FiCalendar} size={18} />
+                </Button>
+              </Tabs.Trigger>
+              <Tabs.Trigger value="chat">
+                <Button square={34} variant="ghost">
+                  <Icon icon={FiMessageSquare} size={18} />
+                </Button>
+              </Tabs.Trigger>
+            </Tabs.List>
+            <Tabs.Separator />
+            <Tabs.Content value="agenda">
+              <Agenda
+                items={event?.plans}
+                noTimeHeader="Plans"
+                noItemsText={`No plans yet...`}
+                renderOnEveryDay={false}
+                showYearSeparator={false}
+                renderItem={(plan) => (
+                  <Plan
+                    key={plan._id.toString()}
+                    plan={plan}
+                    editing={editing === plan._id}
+                    onEdit={() => {
+                      setEditing(plan._id)
+                    }}
+                    onClose={() => setEditing(undefined)}
+                  />
+                )}
+                onAdd={() => setShowPlanAddModal(true)}
+              />
+            </Tabs.Content>
+            <Tabs.Content value="chat">
+              <Chat event={event?._id} />
+            </Tabs.Content>
+          </Tabs.Root>
+        ) : (
           <Flex
+            column
             css={{
               overflow: 'hidden',
+              background: '$background',
+              padding: 5,
+              height: '100%',
             }}
           >
-            <Agenda
-              items={event?.plans}
-              noTimeHeader="Plans"
-              noItemsText={`No plans yet...`}
-              renderOnEveryDay={false}
-              showYearSeparator={false}
-              renderItem={(plan) => (
-                <Plan
-                  key={plan._id.toString()}
-                  plan={plan}
-                  editing={editing === plan._id}
-                  onEdit={() => {
-                    setEditing(plan._id)
-                  }}
-                  onClose={() => setEditing(undefined)}
-                />
-              )}
-            />
-            <Chat event={event?._id} />
+            <Flex
+              css={{
+                overflow: 'hidden',
+              }}
+            >
+              <Agenda
+                items={event?.plans}
+                noTimeHeader="Plans"
+                noItemsText={`No plans yet...`}
+                renderOnEveryDay={false}
+                showYearSeparator={false}
+                renderItem={(plan) => (
+                  <Plan
+                    key={plan._id.toString()}
+                    plan={plan}
+                    editing={editing === plan._id}
+                    onEdit={() => {
+                      setEditing(plan._id)
+                    }}
+                    onClose={() => setEditing(undefined)}
+                  />
+                )}
+                onAdd={() => setShowPlanAddModal(true)}
+              />
+              <Chat event={event?._id} />
+            </Flex>
           </Flex>
-        </Flex>
-      )}
-    </Flex>
+        )}
+        <Dialog.Portal>
+          <Dialog.Overlay
+            style={{
+              backgroundColor: 'black',
+              position: 'fixed',
+              inset: 0,
+              opacity: 0.5,
+              // '@media (prefers-reduced-motion: no-preference)': {
+              //   animation: `${overlayShow} 150ms cubic-bezier(0.16, 1, 0.3, 1)`,
+              // }
+            }}
+          />
+          <Dialog.Content
+            style={{
+              backgroundColor: 'white',
+              borderRadius: 6,
+              boxShadow:
+                'hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px',
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '90vw',
+              maxWidth: '450px',
+              maxHeight: '85vh',
+              padding: 25,
+            }}
+          >
+            hi
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Flex>
+    </Dialog.Root>
   )
 }

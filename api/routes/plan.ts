@@ -51,14 +51,10 @@ export const planNotify = async (
               key,
             },
             {
-              notification: {
+              general: {
                 title: `Plan ${desc} (${doc.event.name})`,
                 body: getTitle(doc),
-              },
-              webpush: {
-                fcmOptions: {
-                  link: `${req.get('host')}/e/${doc.event._id}`,
-                },
+                url: `${req.get('host')}/e/${doc.event._id}`,
               },
             }
           )

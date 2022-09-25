@@ -4,7 +4,7 @@ import { Input } from 'src/components/Input'
 import { useEvents } from 'src/eventfulLib/event'
 import { FiPlus } from 'react-icons/fi'
 import { useMemo, useState } from 'react'
-import { H1, H3, H4, H5 } from 'src/components/Header'
+import { H1, H3, H4, H5 } from 'src/components/Typography'
 import { Eventful } from 'types'
 import { useNavigate } from 'react-router-dom'
 import { Agenda } from 'src/features/Agenda'
@@ -51,8 +51,8 @@ export const Events = () => {
     <Flex column fill css={{ gap: 0, overflow: 'hidden' }}>
       <Agenda
         items={events}
-        noTimeHeader="Still planning"
-        noTimeSubheader="TBD"
+        noTimeHeader="TBD"
+        // noTimeSubheader="TBD"
         noItemsText="No events yet... create one below!"
         renderItem={(event) => <Event event={event} />}
         renderOnEveryDay={false}

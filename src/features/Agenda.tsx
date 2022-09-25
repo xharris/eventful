@@ -2,9 +2,13 @@ import { useFormik } from 'formik'
 import moment from 'moment'
 import { ReactNode, useEffect, useMemo } from 'react'
 import { Checkbox } from 'src/components/Checkbox'
+import { Chip } from 'src/components/Chip'
 import { Flex } from 'src/components/Flex'
-import { H1, H2, H3, H4 } from 'src/components/Header'
+import { H1, H2, H3, H4, H6 } from 'src/components/Typography'
+import { Icon } from 'src/components/Icon'
 import { Eventful } from 'types'
+import { FiCheck, FiList, FiMoreHorizontal, FiPlus } from 'react-icons/fi'
+import { Button } from 'src/components/Button'
 
 // TODO: show past days with less opacity
 
@@ -104,6 +108,7 @@ const Month = <I extends Item = Item>({ label, days, renderItem }: MonthProps<I>
 
 interface AgendaOptions {
   tbd: boolean
+  view: 'notime' | 'agenda'
 }
 
 interface AgendaProps<I extends Item> {
@@ -114,6 +119,7 @@ interface AgendaProps<I extends Item> {
   renderItem: (item: I) => ReactNode
   renderOnEveryDay?: boolean
   showYearSeparator?: boolean
+  onAdd?: () => void
 }
 
 export const Agenda = <I extends Item = Item>({
@@ -124,10 +130,12 @@ export const Agenda = <I extends Item = Item>({
   renderItem,
   showYearSeparator = true,
   renderOnEveryDay = true,
+  onAdd,
 }: AgendaProps<I>) => {
-  const { values: options, handleChange } = useFormik<AgendaOptions>({
+  const { values: options, setFieldValue } = useFormik<AgendaOptions>({
     initialValues: {
       tbd: true,
+      view: 'agenda',
     },
     onSubmit: () => {},
   })
@@ -205,16 +213,47 @@ export const Agenda = <I extends Item = Item>({
       }}
     >
       {!!items.length && (
-        <Flex flex="0">
-          <Checkbox
-            name="tbd"
-            checked={options.tbd}
-            onChange={handleChange}
+        <Flex flex="0" style={{ justifyContent: 'space-between' }}>
+          <Flex flex="0" css={{ alignItems: 'center', gap: '$small' }}>
+            <Chip
+              onClick={() => setFieldValue('view', 'notime')}
+              clickable
+              selected={options.view === 'notime'}
+            >
+              <Icon icon={FiMoreHorizontal} />
+              <H6 style={{ whiteSpace: 'nowrap' }}>{`${noTimeHeader}${
+                !!tbdItems.items.length ? ` (${tbdItems.items.length})` : ''
+              }`}</H6>
+            </Chip>
+            <Chip
+              onClick={() => setFieldValue('view', 'agenda')}
+              clickable
+              selected={options.view === 'agenda'}
+            >
+              <Icon icon={FiList} />
+              <H6>Agenda</H6>
+            </Chip>
+          </Flex>
+          {onAdd && (
+            <Button variant="ghost" square={38} onClick={() => onAdd()}>
+              <FiPlus />
+            </Button>
+          )}
+          {/* <Checkbox
+            name="notime"
+            checked={options.view === 'notime'}
+            onChange={() => setFieldValue('view', 'notime')}
             label={`${noTimeHeader}${!!tbdItems.items.length ? ` (${tbdItems.items.length})` : ''}`}
           />
+          <Checkbox
+            name="agenda"
+            label="Agenda"
+            checked={options.view === 'agenda'}
+            onChange={() => setFieldValue('view', 'agenda')}
+          /> */}
         </Flex>
       )}
-      {options.tbd && !!tbdItems.items.length && (
+      {options.view === 'notime' && (
         <Flex
           column
           css={{
@@ -228,40 +267,43 @@ export const Agenda = <I extends Item = Item>({
           <Month label={noTimeHeader} days={[tbdItems]} renderItem={renderItem} />
         </Flex>
       )}
-      {!!items.length ? (
-        <Flex
-          column
-          css={{
-            flexGrow: 1,
-            flexShrink: 0,
-            padding: '2px 0px',
-            overflow: 'auto',
-            overflowX: 'hidden',
-            justifyContent: !items.length ? 'center' : 'flex-start',
-          }}
-        >
-          {datedItems.map((year) => (
-            <Flex key={year.year} column className="years" css={{ gap: '$small' }}>
-              {showYearSeparator && <Year label={year.year} />}
-              <Flex column className="months" css={{ gap: '$small' }}>
-                {year.months.map((month) => (
-                  <Month
-                    key={month.month}
-                    label={month.month}
-                    days={month.days}
-                    renderItem={renderItem}
-                  />
-                ))}
+      {
+        options.view === 'agenda' && (
+          <Flex
+            column
+            css={{
+              flexGrow: 1,
+              flexShrink: 0,
+              padding: '2px 0px',
+              overflow: 'auto',
+              overflowX: 'hidden',
+              justifyContent: !items.length ? 'center' : 'flex-start',
+            }}
+          >
+            {datedItems.map((year) => (
+              <Flex key={year.year} column className="years" css={{ gap: '$small' }}>
+                {showYearSeparator && <Year label={year.year} />}
+                <Flex column className="months" css={{ gap: '$small' }}>
+                  {year.months.map((month) => (
+                    <Month
+                      key={month.month}
+                      label={month.month}
+                      days={month.days}
+                      renderItem={renderItem}
+                    />
+                  ))}
+                </Flex>
               </Flex>
-            </Flex>
-          ))}
-          <Flex className="filler" fill />
-        </Flex>
-      ) : noItemsText ? (
-        <H1 css={{ color: '$disabled', fontStyle: 'italic', textAlign: 'center' }}>
-          {noItemsText}
-        </H1>
-      ) : null}
+            ))}
+            <Flex className="filler" fill />
+          </Flex>
+        )
+        //  : noItemsText ? (
+        //   <H1 css={{ color: '$disabled', fontStyle: 'italic', textAlign: 'center' }}>
+        //     {noItemsText}
+        //   </H1>
+        // ) : null
+      }
     </Flex>
   )
 }

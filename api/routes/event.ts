@@ -213,14 +213,10 @@ router.post('/event/:eventId/messages/add', checkSession, async (req, res) => {
             key: 'message:add',
           },
           {
-            notification: {
+            general: {
               title: docEvent.name,
               body: `${docMessage2.createdBy.username}: ${docMessage2.text}`,
-            },
-            webpush: {
-              fcmOptions: {
-                link: `${req.get('host')}/e/${docMessage2.event}`,
-              },
+              url: `${req.get('host')}/e/${docMessage2.event}`,
             },
           }
         )
