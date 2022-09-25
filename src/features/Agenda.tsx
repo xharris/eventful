@@ -9,6 +9,7 @@ import { Icon } from 'src/components/Icon'
 import { Eventful } from 'types'
 import { FiCheck, FiList, FiMoreHorizontal, FiPlus } from 'react-icons/fi'
 import { Button } from 'src/components/Button'
+import { IonChip } from '@ionic/react'
 
 // TODO: show past days with less opacity
 
@@ -215,24 +216,22 @@ export const Agenda = <I extends Item = Item>({
       {!!items.length && (
         <Flex flex="0" style={{ justifyContent: 'space-between' }}>
           <Flex flex="0" css={{ alignItems: 'center', gap: '$small' }}>
-            <Chip
+            <IonChip
               onClick={() => setFieldValue('view', 'notime')}
-              clickable
-              selected={options.view === 'notime'}
+              outline={options.view !== 'notime'}
             >
               <Icon icon={FiMoreHorizontal} />
               <H6 style={{ whiteSpace: 'nowrap' }}>{`${noTimeHeader}${
                 !!tbdItems.items.length ? ` (${tbdItems.items.length})` : ''
               }`}</H6>
-            </Chip>
-            <Chip
+            </IonChip>
+            <IonChip
               onClick={() => setFieldValue('view', 'agenda')}
-              clickable
-              selected={options.view === 'agenda'}
+              outline={options.view !== 'agenda'}
             >
               <Icon icon={FiList} />
               <H6>Agenda</H6>
-            </Chip>
+            </IonChip>
           </Flex>
           {onAdd && (
             <Button variant="ghost" square={38} onClick={() => onAdd()}>

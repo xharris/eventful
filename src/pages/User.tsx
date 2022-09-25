@@ -1,7 +1,7 @@
 import { useFormik } from 'formik'
 import { useEffect, useMemo } from 'react'
 import { FiMinus } from 'react-icons/fi'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import { Avatar } from 'src/components/Avatar'
 import { AddButton, Button, RemoveButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
@@ -15,11 +15,11 @@ import { useUser } from 'src/eventfulLib/user'
 import { Eventful } from 'types'
 
 export const User = () => {
-  const { username } = useParams()
+  const { username } = useParams<{ username: string }>()
   const { session, logOut } = useSession()
   const isMe = useMemo(() => username === session?.username, [session, username])
 
-  const navigate = useNavigate()
+  const history = useHistory()
   const { data: user } = useUser({ username })
   const { data: contacts, addContact, removeContact } = useContacts({ user: session?._id })
   const { data: settings, setSettings } = useSettings()
@@ -65,7 +65,7 @@ export const User = () => {
             <Button
               onClick={() =>
                 window.confirm('Are you sure you want to log out?') &&
-                logOut().then(() => navigate('/'))
+                logOut().then(() => history.push('/'))
               }
             >
               Log out

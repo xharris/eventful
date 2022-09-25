@@ -1,7 +1,7 @@
 import { useFormik } from 'formik'
 import { useCallback } from 'react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { Button } from 'src/components/Button'
 import { Checkbox } from 'src/components/Checkbox'
 import { Flex } from 'src/components/Flex'
@@ -14,14 +14,14 @@ import { Eventful } from 'types'
 export const Auth = () => {
   const { logIn, signUp } = useSession()
   const [signingUp, setSigningUp] = useState(false)
-  const navigate = useNavigate()
+  const history = useHistory()
 
   const onSubmit = useCallback(
     (values: Eventful.API.LogInOptions & Eventful.API.SignUpOptions) => {
       if (signingUp) {
-        signUp(values).then(() => navigate(-1))
+        signUp(values).then(() => history.goBack())
       } else {
-        logIn(values).then(() => navigate(-1))
+        logIn(values).then(() => history.goBack())
       }
     },
     [signingUp]

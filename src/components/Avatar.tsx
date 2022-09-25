@@ -1,5 +1,5 @@
 import { ComponentProps } from '@stitches/react'
-import { To } from 'react-router-dom'
+import { LinkProps } from 'react-router-dom'
 import { css, styled } from 'src/libs/styled'
 import { Flex } from './Flex'
 import { Link } from './Link'
@@ -42,7 +42,7 @@ const Component = styled(Flex, {
 interface AvatarProps extends ComponentProps<typeof Component> {
   username?: string
   color?: string
-  to?: To
+  to?: LinkProps['to']
 }
 
 export const Avatar = ({

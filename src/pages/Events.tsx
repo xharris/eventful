@@ -6,11 +6,12 @@ import { FiPlus } from 'react-icons/fi'
 import { useMemo, useState } from 'react'
 import { H1, H3, H4, H5 } from 'src/components/Typography'
 import { Eventful } from 'types'
-import { useNavigate } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { Agenda } from 'src/features/Agenda'
 import { useSession } from 'src/eventfulLib/session'
 import { Time } from 'src/components/Time'
 import { AvatarGroup } from 'src/components/Avatar'
+import { Page } from './Page'
 
 const Event = ({ event }: { event: Eventful.API.EventGet }) => (
   <LinkButton
@@ -41,61 +42,67 @@ export const Events = () => {
   const { session } = useSession()
   const { data: events, createEvent } = useEvents()
   const [newEventValue, setNewEventValue] = useState<string>('')
-  const navigate = useNavigate()
+  const history = useHistory()
 
   const placeholders = ['Add an event', 'What are you planning?']
   const [rand] = useState(Math.floor(Math.random() * placeholders.length))
   const placeholder = useMemo(() => placeholders[rand], [rand])
 
-  return session ? (
-    <Flex column fill css={{ gap: 0, overflow: 'hidden' }}>
-      <Agenda
-        items={events}
-        noTimeHeader="TBD"
-        // noTimeSubheader="TBD"
-        noItemsText="No events yet... create one below!"
-        renderItem={(event) => <Event event={event} />}
-        renderOnEveryDay={false}
-      />
-      <Flex
-        css={{
-          flex: 0,
-          paddingBottom: '$root',
-          paddingLeft: '$small',
-          paddingRight: '$small',
-          background: '$background',
-        }}
-      >
-        <Input
-          variant="filled"
-          name="name"
-          placeholder={placeholder}
-          value={newEventValue}
-          onChange={(e) => setNewEventValue(e.target.value)}
-          css={{
-            flex: 1,
-            fontSize: '1.2rem',
-          }}
-        />
-        <Button
-          variant="ghost"
-          square={39}
-          disabled={!newEventValue.length}
-          onClick={() =>
-            createEvent({ name: newEventValue }).then((res) => navigate(`/e/${res.data._id}`))
-          }
-          title="Add event"
-        >
-          <FiPlus />
-        </Button>
-      </Flex>
-    </Flex>
-  ) : (
-    <Flex column fill css={{ gap: 0, alignItems: 'center', justifyContent: 'center' }}>
-      <Flex column flex="0" css={{ gap: 0 }}>
-        <H1>Eventful</H1>
-        <H4>{`(You need to log in)`}</H4>
-      </Flex>
-    </Flex>
+  return (
+    <Page>
+      {session ? (
+        <Flex column fill css={{ gap: 0, overflow: 'hidden' }}>
+          <Agenda
+            items={events}
+            noTimeHeader="TBD"
+            // noTimeSubheader="TBD"
+            noItemsText="No events yet... create one below!"
+            renderItem={(event) => <Event event={event} />}
+            renderOnEveryDay={false}
+          />
+          <Flex
+            css={{
+              flex: 0,
+              paddingBottom: '$root',
+              paddingLeft: '$small',
+              paddingRight: '$small',
+              background: '$background',
+            }}
+          >
+            <Input
+              variant="filled"
+              name="name"
+              placeholder={placeholder}
+              value={newEventValue}
+              onChange={(e) => setNewEventValue(e.target.value)}
+              css={{
+                flex: 1,
+                fontSize: '1.2rem',
+              }}
+            />
+            <Button
+              variant="ghost"
+              square={39}
+              disabled={!newEventValue.length}
+              onClick={() =>
+                createEvent({ name: newEventValue }).then((res) =>
+                  history.push(`/e/${res.data._id}`)
+                )
+              }
+              title="Add event"
+            >
+              <FiPlus />
+            </Button>
+          </Flex>
+        </Flex>
+      ) : (
+        <Flex column fill css={{ gap: 0, alignItems: 'center', justifyContent: 'center' }}>
+          <Flex column flex="0" css={{ gap: 0 }}>
+            <H1>Eventful</H1>
+            <H4>{`(You need to log in)`}</H4>
+          </Flex>
+        </Flex>
+      )}
+    </Page>
   )
 }

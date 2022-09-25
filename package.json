@@ -19,11 +19,14 @@
     "test:server": "cross-env NODE_ENV=test BROWSER=none yarn run dev",
     "api": "nodemon --config nodemon.json api/index.ts",
     "api:js": "nodemon --config nodemon.json out/api/index.js",
-    "dev": "cross-env DEBUG=eventful:* concurrently -n api,web \"yarn run dev:api\" \"yarn run dev:web\"",
+    "dev": "cross-env DEBUG=eventful:* concurrently -n api,web \"yarn run dev:api\" \"yarn run dev:mobile\"",
     "dev:api": "cross-env PORT=3000 yarn run api",
-    "dev:web": "cross-env PORT=3001 yarn run rs:start"
+    "dev:web": "cross-env PORT=3001 yarn run rs:start",
+    "dev:mobile": "yarn run ionic serve"
   },
   "dependencies": {
+    "@ionic/react": "^6.2.8",
+    "@ionic/react-router": "^6.2.8",
     "@radix-ui/react-dialog": "^1.0.0",
     "@radix-ui/react-popover": "^1.0.0",
     "@radix-ui/react-tabs": "^1.0.0",
@@ -62,7 +65,7 @@
     "react-dom": "^18.2.0",
     "react-icons": "^4.4.0",
     "react-responsive": "^9.0.0-beta.10",
-    "react-router-dom": "6",
+    "react-router-dom": "^5",
     "react-scripts": "5.0.1",
     "react-select": "^5.4.0",
     "react-textarea-autosize": "^8.3.4",
@@ -71,7 +74,19 @@
     "socket.io-client": "^4.5.1",
     "tinycolor": "^0.0.1",
     "typescript": "^4.4.2",
-    "web-vitals": "^2.1.0"
+    "web-vitals": "^2.1.0",
+    "workbox-background-sync": "^6.5.4",
+    "workbox-broadcast-update": "^6.5.4",
+    "workbox-cacheable-response": "^6.5.4",
+    "workbox-core": "^6.5.4",
+    "workbox-expiration": "^6.5.4",
+    "workbox-google-analytics": "^6.5.4",
+    "workbox-navigation-preload": "^6.5.4",
+    "workbox-precaching": "^6.5.4",
+    "workbox-range-requests": "^6.5.4",
+    "workbox-routing": "^6.5.4",
+    "workbox-strategies": "^6.5.4",
+    "workbox-streams": "^6.5.4"
   },
   "eslintConfig": {
     "extends": [
@@ -92,6 +107,7 @@
     ]
   },
   "devDependencies": {
+    "@ionic/cli": "^6.20.1",
     "@playwright/test": "^1.25.0",
     "@types/bcrypt": "^5.0.0",
     "@types/connect-mongodb-session": "^2.4.4",
@@ -102,6 +118,7 @@
     "@types/express-session": "^1.17.5",
     "@types/fs-extra": "^9.0.13",
     "@types/morgan": "^1.9.3",
+    "@types/react-router-dom": "^5.3.3",
     "@types/react-textarea-autosize": "^8.0.0",
     "concurrently": "^7.3.0",
     "cross-env": "^7.0.3",

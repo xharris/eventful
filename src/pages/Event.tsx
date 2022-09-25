@@ -58,7 +58,7 @@ const PlanControls = ({ event }: { event?: Eventful.ID }) => {
 }
 
 export const Event = () => {
-  const { eventId } = useParams()
+  const { eventId } = useParams<{ eventId: string }>()
   const { data: event, updateEvent } = useEvent({ id: eventId })
   const { session } = useSession()
   const [editing, setEditing] = useState<Eventful.ID>()
