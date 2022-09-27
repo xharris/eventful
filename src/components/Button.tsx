@@ -35,6 +35,10 @@ export const Component = styled('button', {
         color: '$successFg',
         backgroundColor: '$successBg',
       },
+      error: {
+        color: '$onErr',
+        backgroundColor: '$err',
+      },
     },
     variant: {
       ghost: {

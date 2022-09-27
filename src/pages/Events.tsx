@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { Button, LinkButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { Input } from 'src/components/Input'
@@ -47,6 +48,11 @@ export const Events = () => {
   const [rand] = useState(Math.floor(Math.random() * placeholders.length))
   const placeholder = useMemo(() => placeholders[rand], [rand])
 
+  const submit = useCallback(
+    () => createEvent({ name: newEventValue }).then((res) => navigate(`/e/${res.data._id}`)),
+    [newEventValue, navigate]
+  )
+
   return session ? (
     <Flex column fill css={{ gap: 0, overflow: 'hidden' }}>
       <Agenda
@@ -74,14 +80,13 @@ export const Events = () => {
           css={{
             flex: 1,
           }}
+          onKeyDown={(e) => e.key.match(/enter/i) && submit()}
         />
         <Button
           variant="ghost"
           square={39}
           disabled={!newEventValue.length}
-          onClick={() =>
-            createEvent({ name: newEventValue }).then((res) => navigate(`/e/${res.data._id}`))
-          }
+          onClick={() => submit()}
           title="Add event"
         >
           <FiPlus />

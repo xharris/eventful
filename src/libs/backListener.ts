@@ -15,5 +15,9 @@ export const useBackListener = ({
       onFirstBack()
     }
   }, [hash, location, onFirstBack])
-  return () => navigate(`#${hash}`, { replace: location.hash === `#${hash}` })
+  return [
+    () => navigate(`#${hash}`, { replace: location.hash === `#${hash}` }),
+    /** remove hash */
+    () => navigate('', { replace: location.hash === `#${hash}` }),
+  ]
 }

@@ -258,7 +258,7 @@ export const Chat = ({ event, small }: ChatProps) => {
 
   const latestMessage = useMemo(() => messages?.at(0), [messages])
 
-  const addChatHash = useBackListener({
+  const [addChatHash] = useBackListener({
     hash: 'chat',
     onFirstBack() {
       setCollapseChat(true)

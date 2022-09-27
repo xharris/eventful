@@ -1,11 +1,21 @@
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { AddButton, Button } from 'src/components/Button'
 import { Flex, HStack } from 'src/components/Flex'
 import { H1, H2, H4, H5, H6 } from 'src/components/Typography'
 import { Input } from 'src/components/Input'
 import { useEvent } from 'src/eventfulLib/event'
 import { useSession } from 'src/eventfulLib/session'
-import { FiFile, FiSave, FiBell, FiCalendar, FiMessageSquare, FiPlus } from 'react-icons/fi'
+import {
+  FiFile,
+  FiSave,
+  FiBell,
+  FiCalendar,
+  FiMessageSquare,
+  FiPlus,
+  FiMoreHorizontal,
+  FiMoreVertical,
+  FiMenu,
+} from 'react-icons/fi'
 import { CATEGORY, CATEGORY_INFO, usePlans } from 'src/eventfulLib/plan'
 import { Agenda } from 'src/features/Agenda'
 import { Eventful } from 'types'
@@ -25,6 +35,7 @@ import * as Dialog from '@radix-ui/react-dialog'
 import moment from 'moment'
 import { logger } from 'src/libs/log'
 import { useBackListener } from 'src/libs/backListener'
+import { PopoverDialog } from 'src/components/Dialog/PopoverDialog'
 
 const log = logger.extend('event')
 
@@ -64,7 +75,7 @@ const PlanControls = ({ event }: { event?: Eventful.ID }) => {
 
 export const Event = () => {
   const { eventId } = useParams()
-  const { data: event, updateEvent } = useEvent({ id: eventId })
+  const { data: event, updateEvent, deleteEvent } = useEvent({ id: eventId })
   const { session } = useSession()
   const [editing, setEditing] = useState<Eventful.ID>()
   const { dirty, handleChange, submitForm } = useFormik<Eventful.API.EventUpdate>({
@@ -86,18 +97,26 @@ export const Event = () => {
   const isSmall = useMediaQuery({ maxSize: 'Tablet' })
   const [showPlanAddModal, setShowPlanAddModal] = useState(false)
   const { addPlan } = usePlans({ event: eventId })
-  const addPlanAddHash = useBackListener({
+  const [addPlanAddHash] = useBackListener({
     hash: 'planadd',
     onFirstBack() {
       setShowPlanAddModal(false)
     },
   })
+  const [showSettingsDlg, setShowSettingsDlg] = useState(false)
+  const [addSettingsHash, remSettingsHash] = useBackListener({
+    hash: 'settings',
+    onFirstBack() {
+      setShowSettingsDlg(false)
+    },
+  })
+  const navigate = useNavigate()
 
   return (
     <Dialog.Root open={showPlanAddModal} onOpenChange={setShowPlanAddModal}>
       <Flex column fill css={{ alignItems: 'stretch', overflow: 'hidden', padding: 2 }}>
-        <Flex flex="0" css={{ alignItems: 'center' }}>
-          <Flex column css={{ gap: '$small' }}>
+        <Flex flex="0" column css={{ gap: 0 }}>
+          <Flex flex="0" css={{ gap: '$small', alignItems: 'center' }}>
             {session?._id.toString() === event?.createdBy?.toString() ? (
               <Input
                 name="name"
@@ -105,7 +124,8 @@ export const Event = () => {
                 onChange={handleChange}
                 variant="underline"
                 placeholder="Add name"
-                css={{ fontSize: '$7', flex: 1, minWidth: '50%' }}
+                className="header3"
+                style={{ flex: 1, minWidth: '50%', textTransform: 'none' }}
               />
             ) : (
               <H2
@@ -116,20 +136,43 @@ export const Event = () => {
                 {event?.name}
               </H2>
             )}
-            {event?.time.start || event?.time.end ? <Time time={event.time} /> : <H6>TBD</H6>}
-          </Flex>
-          {dirty && (
-            <Button onClick={() => submitForm()}>
-              <IconSide icon={FiSave}>Save</IconSide>
-            </Button>
-          )}
-          {event && notificationsQuery.isFetched && (
-            <Popover>
-              <PopoverTrigger clickable>
-                <Icon icon={FiBell} size={20} subtle />
-              </PopoverTrigger>
-              <PopoverContent>
+            {dirty && (
+              <Button onClick={() => submitForm()}>
+                <IconSide icon={FiSave}>Save</IconSide>
+              </Button>
+            )}
+            {event && notificationsQuery.isFetched && (
+              <PopoverDialog
+                open={showSettingsDlg}
+                onOpenChange={(v) => {
+                  setShowSettingsDlg(v)
+                  if (!v) {
+                    remSettingsHash()
+                  }
+                }}
+                trigger={
+                  <Button
+                    square={40}
+                    onClick={() => {
+                      setShowSettingsDlg(true)
+                      addSettingsHash()
+                    }}
+                  >
+                    <Icon icon={FiMenu} size={20} subtle />
+                  </Button>
+                }
+              >
                 <Flex column css={{ gap: '$small' }}>
+                  <Button
+                    color="error"
+                    variant="ghost"
+                    onClick={() =>
+                      window.confirm('Are you sure you want to delete this event?') &&
+                      deleteEvent().then(() => navigate('/'))
+                    }
+                  >
+                    Delete Event
+                  </Button>
                   <H4 underline>Notifications</H4>
                   <H5 bold>Chat</H5>
                   <Checkbox
@@ -155,9 +198,11 @@ export const Event = () => {
                     }
                   />
                 </Flex>
-              </PopoverContent>
-            </Popover>
-          )}
+              </PopoverDialog>
+            )}
+          </Flex>
+
+          {event?.time.start || event?.time.end ? <Time time={event.time} /> : <H6>TBD</H6>}
         </Flex>
         <Flex
           column

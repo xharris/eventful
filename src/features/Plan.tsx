@@ -119,7 +119,7 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
         border: '1px solid $controlBorder',
         borderRadius: '$control',
         boxShadow: plan.time ? '$card' : undefined,
-        minHeight: 36,
+        minHeight: 32,
         minWidth: isSmall ? 0 : 200,
         '& > .edit-button': {
           opacity: 0,
@@ -132,112 +132,119 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
     >
       {editing && session ? (
         <InlineDialog open={editing} onOpenChange={() => onClose()}>
-          {info.fields.what && (
-            <IconSide icon={icon}>
-              <Input
-                name="what"
+          <Flex
+            column
+            css={{
+              gap: '$small',
+            }}
+          >
+            {info.fields.what && (
+              <IconSide icon={icon}>
+                <Input
+                  name="what"
+                  small
+                  value={values.what}
+                  onChange={handleChange}
+                  placeholder={info.placeholder.what}
+                  variant="underline"
+                />
+              </IconSide>
+            )}
+            {info.fields.location && (
+              <IconSide icon={FiMapPin} color="$red" subtle>
+                <Input
+                  name="location.address"
+                  small
+                  value={values.location?.address ?? ''}
+                  placeholder={info.placeholder.location}
+                  onChange={handleChange}
+                  variant="underline"
+                />
+              </IconSide>
+            )}
+            {info.fields.time && (
+              <TimeInput
+                name="time"
+                defaultValue={values.time}
+                onChange={(v) => setFieldValue('time', v)}
+                gap="$small"
                 small
-                value={values.what}
-                onChange={handleChange}
-                placeholder={info.placeholder.what}
+                square={25}
                 variant="underline"
               />
-            </IconSide>
-          )}
-          {info.fields.location && (
-            <IconSide icon={FiMapPin} color="$red" subtle>
-              <Input
-                name="location.address"
-                small
-                value={values.location?.address ?? ''}
-                placeholder={info.placeholder.location}
-                onChange={handleChange}
-                variant="underline"
-              />
-            </IconSide>
-          )}
-          {info.fields.time && (
-            <TimeInput
-              name="time"
-              defaultValue={values.time}
-              onChange={(v) => setFieldValue('time', v)}
-              gap="$small"
-              small
-              square={25}
-              variant="underline"
-            />
-          )}
-          {info.fields.who && (
-            <IconSide icon={FiUsers} subtle>
-              <UserSelect
-                name="who"
-                users={whoAll}
-                options={whoOptions}
-                fixedUsers={whoFixed}
-                value={
-                  values.who?.map(
-                    (id) => whoAll.find((user2) => user2._id === id) as Eventful.User
-                  ) ?? []
-                }
-                onChange={(users) =>
-                  setFieldValue(
-                    'who',
-                    users.map((user) => user._id)
-                  )
-                }
-              />
-            </IconSide>
-          )}
-          <Flex css={{ justifyContent: 'space-between' }}>
-            <Flex css={{ gap: '$small' }}>
-              <Button
-                onClick={() => (dirty ? submitForm() : onClose())}
-                variant={dirty ? 'filled' : 'ghost'}
-                color={dirty ? 'success' : undefined}
-                title="Save plan"
-                square
-              >
-                {dirty ? <FiSave /> : <FiArrowLeft />}
-              </Button>
-              {dirty && (
+            )}
+            {info.fields.who && (
+              <IconSide icon={FiUsers} subtle>
+                <UserSelect
+                  name="who"
+                  users={whoAll}
+                  options={whoOptions}
+                  fixedUsers={whoFixed}
+                  value={
+                    values.who?.map(
+                      (id) => whoAll.find((user2) => user2._id === id) as Eventful.User
+                    ) ?? []
+                  }
+                  onChange={(users) =>
+                    setFieldValue(
+                      'who',
+                      users.map((user) => user._id)
+                    )
+                  }
+                />
+              </IconSide>
+            )}
+            <Flex css={{ justifyContent: 'space-between' }}>
+              <Flex css={{ gap: '$small' }}>
                 <Button
-                  onClick={() => {
-                    resetForm()
-                    onClose()
-                  }}
-                  variant="ghost"
+                  onClick={() => (dirty ? submitForm() : onClose())}
+                  variant={dirty ? 'filled' : 'ghost'}
+                  color={dirty ? 'success' : undefined}
+                  title="Save plan"
                   square
                 >
-                  <FiX />
+                  {dirty ? <FiSave /> : <FiArrowLeft />}
                 </Button>
-              )}
-              {plan.createdBy === session._id && (
-                <Button
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to delete this plan?')) {
-                      deletePlan(plan._id)
+                {dirty && (
+                  <Button
+                    onClick={() => {
+                      resetForm()
                       onClose()
-                    }
-                  }}
-                  variant="ghost"
-                  square
-                >
-                  <FiTrash2 />
-                </Button>
-              )}
+                    }}
+                    variant="ghost"
+                    square
+                  >
+                    <FiX />
+                  </Button>
+                )}
+                {plan.createdBy === session._id && (
+                  <Button
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to delete this plan?')) {
+                        deletePlan(plan._id)
+                        onClose()
+                      }
+                    }}
+                    variant="ghost"
+                    square
+                  >
+                    <FiTrash2 />
+                  </Button>
+                )}
+              </Flex>
+              <Select
+                defaultValue={{
+                  value: values.category ?? 0,
+                  label: CATEGORY_INFO[values.category ?? 0].label,
+                }}
+                onChange={(v) => setFieldValue('category', v?.value ?? 0)}
+                options={Object.entries(CATEGORY_INFO).map(([key, cat]) => ({
+                  value: parseInt(key),
+                  label: cat.label,
+                }))}
+                menuPortalTarget={document.body}
+              />
             </Flex>
-            <Select
-              defaultValue={{
-                value: values.category ?? 0,
-                label: CATEGORY_INFO[values.category ?? 0].label,
-              }}
-              onChange={(v) => setFieldValue('category', v?.value ?? 0)}
-              options={Object.entries(CATEGORY_INFO).map(([key, cat]) => ({
-                value: parseInt(key),
-                label: cat.label,
-              }))}
-              menuPortalTarget={document.body}
-            />
           </Flex>
         </InlineDialog>
       ) : (
