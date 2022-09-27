@@ -10,6 +10,7 @@ import { Page } from './pages/Page'
 import { User } from './pages/User'
 import { UserSearch } from './pages/UserSearch'
 import * as Dialog from '@radix-ui/react-dialog'
+import './App.scss'
 
 localStorage.debug = 'eventful:*'
 

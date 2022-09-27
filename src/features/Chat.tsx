@@ -1,17 +1,30 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  ComponentProps,
+  HTMLProps,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Button, CancelButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
-import { Icon } from 'src/components/Icon'
+import { Icon, IconSide } from 'src/components/Icon'
 import { TextArea } from 'src/components/Input'
 import { useMessages } from 'src/eventfulLib/message'
 import { Eventful } from 'types'
-import { FiCornerUpLeft, FiEdit2, FiSend } from 'react-icons/fi'
-import { H5, H6 } from 'src/components/Typography'
+import { FiCornerUpLeft, FiEdit2, FiMessageSquare, FiSend } from 'react-icons/fi'
+import { H4, H5, H6 } from 'src/components/Typography'
 import { Avatar } from 'src/components/Avatar'
 import { css, keyframes } from 'src/libs/styled'
 import type * as Stitches from '@stitches/react'
 import { createStateContext } from 'react-use'
 import { useSession } from 'src/eventfulLib/session'
+import * as Dialog from '@radix-ui/react-dialog'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { InlineDialog } from 'src/components/Dialog/InlineDialog'
+import { useBackListener } from 'src/libs/backListener'
 
 const newTextMessage = (height: number) =>
   keyframes({
@@ -53,11 +66,12 @@ const [useChatCtx, ChatCtxProvider] = createStateContext<{
   replying: undefined,
 })
 
-interface MessageProps {
+interface MessageProps extends HTMLProps<HTMLDivElement> {
   message?: Eventful.API.MessageGet
+  preview?: boolean
 }
 
-export const Message = ({ message }: MessageProps) => {
+export const Message = ({ message, preview, ...props }: MessageProps) => {
   const refInner = useRef<HTMLDivElement>(null)
   const [style, setStyle] = useState<Stitches.CSS>()
   const [{ editing, replying }, setChatCtx] = useChatCtx()
@@ -80,7 +94,7 @@ export const Message = ({ message }: MessageProps) => {
   }, [refInner])
 
   return (
-    <div className={style ? css(style)() : undefined}>
+    <div className={style ? css(style)() : undefined} {...props}>
       <Flex
         ref={refInner}
         css={{
@@ -105,30 +119,32 @@ export const Message = ({ message }: MessageProps) => {
               <H6>{message?.replyTo.text}</H6>
             </Flex>
           )}
-          <Flex>
+          <Flex css={{ gap: preview ? '$small' : undefined }}>
             <Avatar
               username={message?.createdBy.username}
               to={`/u/${message?.createdBy.username}`}
             />
-            <H5 css={{ whiteSpace: 'pre-wrap', flex: 1 }}>{message?.text}</H5>
-            <Flex className="controls" flex="0" css={{ gap: '$small' }}>
-              {session?._id === message?.createdBy._id && (
+            <H5 css={{ whiteSpace: preview ? 'nowrap' : 'pre-wrap', flex: 1 }}>{message?.text}</H5>
+            {!preview && (
+              <Flex className="controls" flex="0" css={{ gap: '$small' }}>
+                {session?._id === message?.createdBy._id && (
+                  <Button
+                    variant="outline"
+                    square={24}
+                    onClick={() => setChatCtx((prev) => ({ ...prev, editing: message }))}
+                  >
+                    <Icon icon={FiEdit2} />
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   square={24}
-                  onClick={() => setChatCtx((prev) => ({ ...prev, editing: message }))}
+                  onClick={() => setChatCtx((prev) => ({ ...prev, replying: message }))}
                 >
-                  <Icon icon={FiEdit2} />
+                  <Icon icon={FiCornerUpLeft} />
                 </Button>
-              )}
-              <Button
-                variant="outline"
-                square={24}
-                onClick={() => setChatCtx((prev) => ({ ...prev, replying: message }))}
-              >
-                <Icon icon={FiCornerUpLeft} />
-              </Button>
-            </Flex>
+              </Flex>
+            )}
           </Flex>
         </Flex>
       </Flex>
@@ -233,29 +249,76 @@ const ChatInput = ({ event }: ChatInputProps) => {
 
 interface ChatProps {
   event?: Eventful.ID
+  small?: boolean
 }
 
-export const Chat = ({ event }: ChatProps) => {
+export const Chat = ({ event, small }: ChatProps) => {
   const { data: messages } = useMessages({ event })
+  const [collapseChat, setCollapseChat] = useState(true)
+
+  const latestMessage = useMemo(() => messages?.at(0), [messages])
+
+  const addChatHash = useBackListener({
+    hash: 'chat',
+    onFirstBack() {
+      setCollapseChat(true)
+    },
+  })
 
   return (
     <ChatCtxProvider>
-      <Flex
-        column="reverse"
-        css={{
-          height: '100%',
-          padding: '0 $small',
-          overflowY: 'auto',
-          gap: '$small',
-        }}
-      >
-        <ChatInput event={event} />
-        <Flex column="reverse" css={{ gap: '$small' }}>
-          {messages?.map((message) => (
-            <Message key={message._id.toString()} message={message} />
-          ))}
+      {small && collapseChat && (
+        <Flex
+          flex="0"
+          css={{
+            cursor: 'pointer',
+            border: '1px solid $controlBorder',
+            borderRadius: '$control',
+            padding: '0 $controlPadding',
+            gap: '$small',
+          }}
+          onClick={() => {
+            setCollapseChat(false)
+            addChatHash()
+          }}
+        >
+          <Icon icon={FiMessageSquare} />
+          {latestMessage ? (
+            <Message
+              key={latestMessage._id.toString()}
+              message={latestMessage}
+              style={{
+                pointerEvents: 'none',
+                flex: 1,
+                overflow: 'hidden',
+              }}
+              preview
+            />
+          ) : (
+            <H4>Chat</H4>
+          )}
         </Flex>
-      </Flex>
+      )}
+      <InlineDialog open={small && !collapseChat} onOpenChange={(v) => setCollapseChat(!v)}>
+        <Flex
+          column="reverse"
+          css={{
+            flex: small ? '0 auto' : undefined,
+            height: small ? 'auto' : '100%',
+            padding: '0 $small',
+            overflowY: 'auto',
+            gap: '$small',
+            overflowX: 'hidden',
+          }}
+        >
+          <ChatInput event={event} />
+          <Flex column="reverse" css={{ gap: '$small' }}>
+            {messages?.map((message) => (
+              <Message key={message._id.toString()} message={message} />
+            ))}
+          </Flex>
+        </Flex>
+      </InlineDialog>
     </ChatCtxProvider>
   )
 }

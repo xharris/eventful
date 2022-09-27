@@ -1,10 +1,10 @@
 import { useFormik } from 'formik'
 import moment from 'moment'
-import { ReactNode, useEffect, useMemo } from 'react'
+import { ReactNode, useRef, useMemo, useState } from 'react'
 import { Checkbox } from 'src/components/Checkbox'
 import { Chip } from 'src/components/Chip'
 import { Flex } from 'src/components/Flex'
-import { H1, H2, H3, H4, H6 } from 'src/components/Typography'
+import { H1, H2, H3, H4, H5, H6 } from 'src/components/Typography'
 import { Icon } from 'src/components/Icon'
 import { Eventful } from 'types'
 import { FiCheck, FiList, FiMoreHorizontal, FiPlus } from 'react-icons/fi'
@@ -19,7 +19,10 @@ interface Item {
 }
 
 interface DayItems<I extends Item> {
+  key: string
   day: string
+  dayOfWeek: string
+  isOld: boolean
   items: I[]
 }
 
@@ -39,22 +42,12 @@ interface YearProps {
 
 const Year = ({ label }: YearProps) => (
   <Flex
-    flex="0"
     css={{
       alignItems: 'center',
+      justifyContent: 'flex-end',
     }}
   >
-    <Flex
-      css={{
-        borderBottom: '1px solid $disabled',
-      }}
-    />
-    <H3>{label}</H3>
-    <Flex
-      css={{
-        borderBottom: '1px solid $disabled',
-      }}
-    />
+    <H2>{label}</H2>
   </Flex>
 )
 
@@ -66,35 +59,56 @@ interface MonthProps<I extends Item> {
 
 const Month = <I extends Item = Item>({ label, days, renderItem }: MonthProps<I>) => (
   <Flex column flex="0" css={{ gap: '$small' }}>
-    <H3
+    <H4
       css={{
-        textAlign: 'center',
+        textAlign: 'right',
         color: '#616161',
         background: 'linear-gradient(to bottom, $background 90%, transparent)',
         zIndex: 10,
-        padding: '0.5rem 0',
+        // padding: '0.5rem 0',
         position: 'sticky',
         top: -2,
       }}
     >
       {label}
-    </H3>
+    </H4>
     <Flex column css={{ gap: '$small' }}>
       {days.map((day) => (
-        <Flex key={day.day} flex="0" css={{ position: 'relative', alignItems: 'flex-start' }}>
-          <H4
+        <Flex
+          key={day.key}
+          id={day.key}
+          flex="0"
+          css={{ position: 'relative', alignItems: 'flex-start' }}
+        >
+          <Flex
+            column
+            flex={0}
             css={{
-              color: '$disabled',
               position: 'sticky',
               left: 0,
               top: 0,
               padding: '0.25rem 0',
               minWidth: 35,
+              gap: 0,
+              alignItems: 'center',
             }}
           >
-            {day.day}
-          </H4>
-          <Flex column css={{ gap: '$small' }}>
+            <H5
+              css={{
+                color: '$disabled',
+              }}
+            >
+              {day.dayOfWeek}
+            </H5>
+            <H4
+              css={{
+                color: '$disabled',
+              }}
+            >
+              {day.day}
+            </H4>
+          </Flex>
+          <Flex column css={{ gap: 0, paddingTop: '$small', opacity: day.isOld ? 0.4 : 1 }}>
             {day.items.map((item) => (
               <Flex key={item._id.toString()}>{renderItem(item)}</Flex>
             ))}
@@ -113,7 +127,7 @@ interface AgendaOptions {
 
 interface AgendaProps<I extends Item> {
   items?: I[]
-  noTimeHeader: string
+  noTimeHeader?: string
   noTimeSubheader?: string
   noItemsText?: string
   renderItem: (item: I) => ReactNode
@@ -124,14 +138,15 @@ interface AgendaProps<I extends Item> {
 
 export const Agenda = <I extends Item = Item>({
   items = [],
-  noTimeHeader,
-  noTimeSubheader,
+  noTimeHeader = 'TBD',
+  noTimeSubheader = '',
   noItemsText,
   renderItem,
   showYearSeparator = true,
   renderOnEveryDay = true,
   onAdd,
 }: AgendaProps<I>) => {
+  const [scrolled, setScrolled] = useState(false)
   const { values: options, setFieldValue } = useFormik<AgendaOptions>({
     initialValues: {
       tbd: true,
@@ -195,15 +210,21 @@ export const Agenda = <I extends Item = Item>({
             days: Object.entries(days)
               .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
               .map(([day, items]) => ({
+                key: `${year}-${month}-${day}`,
                 day,
+                dayOfWeek: moment(`${year}-${month}-${day}`, 'YYYY-MMMM-DD').format('ddd'),
+                isOld: moment(`${year}-${month}-${day}`, 'YYYY-MMMM-DD').isBefore(new Date()),
                 items,
               })),
           })),
       })) as YearItems<I>[]
   }, [items, renderOnEveryDay])
 
+  const refComponent = useRef<HTMLDivElement>(null)
+
   return (
     <Flex
+      ref={refComponent}
       column
       css={{
         padding: '2px 0px',
@@ -295,7 +316,13 @@ export const Agenda = <I extends Item = Item>({
                 </Flex>
               </Flex>
             ))}
-            <Flex className="filler" fill />
+            <Flex
+              className="filler"
+              css={{
+                width: '100%',
+                minHeight: refComponent.current?.getBoundingClientRect().height,
+              }}
+            />
           </Flex>
         )
         //  : noItemsText ? (

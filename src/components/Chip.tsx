@@ -9,7 +9,7 @@ export const Chip = styled('button', {
   alignItems: 'center',
   gap: '$small',
   borderRadius: 40,
-  height: 30,
+  height: 24,
   variants: {
     selected: {
       true: {

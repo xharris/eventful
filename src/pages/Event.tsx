@@ -5,7 +5,7 @@ import { H1, H2, H4, H5, H6 } from 'src/components/Typography'
 import { Input } from 'src/components/Input'
 import { useEvent } from 'src/eventfulLib/event'
 import { useSession } from 'src/eventfulLib/session'
-import { FiFile, FiSave, FiBell, FiCalendar, FiMessageSquare } from 'react-icons/fi'
+import { FiFile, FiSave, FiBell, FiCalendar, FiMessageSquare, FiPlus } from 'react-icons/fi'
 import { CATEGORY, CATEGORY_INFO, usePlans } from 'src/eventfulLib/plan'
 import { Agenda } from 'src/features/Agenda'
 import { Eventful } from 'types'
@@ -22,6 +22,11 @@ import { useMediaQuery } from 'src/libs/styled'
 import * as Tabs from 'src/components/VerticalTabs'
 import { CATEGORY_ICON } from 'src/libs/plan'
 import * as Dialog from '@radix-ui/react-dialog'
+import moment from 'moment'
+import { logger } from 'src/libs/log'
+import { useBackListener } from 'src/libs/backListener'
+
+const log = logger.extend('event')
 
 const PlanControls = ({ event }: { event?: Eventful.ID }) => {
   const { session } = useSession()
@@ -80,6 +85,13 @@ export const Event = () => {
   })
   const isSmall = useMediaQuery({ maxSize: 'Tablet' })
   const [showPlanAddModal, setShowPlanAddModal] = useState(false)
+  const { addPlan } = usePlans({ event: eventId })
+  const addPlanAddHash = useBackListener({
+    hash: 'planadd',
+    onFirstBack() {
+      setShowPlanAddModal(false)
+    },
+  })
 
   return (
     <Dialog.Root open={showPlanAddModal} onOpenChange={setShowPlanAddModal}>
@@ -147,84 +159,61 @@ export const Event = () => {
             </Popover>
           )}
         </Flex>
-        {isSmall ? (
-          <Tabs.Root defaultValue="agenda">
-            <Tabs.List css={{ gap: '$small' }}>
-              <Tabs.Trigger value="agenda">
-                <Button square={34} variant="ghost">
-                  <Icon icon={FiCalendar} size={18} />
-                </Button>
-              </Tabs.Trigger>
-              <Tabs.Trigger value="chat">
-                <Button square={34} variant="ghost">
-                  <Icon icon={FiMessageSquare} size={18} />
-                </Button>
-              </Tabs.Trigger>
-            </Tabs.List>
-            <Tabs.Separator />
-            <Tabs.Content value="agenda">
-              <Agenda
-                items={event?.plans}
-                noTimeHeader="Plans"
-                noItemsText={`No plans yet...`}
-                renderOnEveryDay={false}
-                showYearSeparator={false}
-                renderItem={(plan) => (
-                  <Plan
-                    key={plan._id.toString()}
-                    plan={plan}
-                    editing={editing === plan._id}
-                    onEdit={() => {
-                      setEditing(plan._id)
-                    }}
-                    onClose={() => setEditing(undefined)}
-                  />
-                )}
-                onAdd={() => setShowPlanAddModal(true)}
-              />
-            </Tabs.Content>
-            <Tabs.Content value="chat">
-              <Chat event={event?._id} />
-            </Tabs.Content>
-          </Tabs.Root>
-        ) : (
+        <Flex
+          column
+          css={{
+            overflow: 'hidden',
+            background: '$background',
+            padding: 5,
+            height: '100%',
+          }}
+        >
           <Flex
-            column
+            column={isSmall}
             css={{
               overflow: 'hidden',
-              background: '$background',
-              padding: 5,
-              height: '100%',
             }}
           >
             <Flex
+              column
               css={{
-                overflow: 'hidden',
+                gap: '$controlPadding',
+                overflow: 'auto',
+                padding: '$small',
+                alignItems: isSmall ? 'stretch' : 'flex-start',
               }}
             >
-              <Agenda
-                items={event?.plans}
-                noTimeHeader="Plans"
-                noItemsText={`No plans yet...`}
-                renderOnEveryDay={false}
-                showYearSeparator={false}
-                renderItem={(plan) => (
-                  <Plan
-                    key={plan._id.toString()}
-                    plan={plan}
-                    editing={editing === plan._id}
-                    onEdit={() => {
-                      setEditing(plan._id)
-                    }}
-                    onClose={() => setEditing(undefined)}
-                  />
-                )}
-                onAdd={() => setShowPlanAddModal(true)}
-              />
-              <Chat event={event?._id} />
+              {event?.plans
+                .sort(
+                  (a, b) =>
+                    moment(b.time?.start?.date ? b.time.start.date : b.createdAt).unix() -
+                    moment(a.time?.start?.date ? a.time.start.date : a.createdAt).unix()
+                )
+                .map((plan) => (
+                  <Flex flex={0} key={plan._id.toString()}>
+                    <Plan
+                      plan={plan}
+                      editing={editing === plan._id}
+                      onEdit={() => {
+                        setEditing(plan._id)
+                      }}
+                      onClose={() => setEditing(undefined)}
+                    />
+                  </Flex>
+                ))}
+              <Button
+                onClick={() => {
+                  setShowPlanAddModal(true)
+                  addPlanAddHash()
+                }}
+                title="Add plan"
+              >
+                <FiPlus />
+              </Button>
             </Flex>
+            <Chat event={event?._id} small={isSmall} />
           </Flex>
-        )}
+        </Flex>
         <Dialog.Portal>
           <Dialog.Overlay
             style={{
@@ -247,13 +236,25 @@ export const Event = () => {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: '90vw',
+              // width: '90vw',
               maxWidth: '450px',
               maxHeight: '85vh',
               padding: 25,
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
-            hi
+            {Object.entries(CATEGORY_INFO).map(([key, value]) => (
+              <Button
+                key={key}
+                onClick={(e) =>
+                  addPlan({ category: parseInt(key) }).then(() => setShowPlanAddModal(false))
+                }
+                variant="ghost"
+              >
+                <IconSide icon={CATEGORY_ICON[parseInt(key)]}>{value.label}</IconSide>
+              </Button>
+            ))}
           </Dialog.Content>
         </Dialog.Portal>
       </Flex>

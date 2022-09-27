@@ -11,8 +11,15 @@ export const Page = () => {
   const { session } = useSession()
 
   return (
-    <Container css={{ padding: '$root' }}>
-      <Flex column fill>
+    <Container
+      css={{
+        padding: '$small',
+        '@phablet': {
+          padding: '$root',
+        },
+      }}
+    >
+      <Flex column fill css={{ gap: '$small' }}>
         <Flex className="page-header" row flex="0" css={{ justifyContent: 'space-between' }}>
           <Flex>
             <LinkButton to="/" variant="ghost" title="Home">

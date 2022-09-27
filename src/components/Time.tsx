@@ -7,6 +7,7 @@ import { H5, H6 } from './Typography'
 
 interface TimeProps extends ComponentProps<typeof Flex> {
   time: Eventful.Time
+  timeOnly?: boolean
 }
 
 const calendarFormat = {
@@ -15,7 +16,7 @@ const calendarFormat = {
   nextDay: '[Tomorrow]',
   lastWeek: '[last] dddd',
   nextWeek: 'dddd',
-  sameElse: 'LT',
+  sameElse: 'L',
 }
 const calendarFormatTime = {
   lastDay: '[Yesterday at] LT',
@@ -23,7 +24,7 @@ const calendarFormatTime = {
   nextDay: '[Tomorrow at] LT',
   lastWeek: '[last] dddd [at] LT',
   nextWeek: 'dddd [at] LT',
-  sameElse: 'L',
+  sameElse: 'LT',
 }
 
 export const formatStart = (time: Eventful.Time) =>
@@ -31,7 +32,7 @@ export const formatStart = (time: Eventful.Time) =>
     ? moment(time.start.date).calendar(time.start?.allday ? calendarFormat : calendarFormatTime)
     : null
 
-export const Time = ({ time, css, ...props }: TimeProps) => {
+export const Time = ({ time, css, timeOnly, ...props }: TimeProps) => {
   const str = useMemo(() => {
     const start = time.start ? moment(time.start.date) : null
     const end = time.end ? moment(time.end.date) : null
@@ -44,9 +45,13 @@ export const Time = ({ time, css, ...props }: TimeProps) => {
       .join(' - ')
   }, [time])
 
-  return (
-    <Flex css={{ gap: '$small', alignItems: 'center', ...css }} {...props}>
-      {time.start && <H5>{str}</H5>}
+  return !timeOnly || !time.start?.allday ? (
+    <Flex
+      flex={0}
+      css={{ gap: '$small', alignItems: 'center', whiteSpace: 'nowrap', ...css }}
+      {...props}
+    >
+      {time.start && <H6>{str}</H6>}
     </Flex>
-  )
+  ) : null
 }

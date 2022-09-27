@@ -5,7 +5,7 @@ import { FiMapPin, FiUsers, FiSave, FiArrowLeft, FiX, FiClock, FiTrash2 } from '
 import { Button } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { H4, H5, H6 } from 'src/components/Typography'
-import { IconSide } from 'src/components/Icon'
+import { Icon, IconSide } from 'src/components/Icon'
 import { CategoryInfo, usePlans, CATEGORY_INFO, CATEGORY } from 'src/eventfulLib/plan'
 import { Eventful } from 'types'
 import { TimeInput } from './TimeInput'
@@ -18,6 +18,9 @@ import { Avatar, AvatarGroup } from 'src/components/Avatar'
 import { Popover, PopoverContent, PopoverTrigger } from 'src/components/Popover'
 import { useEvent } from 'src/eventfulLib/event'
 import { CATEGORY_ICON } from 'src/libs/plan'
+import tinycolor from 'tinycolor2'
+import { InlineDialog } from 'src/components/Dialog/InlineDialog'
+import { useMediaQuery } from 'src/libs/styled'
 
 interface EmptyProps {
   info: CategoryInfo
@@ -93,16 +96,31 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
         .map((user) => user._id),
     [whoAll, whoOptions]
   )
+  const label = useMemo(
+    () =>
+      (plan.category === CATEGORY.Carpool
+        ? `${plan.what} carpool`
+        : plan.category === CATEGORY.Lodging || plan.category === CATEGORY.Meet
+        ? plan.location?.label ?? plan.location?.address
+        : !!plan.what?.length
+        ? plan.what
+        : ''
+      )?.trim() ?? '',
+    [plan]
+  )
+  const isSmall = useMediaQuery({ maxSize: 'Tablet' })
 
   return (
     <Flex
       column
       css={{
-        padding: '$small',
+        padding: ' $small  $controlPadding',
         gap: '$small',
         border: '1px solid $controlBorder',
         borderRadius: '$control',
-        boxShadow: '$card',
+        boxShadow: plan.time ? '$card' : undefined,
+        minHeight: 36,
+        minWidth: isSmall ? 0 : 200,
         '& > .edit-button': {
           opacity: 0,
         },
@@ -113,7 +131,7 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
       data-testid="plan"
     >
       {editing && session ? (
-        <>
+        <InlineDialog open={editing} onOpenChange={() => onClose()}>
           {info.fields.what && (
             <IconSide icon={icon}>
               <Input
@@ -221,75 +239,85 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
               menuPortalTarget={document.body}
             />
           </Flex>
-        </>
+        </InlineDialog>
       ) : (
         <Empty plan={plan} info={info} onEdit={onEdit}>
-          <Flex>
-            <IconSide icon={plan.category !== CATEGORY.None ? icon : undefined}>
-              {(info.fields.what ||
-                plan.category === CATEGORY.Lodging ||
-                plan.category === CATEGORY.Meet) && (
-                <H5
-                  clickable
-                  onClick={() => onEdit()}
-                  css={{
-                    flex: 1,
-                    fontStyle: !!plan.what?.length ? 'normal' : 'italic',
-                    color: !!plan.what?.length ? '$black' : '$disabled',
-                    fontWeight: 500,
-                  }}
-                >
-                  {plan.category === CATEGORY.Carpool
-                    ? `${plan.what} carpool`
-                    : plan.category === CATEGORY.Lodging || plan.category === CATEGORY.Meet
-                    ? plan.location?.label ?? plan.location?.address
-                    : !!plan.what?.length
-                    ? plan.what
-                    : 'Untitled plan'}
-                </H5>
-              )}
-            </IconSide>
-            {info.fields.who && (
-              <Flex flex="0">
-                {!!plan.who?.length && (
-                  <Popover>
-                    <PopoverTrigger clickable>
-                      <AvatarGroup
-                        avatars={plan.who.map((user) => ({
-                          username: user.username,
-                        }))}
-                      />
-                    </PopoverTrigger>
-                    <PopoverContent>
-                      <Flex column css={{ gap: '$small' }}>
-                        <H5>{`Participants (${plan.who.length})`}</H5>
-                        <Flex css={{ flexWrap: 'wrap', overflow: 'auto', gap: 7 }}>
-                          {plan.who.map((user) => (
-                            <Avatar
-                              key={user._id.toString()}
-                              username={user.username}
-                              size="medium"
-                              to={`/u/${user.username}`}
-                            />
-                          ))}
-                        </Flex>
-                      </Flex>
-                    </PopoverContent>
-                  </Popover>
+          <Flex css={{ gap: '$small' }}>
+            {plan.category !== CATEGORY.None && (
+              <Icon
+                icon={icon}
+                size={25}
+                color={tinycolor(info.color).setAlpha(0.5).toHexString()}
+                css={{
+                  filter: `drop-shadow(2px 2px 0px ${tinycolor(info.color)
+                    .lighten(30)
+                    .toHexString()})`,
+                }}
+              />
+            )}
+            <Flex column css={{ gap: 0 }}>
+              <Flex css={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                {(info.fields.what ||
+                  plan.category === CATEGORY.Lodging ||
+                  plan.category === CATEGORY.Meet) && (
+                  <H4
+                    clickable
+                    onClick={() => onEdit()}
+                    css={{
+                      flex: 1,
+                      fontStyle: !!label?.length ? 'normal' : 'italic',
+                      color: !!label?.length ? '$black' : '$disabled',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {!!label?.length ? label : 'Untitled plan'}
+                  </H4>
+                )}
+                {info.fields.who && (
+                  <Flex flex="0">
+                    {!!plan.who?.length && (
+                      <Popover>
+                        <PopoverTrigger clickable>
+                          <AvatarGroup
+                            avatars={plan.who.map((user) => ({
+                              username: user.username,
+                            }))}
+                          />
+                        </PopoverTrigger>
+                        <PopoverContent>
+                          <Flex column css={{ gap: '$small' }}>
+                            <H5>{`Participants (${plan.who.length})`}</H5>
+                            <Flex css={{ flexWrap: 'wrap', overflow: 'auto', gap: 7 }}>
+                              {plan.who.map((user) => (
+                                <Avatar
+                                  key={user._id.toString()}
+                                  username={user.username}
+                                  size="medium"
+                                  to={`/u/${user.username}`}
+                                />
+                              ))}
+                            </Flex>
+                          </Flex>
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  </Flex>
                 )}
               </Flex>
-            )}
+              {((plan.location && plan.location.address !== label) || plan.time) && (
+                <Flex css={{ justifyContent: 'space-between' }}>
+                  {info.fields.location && plan.location && plan.location.address !== label ? (
+                    <H6>{plan.location.address}</H6>
+                  ) : (
+                    <Flex />
+                  )}
+                  {info.fields.time && plan.time && (
+                    <Time time={plan.time} css={{ justifyContent: 'flex-end' }} />
+                  )}
+                </Flex>
+              )}
+            </Flex>
           </Flex>
-          {info.fields.location && plan.location && (
-            <IconSide icon={FiMapPin} color="$red" subtle>
-              <H5>{plan.location.address}</H5>
-            </IconSide>
-          )}
-          {info.fields.time && plan.time && (
-            <IconSide icon={FiClock} subtle>
-              <Time time={plan.time} />
-            </IconSide>
-          )}
         </Empty>
       )}
     </Flex>

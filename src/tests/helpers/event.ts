@@ -23,10 +23,13 @@ export class Event {
     return event
   }
 
-  async visit({ name }: EventObject) {
+  async visit({ name }: EventObject, isTbd = false) {
     const { page } = this
 
     await goToHome({ page })
+    if (isTbd) {
+      await page.click('text=TBD')
+    }
     await page.click(`text=${name}`)
     await page.waitForLoadState('networkidle')
   }

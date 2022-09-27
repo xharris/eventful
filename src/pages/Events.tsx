@@ -4,7 +4,7 @@ import { Input } from 'src/components/Input'
 import { useEvents } from 'src/eventfulLib/event'
 import { FiPlus } from 'react-icons/fi'
 import { useMemo, useState } from 'react'
-import { H1, H3, H4, H5 } from 'src/components/Typography'
+import { H1, H2, H3, H4, H5, H6 } from 'src/components/Typography'
 import { Eventful } from 'types'
 import { useNavigate } from 'react-router-dom'
 import { Agenda } from 'src/features/Agenda'
@@ -23,9 +23,9 @@ const Event = ({ event }: { event: Eventful.API.EventGet }) => (
   >
     <Flex>
       <Flex css={{ alignItems: 'center' }}>
-        <H4 css={{ fontWeight: 600 }}>{event.name}</H4>
+        <H4 css={{ fontWeight: 600, textAlign: 'left' }}>{event.name}</H4>
         <H4>
-          <Time time={event.time} />
+          <Time time={event.time} timeOnly />
         </H4>
       </Flex>
       <AvatarGroup
@@ -55,7 +55,6 @@ export const Events = () => {
         // noTimeSubheader="TBD"
         noItemsText="No events yet... create one below!"
         renderItem={(event) => <Event event={event} />}
-        renderOnEveryDay={false}
       />
       <Flex
         css={{
@@ -74,7 +73,6 @@ export const Events = () => {
           onChange={(e) => setNewEventValue(e.target.value)}
           css={{
             flex: 1,
-            fontSize: '1.2rem',
           }}
         />
         <Button

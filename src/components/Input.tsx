@@ -6,7 +6,6 @@ import { css, styled } from 'src/libs/styled'
 export const InputStyle = css({
   flex: 1,
   padding: '$controlPadding',
-  fontSize: '$control',
   borderRadius: '$control',
   borderColor: '$controlBorder',
   borderWidth: 1,

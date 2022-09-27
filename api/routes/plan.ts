@@ -78,6 +78,11 @@ export const planAggr: () => PipelineStage[] = () => [
       ],
     },
   },
+  {
+    $sort: {
+      'time.start.date': -1,
+    },
+  },
 ]
 
 router.get('/plan/:planId', async (req, res) => {
