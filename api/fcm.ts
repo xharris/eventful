@@ -40,6 +40,10 @@ export const messaging: Express.Request['fcm'] = {
       tokenChunks.map((tokens) =>
         instance.sendMulticast({
           ...data,
+          apns: {
+            ...data.apns,
+            // do i need 'content-available': 1 ?
+          },
           tokens,
         })
       )

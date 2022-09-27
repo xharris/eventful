@@ -18,13 +18,14 @@ interface IconProps extends Omit<ComponentProps<typeof Component>, 'square'> {
   size?: number
 }
 
-export const Icon = ({ icon, css, square, subtle, size, ...props }: IconProps) => (
+export const Icon = ({ icon, css, square, subtle, size, color, ...props }: IconProps) => (
   <Component
     css={{
       ...css,
       width: square === true ? 32 : square,
       height: square === true ? 32 : square,
       fontSize: size,
+      color,
       ...(square
         ? {
             display: 'flex',

@@ -53,7 +53,7 @@ basicTest.describe('Empty Plan - Who', () => {
 
     // u1 can remove u1 but not u2
     await user.login(u1)
-    await event.visit(e1)
+    await event.visit(e1, true)
     await plan.edit(p1)
     await expect(
       page.locator(

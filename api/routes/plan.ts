@@ -51,14 +51,10 @@ export const planNotify = async (
               key,
             },
             {
-              notification: {
+              general: {
                 title: `Plan ${desc} (${doc.event.name})`,
                 body: getTitle(doc),
-              },
-              webpush: {
-                fcmOptions: {
-                  link: `${req.get('host')}/e/${doc.event._id}`,
-                },
+                url: `${req.get('host')}/e/${doc.event._id}`,
               },
             }
           )
@@ -73,6 +69,18 @@ export const planAggr: () => PipelineStage[] = () => [
       localField: 'who',
       foreignField: '_id',
       as: 'who',
+      pipeline: [
+        {
+          $project: {
+            password: 0,
+          },
+        },
+      ],
+    },
+  },
+  {
+    $sort: {
+      'time.start.date': -1,
     },
   },
 ]

@@ -5,6 +5,15 @@ import { Eventful } from 'types'
 import session from 'express-session'
 import ConnectMongo from 'connect-mongodb-session'
 import { DATABASE_URI, IS_PRODUCTION } from 'api/config'
+import { cleanUser, limiter } from 'api/util'
+
+const rlimit = limiter({
+  windowMs: 2 * 60 * 1000,
+  max: 6,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many attempts. Try again later.',
+})
 
 const MongoDBStore = ConnectMongo(session)
 
@@ -52,7 +61,7 @@ const destroySession = (req: Request) => {
   req.session.destroy(console.log)
 }
 
-router.post('/signup', async (req, res) => {
+router.post('/signup', rlimit, async (req, res) => {
   if (!req.body.username || !req.body.password || !req.body.confirm_password) {
     return res.status(400).send('INVALID_INPUT')
   }
@@ -72,7 +81,7 @@ router.post('/signup', async (req, res) => {
   return res.status(200).send(docUser)
 })
 
-router.post('/login', async (req, res) => {
+router.post('/login', rlimit, async (req, res) => {
   if (!req.body.username || !req.body.password) {
     return res.status(400).send('INVALID_CREDS')
   }
@@ -84,6 +93,7 @@ router.post('/login', async (req, res) => {
     return res.status(401).send('INVALID_CREDS')
   }
   newSession(req, docUser, req.body.remember)
+  cleanUser(docUser)
   return res.status(200).send(docUser)
 })
 

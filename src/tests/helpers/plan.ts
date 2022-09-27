@@ -12,6 +12,7 @@ export class Plan {
   async create(type: 'Empty' | 'Lodging' | 'Carpool' | 'Location') {
     const { page } = this
 
+    await page.click('button[title="Add plan"]')
     await page.click(`text=${type}`)
   }
 
@@ -43,7 +44,12 @@ export class Plan {
     const { page } = this
 
     for (const user of users) {
-      await page.click('[data-testid="plan"] [data-testid="select"]')
+      await page.click('[data-testid="plan"] [data-testid="select"]', {
+        position: {
+          x: 2,
+          y: 2,
+        },
+      })
       await page.click(`.rs__menu-portal :text("${user.username}")`)
     }
   }

@@ -1,10 +1,18 @@
-import { contact, user, userSetting } from 'api/models'
-import express from 'express'
+import { contact, reminder, user, userSetting } from 'api/models'
+import { cleanUser } from 'api/util'
+import express, { Request, RequestHandler, Response } from 'express'
 import { Schema, Types } from 'mongoose'
 import { Eventful } from 'types'
 import { checkSession } from './auth'
 
 export const router = express.Router()
+
+const isMe: RequestHandler = (req, res, next) => {
+  if (req.params.userId !== req.session.user?._id.toString()) {
+    return res.sendStatus(401)
+  }
+  return next()
+}
 
 router.get('/user/:userId', async (req, res) => {
   // query by userid and username
@@ -20,13 +28,11 @@ router.get('/user/:userId', async (req, res) => {
   if (!docUser) {
     return res.sendStatus(404)
   }
+  cleanUser(docUser)
   return res.send(docUser)
 })
 
-router.get('/user/:userId/settings', checkSession, async (req, res) => {
-  if (req.params.userId !== req.session.user?._id.toString()) {
-    return res.sendStatus(401)
-  }
+router.get('/user/:userId/settings', checkSession, isMe, async (req, res) => {
   const docSettings = await userSetting.find({
     createdBy: new Types.ObjectId(req.params.userId),
   })
@@ -37,14 +43,51 @@ router.get('/user/:userId/settings', checkSession, async (req, res) => {
   return res.send(settings)
 })
 
-router.put('/user/:userId/settings', checkSession, async (req, res) => {
-  if (req.params.userId !== req.session.user?._id.toString()) {
-    return res.sendStatus(401)
-  }
+router.put('/user/:userId/settings', checkSession, isMe, async (req, res) => {
   for (const [key, value] of Object.entries(req.body as Eventful.API.SettingsEdit)) {
     await userSetting.updateOne({ key, createdBy: req.params.userId }, { value }, { upsert: true })
   }
   return res.sendStatus(200)
+})
+
+router.get('/user/:userId/reminders', checkSession, isMe, async (req, res) => {
+  const docs = await reminder.find({ createdBy: req.params.userId })
+  const unitOrder = ['m', 'h', 'd', 'w', 'M']
+  return res.send(
+    docs.sort((a, b) => {
+      if (a.unit === b.unit) {
+        return b.amount - a.amount
+      }
+      return unitOrder.findIndex((u) => u === b.unit) - unitOrder.findIndex((u) => u === a.unit)
+    })
+  )
+})
+
+// create
+router.post('/user/:userId/reminders', checkSession, isMe, async (req, res) => {
+  const doc = await reminder.create({ createdBy: req.params.userId })
+  return res.send(doc)
+})
+
+// update
+router.put('/user/:userId/reminders/:reminderId', checkSession, isMe, async (req, res) => {
+  const doc = await reminder.updateOne(
+    { createdBy: req.params.userId, _id: req.params.reminderId },
+    req.body
+  )
+  if (!doc.modifiedCount) {
+    return res.sendStatus(404)
+  }
+  return res.send(doc)
+})
+
+// delete
+router.delete('/user/:userId/reminders/:reminderId', checkSession, isMe, async (req, res) => {
+  const doc = await reminder.deleteOne({ createdBy: req.params.userId, _id: req.params.reminderId })
+  if (!doc.deletedCount) {
+    return res.sendStatus(404)
+  }
+  return res.send(doc)
 })
 
 router.get('/users/search/:username', checkSession, async (req, res) => {
@@ -55,6 +98,11 @@ router.get('/users/search/:username', checkSession, async (req, res) => {
           $regex: req.params.username,
           $options: 'i',
         },
+      },
+    },
+    {
+      $project: {
+        password: 0,
       },
     },
     {

@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { useReminderScheduler } from './eventfulLib/reminder'
 import { SessionProvider, useSession } from './eventfulLib/session'
 import { globalStyles } from './libs/styled'
 import { Auth } from './pages/Auth'
@@ -8,11 +9,16 @@ import { Events } from './pages/Events'
 import { Page } from './pages/Page'
 import { User } from './pages/User'
 import { UserSearch } from './pages/UserSearch'
+import * as Dialog from '@radix-ui/react-dialog'
+import './App.scss'
+
+localStorage.debug = 'eventful:*'
 
 const qc = new QueryClient()
 
 const Inner = () => {
   useSession(true)
+  useReminderScheduler()
   return null
 }
 

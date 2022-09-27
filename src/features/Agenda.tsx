@@ -1,10 +1,14 @@
 import { useFormik } from 'formik'
 import moment from 'moment'
-import { ReactNode, useEffect, useMemo } from 'react'
+import { ReactNode, useRef, useMemo, useState } from 'react'
 import { Checkbox } from 'src/components/Checkbox'
+import { Chip } from 'src/components/Chip'
 import { Flex } from 'src/components/Flex'
-import { H1, H2, H3, H4 } from 'src/components/Header'
+import { H1, H2, H3, H4, H5, H6 } from 'src/components/Typography'
+import { Icon } from 'src/components/Icon'
 import { Eventful } from 'types'
+import { FiCheck, FiList, FiMoreHorizontal, FiPlus } from 'react-icons/fi'
+import { Button } from 'src/components/Button'
 
 // TODO: show past days with less opacity
 
@@ -15,7 +19,10 @@ interface Item {
 }
 
 interface DayItems<I extends Item> {
+  key: string
   day: string
+  dayOfWeek: string
+  isOld: boolean
   items: I[]
 }
 
@@ -35,22 +42,12 @@ interface YearProps {
 
 const Year = ({ label }: YearProps) => (
   <Flex
-    flex="0"
     css={{
       alignItems: 'center',
+      justifyContent: 'flex-end',
     }}
   >
-    <Flex
-      css={{
-        borderBottom: '1px solid $disabled',
-      }}
-    />
-    <H3>{label}</H3>
-    <Flex
-      css={{
-        borderBottom: '1px solid $disabled',
-      }}
-    />
+    <H2>{label}</H2>
   </Flex>
 )
 
@@ -62,35 +59,56 @@ interface MonthProps<I extends Item> {
 
 const Month = <I extends Item = Item>({ label, days, renderItem }: MonthProps<I>) => (
   <Flex column flex="0" css={{ gap: '$small' }}>
-    <H3
+    <H4
       css={{
-        textAlign: 'center',
+        textAlign: 'right',
         color: '#616161',
         background: 'linear-gradient(to bottom, $background 90%, transparent)',
         zIndex: 10,
-        padding: '0.5rem 0',
+        // padding: '0.5rem 0',
         position: 'sticky',
         top: -2,
       }}
     >
       {label}
-    </H3>
+    </H4>
     <Flex column css={{ gap: '$small' }}>
       {days.map((day) => (
-        <Flex key={day.day} flex="0" css={{ position: 'relative', alignItems: 'flex-start' }}>
-          <H4
+        <Flex
+          key={day.key}
+          id={day.key}
+          flex="0"
+          css={{ position: 'relative', alignItems: 'flex-start' }}
+        >
+          <Flex
+            column
+            flex={0}
             css={{
-              color: '$disabled',
               position: 'sticky',
               left: 0,
               top: 0,
               padding: '0.25rem 0',
               minWidth: 35,
+              gap: 0,
+              alignItems: 'center',
             }}
           >
-            {day.day}
-          </H4>
-          <Flex column css={{ gap: '$small' }}>
+            <H5
+              css={{
+                color: '$disabled',
+              }}
+            >
+              {day.dayOfWeek}
+            </H5>
+            <H4
+              css={{
+                color: '$disabled',
+              }}
+            >
+              {day.day}
+            </H4>
+          </Flex>
+          <Flex column css={{ gap: 0, paddingTop: '$small', opacity: day.isOld ? 0.4 : 1 }}>
             {day.items.map((item) => (
               <Flex key={item._id.toString()}>{renderItem(item)}</Flex>
             ))}
@@ -104,30 +122,35 @@ const Month = <I extends Item = Item>({ label, days, renderItem }: MonthProps<I>
 
 interface AgendaOptions {
   tbd: boolean
+  view: 'notime' | 'agenda'
 }
 
 interface AgendaProps<I extends Item> {
   items?: I[]
-  noTimeHeader: string
+  noTimeHeader?: string
   noTimeSubheader?: string
   noItemsText?: string
   renderItem: (item: I) => ReactNode
   renderOnEveryDay?: boolean
   showYearSeparator?: boolean
+  onAdd?: () => void
 }
 
 export const Agenda = <I extends Item = Item>({
   items = [],
-  noTimeHeader,
-  noTimeSubheader,
+  noTimeHeader = 'TBD',
+  noTimeSubheader = '',
   noItemsText,
   renderItem,
   showYearSeparator = true,
   renderOnEveryDay = true,
+  onAdd,
 }: AgendaProps<I>) => {
-  const { values: options, handleChange } = useFormik<AgendaOptions>({
+  const [scrolled, setScrolled] = useState(false)
+  const { values: options, setFieldValue } = useFormik<AgendaOptions>({
     initialValues: {
       tbd: true,
+      view: 'agenda',
     },
     onSubmit: () => {},
   })
@@ -187,15 +210,21 @@ export const Agenda = <I extends Item = Item>({
             days: Object.entries(days)
               .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
               .map(([day, items]) => ({
+                key: `${year}-${month}-${day}`,
                 day,
+                dayOfWeek: moment(`${year}-${month}-${day}`, 'YYYY-MMMM-DD').format('ddd'),
+                isOld: moment(`${year}-${month}-${day}`, 'YYYY-MMMM-DD').isBefore(new Date()),
                 items,
               })),
           })),
       })) as YearItems<I>[]
   }, [items, renderOnEveryDay])
 
+  const refComponent = useRef<HTMLDivElement>(null)
+
   return (
     <Flex
+      ref={refComponent}
       column
       css={{
         padding: '2px 0px',
@@ -205,16 +234,47 @@ export const Agenda = <I extends Item = Item>({
       }}
     >
       {!!items.length && (
-        <Flex flex="0">
-          <Checkbox
-            name="tbd"
-            checked={options.tbd}
-            onChange={handleChange}
+        <Flex flex="0" style={{ justifyContent: 'space-between' }}>
+          <Flex flex="0" css={{ alignItems: 'center', gap: '$small' }}>
+            <Chip
+              onClick={() => setFieldValue('view', 'notime')}
+              clickable
+              selected={options.view === 'notime'}
+            >
+              <Icon icon={FiMoreHorizontal} />
+              <H6 style={{ whiteSpace: 'nowrap' }}>{`${noTimeHeader}${
+                !!tbdItems.items.length ? ` (${tbdItems.items.length})` : ''
+              }`}</H6>
+            </Chip>
+            <Chip
+              onClick={() => setFieldValue('view', 'agenda')}
+              clickable
+              selected={options.view === 'agenda'}
+            >
+              <Icon icon={FiList} />
+              <H6>Agenda</H6>
+            </Chip>
+          </Flex>
+          {onAdd && (
+            <Button variant="ghost" square={38} onClick={() => onAdd()}>
+              <FiPlus />
+            </Button>
+          )}
+          {/* <Checkbox
+            name="notime"
+            checked={options.view === 'notime'}
+            onChange={() => setFieldValue('view', 'notime')}
             label={`${noTimeHeader}${!!tbdItems.items.length ? ` (${tbdItems.items.length})` : ''}`}
           />
+          <Checkbox
+            name="agenda"
+            label="Agenda"
+            checked={options.view === 'agenda'}
+            onChange={() => setFieldValue('view', 'agenda')}
+          /> */}
         </Flex>
       )}
-      {options.tbd && !!tbdItems.items.length && (
+      {options.view === 'notime' && (
         <Flex
           column
           css={{
@@ -228,40 +288,49 @@ export const Agenda = <I extends Item = Item>({
           <Month label={noTimeHeader} days={[tbdItems]} renderItem={renderItem} />
         </Flex>
       )}
-      {!!items.length ? (
-        <Flex
-          column
-          css={{
-            flexGrow: 1,
-            flexShrink: 0,
-            padding: '2px 0px',
-            overflow: 'auto',
-            overflowX: 'hidden',
-            justifyContent: !items.length ? 'center' : 'flex-start',
-          }}
-        >
-          {datedItems.map((year) => (
-            <Flex key={year.year} column className="years" css={{ gap: '$small' }}>
-              {showYearSeparator && <Year label={year.year} />}
-              <Flex column className="months" css={{ gap: '$small' }}>
-                {year.months.map((month) => (
-                  <Month
-                    key={month.month}
-                    label={month.month}
-                    days={month.days}
-                    renderItem={renderItem}
-                  />
-                ))}
+      {
+        options.view === 'agenda' && (
+          <Flex
+            column
+            css={{
+              flexGrow: 1,
+              flexShrink: 0,
+              padding: '2px 0px',
+              overflow: 'auto',
+              overflowX: 'hidden',
+              justifyContent: !items.length ? 'center' : 'flex-start',
+            }}
+          >
+            {datedItems.map((year) => (
+              <Flex key={year.year} column className="years" css={{ gap: '$small' }}>
+                {showYearSeparator && <Year label={year.year} />}
+                <Flex column className="months" css={{ gap: '$small' }}>
+                  {year.months.map((month) => (
+                    <Month
+                      key={month.month}
+                      label={month.month}
+                      days={month.days}
+                      renderItem={renderItem}
+                    />
+                  ))}
+                </Flex>
               </Flex>
-            </Flex>
-          ))}
-          <Flex className="filler" fill />
-        </Flex>
-      ) : noItemsText ? (
-        <H1 css={{ color: '$disabled', fontStyle: 'italic', textAlign: 'center' }}>
-          {noItemsText}
-        </H1>
-      ) : null}
+            ))}
+            <Flex
+              className="filler"
+              css={{
+                width: '100%',
+                minHeight: refComponent.current?.getBoundingClientRect().height,
+              }}
+            />
+          </Flex>
+        )
+        //  : noItemsText ? (
+        //   <H1 css={{ color: '$disabled', fontStyle: 'italic', textAlign: 'center' }}>
+        //     {noItemsText}
+        //   </H1>
+        // ) : null
+      }
     </Flex>
   )
 }

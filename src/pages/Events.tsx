@@ -1,10 +1,11 @@
+import { useCallback } from 'react'
 import { Button, LinkButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { Input } from 'src/components/Input'
 import { useEvents } from 'src/eventfulLib/event'
 import { FiPlus } from 'react-icons/fi'
 import { useMemo, useState } from 'react'
-import { H1, H3, H4, H5 } from 'src/components/Header'
+import { H1, H2, H3, H4, H5, H6 } from 'src/components/Typography'
 import { Eventful } from 'types'
 import { useNavigate } from 'react-router-dom'
 import { Agenda } from 'src/features/Agenda'
@@ -23,9 +24,9 @@ const Event = ({ event }: { event: Eventful.API.EventGet }) => (
   >
     <Flex>
       <Flex css={{ alignItems: 'center' }}>
-        <H4 css={{ fontWeight: 600 }}>{event.name}</H4>
+        <H4 css={{ fontWeight: 600, textAlign: 'left' }}>{event.name}</H4>
         <H4>
-          <Time time={event.time} />
+          <Time time={event.time} timeOnly />
         </H4>
       </Flex>
       <AvatarGroup
@@ -47,15 +48,19 @@ export const Events = () => {
   const [rand] = useState(Math.floor(Math.random() * placeholders.length))
   const placeholder = useMemo(() => placeholders[rand], [rand])
 
+  const submit = useCallback(
+    () => createEvent({ name: newEventValue }).then((res) => navigate(`/e/${res.data._id}`)),
+    [newEventValue, navigate]
+  )
+
   return session ? (
     <Flex column fill css={{ gap: 0, overflow: 'hidden' }}>
       <Agenda
         items={events}
-        noTimeHeader="Still planning"
-        noTimeSubheader="TBD"
+        noTimeHeader="TBD"
+        // noTimeSubheader="TBD"
         noItemsText="No events yet... create one below!"
         renderItem={(event) => <Event event={event} />}
-        renderOnEveryDay={false}
       />
       <Flex
         css={{
@@ -74,16 +79,14 @@ export const Events = () => {
           onChange={(e) => setNewEventValue(e.target.value)}
           css={{
             flex: 1,
-            fontSize: '1.2rem',
           }}
+          onKeyDown={(e) => e.key.match(/enter/i) && submit()}
         />
         <Button
           variant="ghost"
           square={39}
           disabled={!newEventValue.length}
-          onClick={() =>
-            createEvent({ name: newEventValue }).then((res) => navigate(`/e/${res.data._id}`))
-          }
+          onClick={() => submit()}
           title="Add event"
         >
           <FiPlus />

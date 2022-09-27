@@ -3,6 +3,9 @@ import { useEffect } from 'react'
 import { Eventful } from 'types'
 // import config from '../google-services.json'
 import { api } from '../eventfulLib/api'
+import { logger } from 'src/eventfulLib/log'
+
+const log = logger.extend('lib/notification')
 
 // if (!firebase.apps.length) {
 //   firebase.initializeApp({
@@ -20,7 +23,19 @@ import { api } from '../eventfulLib/api'
 //   console.log(msg)
 // })
 
-export const requestPermission = () => Promise.resolve(false)
+export const requestPermission = async () => {
+  if (!('Notification' in window)) {
+    return false
+  }
+  if (Notification.permission === 'granted') {
+    return true
+  }
+  const perm = await Notification.requestPermission()
+  if (perm === 'granted') {
+    return true
+  }
+  return false
+}
 // messaging()
 //   .requestPermission()
 //   .then(
@@ -33,6 +48,22 @@ export const showLocalNotification = (payload: Eventful.NotificationPayload) =>
   new Notification(payload.notification?.title ?? '', {
     body: payload.notification?.body,
   })
+
+export const cancelAllScheduledNotifications = async () => {
+  // try {
+  //   const reg = await navigator.serviceWorker.getRegistration()
+  //   if (reg) {
+  //     const notifications = await reg.getNotifications()
+  //     notifications.forEach((notif) => notif.close())
+  //     log.info(`${notifications.length} notifications cancelled`)
+  //   }
+  //   log.info('nothing cancelled')
+  // } catch (e) {
+  //   log.error(e)
+  // }
+}
+
+export const scheduleNotification = async (notification: Eventful.LocalNotification) => {}
 
 export const useMessaging = () => {
   // useEffect(() => {

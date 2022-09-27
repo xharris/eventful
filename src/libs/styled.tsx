@@ -74,8 +74,30 @@ export const { styled, css, config, keyframes } = createStitches({
       inputBackground: '#EEEEEE',
       successFg: '#1B5E20',
       successBg: '#A5D6A7',
-      red: '#F44336',
       cardBg: '#ECEFF1',
+
+      /** primary: frequently used */
+      one: '#a9b9cc',
+      oneLight: '#dbebff',
+      oneDark: '#7a899b',
+      /** secondary */
+      two: '#42d4ec',
+      twoLight: '#82ffff',
+      twoDark: '#00a2ba',
+      oneVariant: '',
+      twoVariant: '',
+      bg: '#FAFAFA', // '#f6f6f6',
+      surf: '#FFFFFF',
+      err: '#B00020',
+      onOneLight: '#263238',
+      onOneDark: '#F5F5F5',
+      onTwoLight: '#212121',
+      onTwoDark: '#ECEFF1',
+      onBg: '#000000',
+      onSurf: '#000000',
+      onErr: '#FFFFFF',
+      // regular colors
+      red: '#F44336',
     },
     shadows: {
       none: '0px 0px 0px #BDBDBD',

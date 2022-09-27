@@ -7,8 +7,9 @@ import * as contact from './contact'
 import * as message from './message'
 import * as notificationSetting from './notificationSetting'
 import * as fcm from './fcm'
+import * as feedback from './feedback'
+import * as tag from './tag'
 import type { Eventful } from 'types'
-
 export const router = express.Router()
 
 router.get('/', (req, res) => {
@@ -24,7 +25,7 @@ const routes = (name: string, { route }: Eventful.API.RouteOptions) => {
   if (route.create) {
     router.post(`/${name}s/add`, checkSession, route.create)
   }
-  router.get(`/${name}/:${name}Id`, route.get)
+  router.get(`/${name}/:${name}Id`, checkSession, route.get)
   router.put(`/${name}/:${name}Id`, checkSession, route.update)
   router.delete(`/${name}/:${name}Id`, checkSession, route.delete)
 }
@@ -38,3 +39,5 @@ router.use(user.router)
 router.use(message.router)
 router.use(notificationSetting.router)
 router.use(fcm.router)
+router.use(feedback.router)
+router.use(tag.router)
