@@ -181,9 +181,13 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
                   options={whoOptions}
                   fixedUsers={whoFixed}
                   value={
-                    values.who?.map(
-                      (id) => whoAll.find((user2) => user2._id === id) as Eventful.User
-                    ) ?? []
+                    values.who?.reduce((arr, id) => {
+                      const user = whoAll.find((user2) => user2._id === id)
+                      if (user) {
+                        arr.push(user)
+                      }
+                      return arr
+                    }, [] as Eventful.User[]) ?? []
                   }
                   onChange={(users) =>
                     setFieldValue(

@@ -153,7 +153,7 @@ export const eventAggr: EventAggr = (user) => [
   {
     $set: {
       who: {
-        $setUnion: ['$who', ['$createdBy'], '$acccesses'],
+        $setUnion: ['$who', ['$createdBy'], '$accesses'],
       },
     },
   },
