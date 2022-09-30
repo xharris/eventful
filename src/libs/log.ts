@@ -20,3 +20,5 @@ export const logger: Logging = {
     }
   },
 }
+
+export const extend = logger.extend
