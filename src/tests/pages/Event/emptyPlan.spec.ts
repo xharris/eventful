@@ -27,7 +27,7 @@ basicTest.describe('Empty Plan - Who', () => {
     await expect(page.locator(`.rs__menu-portal :text("${u3.username}")`)).toBeVisible()
   })
 
-  basicTest.only("can't remove non-contacts/non-self", async ({ page, user, event, plan }) => {
+  basicTest("can't remove non-contacts/non-self", async ({ page, user, event, plan }) => {
     await user.addContact(u1)
     await user.addContact(u2)
     const e1 = await event.create()
