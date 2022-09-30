@@ -1,12 +1,13 @@
 import { event, plan, location, message } from 'api/models'
 import { PipelineStage, Types } from 'mongoose'
 import { Eventful } from 'types'
-import express from 'express'
+import express, { RequestHandler } from 'express'
 import { checkSession } from './auth'
 import { planAggr, planNotify } from './plan'
 
 // new Types.ObjectId(req.session.user?._id)
-export const eventAggr: (user?: Eventful.ID) => PipelineStage[] = (user) => [
+type EventAggr = (user?: Eventful.ID) => PipelineStage[]
+export const eventAggr: EventAggr = (user) => [
   {
     $lookup: {
       from: 'plans',
@@ -17,13 +18,55 @@ export const eventAggr: (user?: Eventful.ID) => PipelineStage[] = (user) => [
     },
   },
   {
+    $lookup: {
+      from: 'accesses',
+      localField: '_id',
+      foreignField: 'ref',
+      as: 'access',
+      pipeline: [
+        {
+          $match: {
+            $or: [
+              {
+                canView: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+  {
+    $unwind: {
+      path: '$access',
+      preserveNullAndEmptyArrays: true,
+    },
+  },
+  {
     $match: {
       $or: [
+        {
+          $and: [
+            {
+              private: {
+                $ne: true,
+              },
+            },
+            {
+              'access.canView': {
+                $ne: false,
+              },
+            },
+          ],
+        },
         {
           createdBy: new Types.ObjectId(user),
         },
         {
           'plans.who._id': new Types.ObjectId(user),
+        },
+        {
+          'access.canView': true,
         },
       ],
     },
@@ -82,10 +125,41 @@ export const eventAggr: (user?: Eventful.ID) => PipelineStage[] = (user) => [
     },
   },
   {
+    $lookup: {
+      from: 'accesses',
+      localField: '_id',
+      foreignField: 'ref',
+      as: 'accesses',
+      pipeline: [
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $unwind: '$user',
+        },
+        {
+          $replaceRoot: {
+            newRoot: '$user',
+          },
+        },
+      ],
+    },
+  },
+  {
     $set: {
       who: {
-        $setUnion: ['$who', ['$createdBy']],
+        $setUnion: ['$who', ['$createdBy'], '$acccesses'],
       },
+    },
+  },
+  {
+    $project: {
+      accesses: 0,
     },
   },
   {
@@ -104,6 +178,14 @@ export const eventAggr: (user?: Eventful.ID) => PipelineStage[] = (user) => [
     },
   },
   {
+    $lookup: {
+      from: 'tags',
+      localField: 'tags',
+      foreignField: '_id',
+      as: 'tags',
+    },
+  },
+  {
     $sort: {
       'time.start.date': 1,
     },
@@ -114,47 +196,16 @@ export const options: Eventful.API.RouteOptions = {
   route: {
     create: async (req, res) => {
       const docEvent = await event.create({
+        ...req.body,
         name: req.body.name ?? 'new event',
         createdBy: req.session.user?._id,
       })
       return res.send(docEvent)
     },
-    getAll: async (req, res) => {
-      /*
-        Get events...
-          - created by session user
-          - where plan.event == eventId && plan.who.includes(session user)
-          - where plan.event == eventId && plan.createdBy == session user
-      */
-      const docEvents: Eventful.API.EventGet[] = await event.aggregate(
-        eventAggr(req.session.user?._id)
-      )
-      return res.send(docEvents)
-    },
-    get: async (req, res) => {
-      const docEvents = await event.aggregate([
-        {
-          $match: {
-            _id: new Types.ObjectId(req.params.eventId),
-          },
-        },
-        ...eventAggr(req.session.user?._id),
-      ])
-      if (!docEvents.length) {
-        return res.sendStatus(404)
-      }
-      return res.send(docEvents[0])
-    },
     update: async (req, res) => {
-      const docEvent = await event.findByIdAndUpdate(
-        req.params.eventId,
-        {
-          name: req.body.name,
-        },
-        {
-          new: true,
-        }
-      )
+      const docEvent = await event.findByIdAndUpdate(req.params.eventId, req.body, {
+        new: true,
+      })
       return res.send(docEvent)
     },
     delete: async (req, res) => {
@@ -165,6 +216,32 @@ export const options: Eventful.API.RouteOptions = {
 }
 
 export const router = express.Router()
+
+const getall: RequestHandler = async (req, res) => {
+  const docEvents = await event.aggregate([...eventAggr(req.session.user?._id)])
+
+  if (!docEvents.length) {
+    return res.sendStatus(404)
+  }
+  return res.send(docEvents)
+}
+
+router.get('/event/:eventId', async (req, res) => {
+  const docEvents = await event.aggregate([
+    {
+      $match: {
+        _id: new Types.ObjectId(req.params.eventId),
+      },
+    },
+    ...eventAggr(req.session.user?._id),
+  ])
+  if (!docEvents.length) {
+    return res.sendStatus(404)
+  }
+  return res.send(docEvents[0])
+})
+
+router.route('/events').get(getall).post(getall)
 
 router.post<{ eventId: string }>('/event/:eventId/plans/add', checkSession, async (req, res) => {
   const docPlan = await plan.create({

@@ -41,7 +41,7 @@ export const messaging: Express.Request['fcm'] = {
         instance.sendMulticast({
           ...data,
           apns: {
-            ...data.apns,
+            ...data?.apns,
             // do i need 'content-available': 1 ?
           },
           tokens,

@@ -4,19 +4,19 @@ import { notificationSetting } from './models'
 export const router = Router()
 
 router.use((req, _, next) => {
-  const send: Request['notification']['send'] = async (setting, data) => {
+  const send: Request['notification']['send'] = async (setting, data = {}) => {
     data.data = {
       ...data.data,
       ...(req.session.user ? { createdBy: req.session.user._id.toString() } : {}),
     }
     data.notification = {
-      title: data.general.title,
-      body: data.general.body,
+      title: data.general?.title,
+      body: data.general?.body,
       ...data.notification,
     }
     data.webpush = {
       fcmOptions: {
-        link: data.general.url,
+        link: data.general?.url,
         ...data.webpush?.fcmOptions,
       },
       ...data.webpush,
