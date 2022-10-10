@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Button, LinkButton } from 'src/components/Button'
 import { Flex } from 'src/components/Flex'
 import { Input } from 'src/components/Input'
@@ -12,6 +12,7 @@ import { Agenda } from 'src/features/Agenda'
 import { useSession } from 'src/eventfulLib/session'
 import { Time } from 'src/components/Time'
 import { AvatarGroup } from 'src/components/Avatar'
+import moment from 'moment'
 
 const Event = ({ event }: { event: Eventful.API.EventGet }) => (
   <LinkButton
@@ -22,7 +23,16 @@ const Event = ({ event }: { event: Eventful.API.EventGet }) => (
     css={{ padding: '0.3rem', width: '100%' }}
     variant="ghost"
   >
-    <Flex>
+    <Flex
+      css={{
+        opacity:
+          event.time &&
+          event.time.start &&
+          moment(event.time.end?.date ?? event.time.start.date).isSameOrBefore(moment.now())
+            ? 0.4
+            : 1,
+      }}
+    >
       <Flex css={{ alignItems: 'center' }}>
         <H4 css={{ fontWeight: 600, textAlign: 'left' }}>{event.name}</H4>
         <H4>

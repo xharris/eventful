@@ -11,6 +11,7 @@ export default new Schema<Eventful.Access>(
     canDelete: Schema.Types.Boolean,
     canModerate: Schema.Types.Boolean,
     isInvited: Schema.Types.Boolean,
+    isRemoved: Schema.Types.Boolean,
     createdBy: { type: Schema.Types.ObjectId, ref: 'users', required: true },
   },
   { timestamps: true }

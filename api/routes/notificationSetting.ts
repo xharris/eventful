@@ -4,6 +4,7 @@ import { checkSession } from './auth'
 
 export const router = express.Router()
 
+// get all settings for a user
 router.get('/notifications/settings', checkSession, async (req, res) => {
   const docNotifSettings = await notificationSetting.find({
     createdBy: req.session.user?._id,
@@ -11,6 +12,7 @@ router.get('/notifications/settings', checkSession, async (req, res) => {
   return res.send(docNotifSettings)
 })
 
+// get settings for a source
 router.get('/notifications/:source/:sourceId', checkSession, async (req, res) => {
   const docNotifSettings = await notificationSetting.find({
     refModel: req.params.source,
@@ -20,6 +22,31 @@ router.get('/notifications/:source/:sourceId', checkSession, async (req, res) =>
   return res.send(docNotifSettings)
 })
 
+// enable global setting
+router.get('/notifications/:key/enable', checkSession, async (req, res) => {
+  const docNotifSetting = await notificationSetting.updateOne(
+    {
+      key: req.params.key,
+      createdBy: req.session.user?._id,
+    },
+    {},
+    {
+      upsert: true,
+    }
+  )
+  return res.send(docNotifSetting)
+})
+
+// disable global setting
+router.get('/notifications/:key/disable', async (req, res) => {
+  const docNotifSetting = await notificationSetting.deleteOne({
+    key: req.params.key,
+    createdBy: req.session.user?._id,
+  })
+  return res.send(docNotifSetting)
+})
+
+// enable setting for source
 router.get('/notifications/:source/:sourceId/:key/enable', checkSession, async (req, res) => {
   const docNotifSetting = await notificationSetting.updateOne(
     {
@@ -36,6 +63,7 @@ router.get('/notifications/:source/:sourceId/:key/enable', checkSession, async (
   return res.send(docNotifSetting)
 })
 
+// disable setting for source
 router.get('/notifications/:source/:sourceId/:key/disable', async (req, res) => {
   const docNotifSetting = await notificationSetting.deleteOne({
     key: req.params.key,
@@ -44,4 +72,30 @@ router.get('/notifications/:source/:sourceId/:key/disable', async (req, res) => 
     createdBy: req.session.user?._id,
   })
   return res.send(docNotifSetting)
+})
+
+// enable all setting for source
+router.get('/notifications/:source/:sourceId/enable', checkSession, async (req, res) => {
+  const docNotifSetting = await notificationSetting.updateOne(
+    {
+      key: req.params.key,
+      refModel: req.params.source,
+      ref: req.params.sourceId,
+      createdBy: req.session.user?._id,
+    },
+    {},
+    {
+      upsert: true,
+    }
+  )
+  return res.send(docNotifSetting)
+})
+
+// disable all setting for source
+router.get('/notifications/:source/:sourceId/disable', async (req, res) => {
+  const doc = await notificationSetting.deleteMany({
+    refModel: req.params.source,
+    ref: req.params.sourceId,
+    createdBy: req.session.user?._id,
+  })
 })

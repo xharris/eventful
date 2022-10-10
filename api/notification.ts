@@ -1,5 +1,5 @@
 import { Request, Router } from 'express'
-import { notificationSetting } from './models'
+import { notification, notificationSetting } from './models'
 
 export const router = Router()
 
@@ -9,11 +9,14 @@ router.use((req, _, next) => {
       ...data.data,
       ...(req.session.user ? { createdBy: req.session.user._id.toString() } : {}),
     }
-    data.notification = {
-      title: data.general?.title,
-      body: data.general?.body,
-      ...data.notification,
-    }
+    data.notification =
+      data.notification || data.general?.ui
+        ? {
+            title: data.general?.title,
+            body: data.general?.body,
+            ...data.notification,
+          }
+        : undefined
     data.webpush = {
       fcmOptions: {
         link: data.general?.url,

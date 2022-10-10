@@ -49,9 +49,9 @@ const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
 })
 app.use((req, _, next) => {
   req.io = io
-  req.fcm = messaging
   next()
 })
+app.use(messaging)
 app.use(notification.router)
 io.on('connection', (socket) => {
   socket.on('event:join', async (eventId, user) => {

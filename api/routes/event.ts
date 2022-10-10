@@ -44,6 +44,9 @@ export const eventAggr: EventAggr = (user) => [
   },
   {
     $match: {
+      'access.isRemoved': {
+        $in: [false, null],
+      },
       $or: [
         {
           $and: [
@@ -67,6 +70,9 @@ export const eventAggr: EventAggr = (user) => [
         },
         {
           'access.canView': true,
+        },
+        {
+          'access.isInvited': true,
         },
       ],
     },
@@ -137,6 +143,13 @@ export const eventAggr: EventAggr = (user) => [
             localField: 'user',
             foreignField: '_id',
             as: 'user',
+            pipeline: [
+              {
+                $project: {
+                  password: 0,
+                },
+              },
+            ],
           },
         },
         {
@@ -162,16 +175,48 @@ export const eventAggr: EventAggr = (user) => [
       accesses: 0,
     },
   },
+  // remove users that have 'isRemoved' access flag
   {
     $lookup: {
       from: 'users',
       localField: 'who',
       foreignField: '_id',
       as: 'who',
+      let: {
+        event: '$_id',
+      },
       pipeline: [
         {
           $project: {
             password: 0,
+          },
+        },
+        {
+          $lookup: {
+            from: 'accesses',
+            localField: '_id',
+            foreignField: 'user',
+            as: 'access',
+            pipeline: [
+              {
+                $match: {
+                  ref: '$$event',
+                },
+              },
+            ],
+          },
+        },
+        {
+          $unwind: {
+            path: '$access',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $match: {
+            'access.isRemoved': {
+              $in: [false, null],
+            },
           },
         },
       ],
@@ -218,11 +263,9 @@ export const options: Eventful.API.RouteOptions = {
 export const router = express.Router()
 
 const getall: RequestHandler = async (req, res) => {
+  // console.log(JSON.stringify(eventAggr(req.session.user?._id)))
   const docEvents = await event.aggregate([...eventAggr(req.session.user?._id)])
 
-  if (!docEvents.length) {
-    return res.sendStatus(404)
-  }
   return res.send(docEvents)
 }
 

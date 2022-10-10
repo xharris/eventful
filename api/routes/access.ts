@@ -1,4 +1,4 @@
-import { access } from 'api/models'
+import { access, event } from 'api/models'
 import { filterKeys } from 'api/util'
 import express from 'express'
 import { PipelineStage, Types } from 'mongoose'
@@ -58,14 +58,42 @@ router.get('/access/:userId', checkSession, async (req, res) => {
 })
 
 router.put('/access/:refModel/:refId/:userId', checkSession, async (req, res) => {
+  if (req.body.isRemoved) {
+    req.body.isInvited = false
+  } else if (req.body.isInvited) {
+    req.body.isRemoved = false
+  }
   const doc = await access.findOneAndUpdate(
     { user: req.params.userId, ref: req.params.refId, refModel: req.params.refModel },
     filterKeys(req.body, ['_id', 'createdAt', 'createdBy', 'ref', 'refModel', 'user']),
     { upsert: true, new: true }
   )
-  const transform = { tags: 'tag', events: 'event' }
-  if (doc.refModel in transform) {
-    req.io.to(`${transform[doc.refModel]}/${doc._id}`).emit('access:change', doc)
+  const transform = { tags: 'tag', events: 'event', users: 'user', plans: 'plan' }
+  if (doc.refModel && doc.refModel in transform) {
+    new Promise(async () => {
+      if (doc.refModel) {
+        req.io.to(`${transform[doc.refModel]}/${doc._id}`).emit('access:change', doc)
+      }
+      // notify: invited to event
+      if (doc.refModel === 'events' && req.body.isInvited) {
+        const docEvent = await event.findById(doc.ref)
+        req.notification.send(
+          {
+            key: 'access:change',
+            ref: doc._id,
+            refModel: req.params.refModel as Eventful.NotificationSetting['refModel'],
+          },
+          {
+            general: {
+              title: 'You have been invited',
+              body: docEvent?.name,
+              ui: true,
+              store: true,
+            },
+          }
+        )
+      }
+    })
   }
   return res.send(doc)
 })

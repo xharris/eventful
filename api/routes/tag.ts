@@ -5,6 +5,7 @@ import { PipelineStage, Types } from 'mongoose'
 import { Eventful } from 'types'
 import { checkSession } from './auth'
 import { eventAggr } from './event'
+import { pingAggr } from './ping'
 
 type TagAggr = (options: { user?: Eventful.ID }) => PipelineStage[]
 export const tagAggr: TagAggr = ({ user }) => [
@@ -92,6 +93,15 @@ export const tagAggr: TagAggr = ({ user }) => [
       foreignField: 'tags',
       as: 'events',
       pipeline: eventAggr(user) as PipelineStage.Lookup['$lookup']['pipeline'],
+    },
+  },
+  {
+    $lookup: {
+      from: 'pings',
+      localField: '_id',
+      foreignField: 'tags',
+      as: 'pings',
+      pipeline: pingAggr(user) as PipelineStage.Lookup['$lookup']['pipeline'],
     },
   },
 ]

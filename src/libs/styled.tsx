@@ -108,6 +108,110 @@ export const { styled, css, config, keyframes } = createStitches({
   },
 })
 
+export const spacing = {
+  small: 2, // large (5)
+  normal: 5, // large (10)
+  container: 10, // large (15)
+  inputPadding: 8,
+  controlPadding: 10,
+}
+
+export const radius = {
+  normal: 5,
+  large: 10,
+}
+
+export const c = {
+  /** primary: frequently used */
+  one: '#a9b9cc',
+  oneLight: '#dbebff',
+  oneDark: '#7a899b',
+  /** secondary */
+  twoLight: '#80DEEA', // '#4DD0E1',
+  two: '#81D4FA', // '#4FC3F7',
+  twoDark: '#90CAF9', // '#42A5F5',
+  oneVariant: '#42d4ec',
+  twoVariant: '',
+  bg: '#FAFAFA', // '#f6f6f6',
+  surf: '#FFFFFF',
+  err: '#B00020',
+  onOneLight: '#263238',
+  onOneDark: '#F5F5F5',
+  onTwoLight: '#212121',
+  onTwoDark: '#ECEFF1',
+  onBg: '#000000',
+  onSurf: '#000000',
+  onErr: '#FFFFFF',
+  // regular colors
+  red: '#F44336',
+}
+
+const s = {
+  flx_r: {
+    flexDirection: 'row',
+  },
+  flx_c: {
+    flexDirection: 'column',
+  },
+  flx_rr: {
+    flexDirection: 'row-reverse',
+  },
+  flx_cr: {
+    flexDirection: 'column-reverse',
+  },
+  flx_0: {
+    flex: 0,
+  },
+  flx_1: {
+    flex: 1,
+  },
+  flx_2: {
+    flex: 2,
+  },
+  flx_3: {
+    flex: 3,
+  },
+  ais: { alignItems: 'stretch' },
+  aifs: { alignItems: 'flex-start' },
+  aic: { alignItems: 'center' },
+  aife: { alignItems: 'flex-end' },
+  jcc: { justifyContent: 'center' },
+  jcfs: { justifyContent: 'flex-start' },
+  jcfe: { justifyContent: 'flex-end' },
+  jcsb: { justifyContent: 'space-between' },
+  jcsa: { justifyContent: 'space-around' },
+  asfs: { alignSelf: 'flex-start' },
+  asfe: { alignSelf: 'flex-end' },
+  asc: { alignSelf: 'center' },
+  ass: { alignSelf: 'stretch' },
+  acsb: { alignContent: 'space-between' },
+  /** container */
+  c: {
+    padding: spacing.container,
+    borderRadius: radius.normal,
+  },
+  surf: {
+    padding: spacing.container,
+    borderRadius: radius.normal,
+    backgroundColor: c.surf,
+  },
+  ctrl: {
+    padding: spacing.controlPadding,
+    borderRadius: radius.normal,
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+}
+
+export const cls = (...names: (keyof typeof s)[]) => ''
+// names.reduce((out, name) =>
+//   [
+//     ...out,
+//     s[name]
+//   ]
+// , []).join(' ')
+
 interface UseMediaQueryProps {
   /** false if size is at or below minSize */
   minSize?: keyof typeof MEDIA

@@ -1,5 +1,6 @@
+import { RequestHandler } from 'express'
 import admin from 'firebase-admin'
-import { fcmToken, notificationSetting } from './models'
+import { fcmToken, notification, notificationSetting } from './models'
 
 admin.initializeApp({
   credential: admin.credential.cert({
@@ -17,41 +18,66 @@ const chunkArray = <T>(arr: T[], size: number) =>
 
 const instance = admin.messaging()
 
-export const messaging: Express.Request['fcm'] = {
-  messaging: instance,
-  send: async (setting, data) => {
-    // get all users subscribed to this notification type (notificationSettings)
-    const docNotifSettings = await notificationSetting.find(setting)
-    const users = docNotifSettings.map((ns) => ns.createdBy)
-    // get all device tokens (fcmTokens)
-    const docFcmTokens = await fcmToken.find({
-      createdBy: { $in: users },
-    })
-    const tokenChunks = chunkArray(
-      docFcmTokens.map((doc) => doc.token),
-      500
-    )
-    // send message
-    console.log(
-      'FCM',
-      `${setting.refModel}/${setting.key} (id=${setting.ref}, users=${users.length}, tokens=${docFcmTokens.length}, chunks=${tokenChunks.length})`
-    )
-    return Promise.all(
-      tokenChunks.map((tokens) =>
-        instance.sendMulticast({
-          ...data,
-          apns: {
-            ...data?.apns,
-            // do i need 'content-available': 1 ?
+export const messaging: RequestHandler = (req, res, next) => {
+  req.fcm = {
+    send: async (setting, data) => {
+      // get all users subscribed to this notification type (notificationSettings)
+      const docNotifSettings = await notificationSetting.find({
+        $or: [
+          setting,
+          {
+            key: setting.key,
+            ref: null,
+            refModel: null,
           },
-          tokens,
-        })
+          {
+            key: null,
+            ref: setting.ref,
+            refModel: setting.refModel,
+          },
+        ],
+      })
+      const users = new Set(docNotifSettings.map((ns) => ns.createdBy))
+      if (data?.general?.store) {
+        users.forEach((user) =>
+          notification.create({
+            ...data.general,
+            user,
+            createdBy: req.session.user?._id,
+          })
+        )
+      }
+      // get all device tokens (fcmTokens)
+      const docFcmTokens = await fcmToken.find({
+        createdBy: { $in: users },
+      })
+      const tokenChunks = chunkArray(
+        docFcmTokens.map((doc) => doc.token),
+        500
       )
-    )
-  },
-  addToken: async (token, user) =>
-    await fcmToken.create({
-      token,
-      createdBy: user,
-    }),
+      // send message
+      console.log(
+        'FCM',
+        `${setting.refModel}/${setting.key} (id=${setting.ref}, users=${users.size}, tokens=${docFcmTokens.length}, chunks=${tokenChunks.length})`
+      )
+      return Promise.all(
+        tokenChunks.map((tokens) =>
+          instance.sendMulticast({
+            ...data,
+            apns: {
+              ...data?.apns,
+              // do i need 'content-available': 1 ?
+            },
+            tokens,
+          })
+        )
+      )
+    },
+    addToken: async (token, user) =>
+      await fcmToken.create({
+        token,
+        createdBy: user,
+      }),
+  }
+  next()
 }
