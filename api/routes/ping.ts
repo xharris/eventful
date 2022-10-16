@@ -124,6 +124,30 @@ router.get('/pings', checkSession, async (req, res) => {
 })
 
 router.post('/pings', checkSession, async (req, res) => {
+  let aggr = pingAggr(req.session.user?._id)
+  if (req.body.afterTime) {
+    aggr.push({
+      $match: {
+        createdAt: {
+          $gte: new Date(req.body.afterTime),
+        },
+      },
+    })
+  }
+  if (req.body.beforeTime) {
+    aggr.push({
+      $match: {
+        createdAt: {
+          $lte: new Date(req.body.beforeTime),
+        },
+      },
+    })
+  }
+  const docs = await ping.aggregate(aggr)
+  return res.send(docs)
+})
+
+router.post('/pings/add', checkSession, async (req, res) => {
   const doc = await ping.create({
     ...req.body,
     createdBy: req.session.user?._id,
