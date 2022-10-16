@@ -68,7 +68,7 @@ router.put('/access/:refModel/:refId/:userId', checkSession, async (req, res) =>
     filterKeys(req.body, ['_id', 'createdAt', 'createdBy', 'ref', 'refModel', 'user']),
     { upsert: true, new: true }
   )
-  const transform = { tags: 'tag', events: 'event', users: 'user', plans: 'plan' }
+  const transform = { tags: 'tag', events: 'event', users: 'user', plans: 'plan', pings: 'ping' }
   if (doc.refModel && doc.refModel in transform) {
     new Promise(async () => {
       if (doc.refModel) {

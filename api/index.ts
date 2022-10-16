@@ -18,12 +18,24 @@ import { limiter } from './util'
 
 const app = express()
 // middleware
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-  })
-)
+const allowedOrigins = [
+  'capacitor://localhost',
+  'ionic://localhost',
+  'http://localhost',
+  'http://localhost:8080',
+  'http://localhost:8100',
+]
+const corsOptions: Parameters<typeof cors>['0'] = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Origin not allowed by CORS'))
+    }
+  },
+  credentials: true,
+}
+app.use(cors(corsOptions))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(
@@ -42,10 +54,7 @@ mongoose
 // socket
 const server = http.createServer(app)
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
-  cors: {
-    origin: true,
-    credentials: true,
-  },
+  cors: corsOptions,
 })
 app.use((req, _, next) => {
   req.io = io

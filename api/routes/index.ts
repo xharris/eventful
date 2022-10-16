@@ -11,6 +11,7 @@ import * as feedback from './feedback'
 import * as tag from './tag'
 import * as access from './access'
 import * as ping from './ping'
+import * as inviteLink from './inviteLink'
 import type { Eventful } from 'types'
 export const router = express.Router()
 
@@ -47,3 +48,4 @@ router.use(feedback.router)
 router.use(tag.router)
 router.use(access.router)
 router.use(ping.router)
+router.use(inviteLink.router)

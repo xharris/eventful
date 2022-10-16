@@ -82,7 +82,7 @@ export const tagAggr: TagAggr = ({ user }) => [
   {
     $set: {
       users: {
-        $concatArrays: ['$users', ['$createdBy']],
+        $setUnion: ['$users', ['$createdBy']],
       },
     },
   },

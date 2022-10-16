@@ -37,7 +37,7 @@ export const messaging: RequestHandler = (req, res, next) => {
           },
         ],
       })
-      const users = new Set(docNotifSettings.map((ns) => ns.createdBy))
+      const users = new Set(setting.users ?? docNotifSettings.map((ns) => ns.createdBy))
       if (data?.general?.store) {
         users.forEach((user) =>
           notification.create({

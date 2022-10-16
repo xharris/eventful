@@ -25,6 +25,14 @@ req.notification.send(
 )
 ```
 
+**Android notification anatomy**
+
+```
+[smallicon] App Name - Time stamp
+Title                               Large
+Text                                Icon
+```
+
 ### Sending a live update (no notification)
 
 ```js

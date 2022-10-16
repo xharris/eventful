@@ -1,16 +1,63 @@
 import { contact } from 'api/models'
 import express from 'express'
+import { Types } from 'mongoose'
+import { Eventful } from 'types'
 import { checkSession } from './auth'
 
 export const router = express.Router()
 
-router.get('/contacts', checkSession, async (req, res) => {
-  const docContacts = await contact
-    .find({
-      createdBy: req.session.user?._id,
-    })
-    .populate('user')
-  return res.send(docContacts.map((contact) => contact.user))
+router.get('/contacts/:userId', checkSession, async (req, res) => {
+  const docContacts = await contact.aggregate([
+    {
+      $match: {
+        $or: [
+          {
+            createdBy: new Types.ObjectId(req.params.userId),
+          },
+          {
+            user: new Types.ObjectId(req.params.userId),
+          },
+        ],
+      },
+    },
+    {
+      $set: {
+        user: {
+          $cond: [
+            {
+              $eq: ['$createdBy', new Types.ObjectId(req.params.userId)],
+            },
+            '$user',
+            '$createdBy',
+          ],
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'user',
+        foreignField: '_id',
+        as: 'user',
+      },
+    },
+    {
+      $unwind: {
+        path: '$user',
+      },
+    },
+    {
+      $unwind: {
+        path: '$user',
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: '$user',
+      },
+    },
+  ])
+  return res.send(docContacts)
 })
 
 router.post('/contact/add/:otherUserId', checkSession, async (req, res) => {

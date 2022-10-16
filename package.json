@@ -22,7 +22,8 @@
     "dev": "cross-env DEBUG=eventful:* concurrently -n api,web \"yarn run dev:api\" \"yarn run dev:web\"",
     "dev:api": "cross-env PORT=3000 yarn run api",
     "dev:web": "cross-env PORT=3001 yarn run rs:start",
-    "deploy": "flyctl deploy --no-cache"
+    "deploy": "flyctl deploy --no-cache",
+    "tunnel": "../ngrok http 3000"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.0",
