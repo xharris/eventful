@@ -4,6 +4,9 @@ import { RequestHandler } from 'express'
 
 export const cleanUser = (user: Eventful.User) => {
   delete (user as Partial<Eventful.User>).password
+  delete (user as Partial<Eventful.User>).deviceId
+  delete (user as Partial<Eventful.User>).method
+  return user
 }
 
 export const limiter = (...props: Parameters<typeof ratelimit>) => {

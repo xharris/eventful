@@ -92,7 +92,7 @@ router.post('/signup', rlimit, async (req, res) => {
     deviceId: rnd(30, rnd.alphaUpper, rnd.num),
   })
   newSession(req, docUser, req.body.remember)
-  return res.status(200).send(docUser)
+  return res.status(200).send(cleanUser(docUser))
 })
 
 router.post('/login', rlimit, async (req, res) => {
@@ -107,8 +107,7 @@ router.post('/login', rlimit, async (req, res) => {
     return res.status(401).send('INVALID_CREDS')
   }
   newSession(req, docUser, req.body.remember)
-  cleanUser(docUser)
-  return res.status(200).send(docUser)
+  return res.status(200).send(cleanUser(docUser))
 })
 
 router.get('/logout', (req, res) => {
@@ -116,6 +115,6 @@ router.get('/logout', (req, res) => {
   res.sendStatus(200)
 })
 
-router.get('/auth', checkSession, (req, res) => res.send(req.session.user))
+router.get('/auth', checkSession, (req, res) => res.send(cleanUser(req.session.user!)))
 
 export default router

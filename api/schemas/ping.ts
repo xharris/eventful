@@ -9,7 +9,7 @@ export default new Schema<Eventful.Ping>(
     tags: { type: [Schema.Types.ObjectId], ref: 'tags', required: true },
     location: { type: location, required: true },
     time: Date,
-    scope: String,
+    scope: { type: String, default: 'contacts' },
     createdBy: { type: Schema.Types.ObjectId, ref: 'users', required: true },
   },
   { timestamps: true }

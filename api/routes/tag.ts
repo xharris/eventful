@@ -104,6 +104,11 @@ export const tagAggr: TagAggr = ({ user }) => [
       pipeline: pingAggr(user) as PipelineStage.Lookup['$lookup']['pipeline'],
     },
   },
+  {
+    $match: {
+      'users._id': new Types.ObjectId(user),
+    },
+  },
 ]
 
 export const router = express.Router()

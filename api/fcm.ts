@@ -48,26 +48,44 @@ export const messaging: RequestHandler = (req, res, next) => {
         )
       }
       // get all device tokens (fcmTokens)
-      const docFcmTokens = await fcmToken.find({
-        createdBy: { $in: users },
-      })
+      const docFcmTokens = await fcmToken
+        .find({
+          createdBy: { $in: Array.from(users).filter((id) => id !== req.session.user?._id) },
+        })
+        .exec()
       const tokenChunks = chunkArray(
         docFcmTokens.map((doc) => doc.token),
         500
       )
       // send message
+      const payload = {
+        ...data,
+        general: undefined,
+        apns: {
+          ...data?.apns,
+          payload: {
+            ...data?.apns?.payload,
+            aps: {
+              ...data?.apns?.payload?.aps,
+              contentAvailable: true,
+            },
+          },
+          headers: {
+            ...data?.apns?.headers,
+            'apns-push-type': 'background',
+            'apns-topic': 'pingrn',
+          },
+        },
+      }
       console.log(
         'FCM',
-        `${setting.refModel}/${setting.key} (id=${setting.ref}, users=${users.size}, tokens=${docFcmTokens.length}, chunks=${tokenChunks.length})`
+        `${setting.refModel}/${setting.key} (id=${setting.ref}, users=${users.size}, tokens=${docFcmTokens.length}, chunks=${tokenChunks.length})`,
+        payload
       )
       return Promise.all(
         tokenChunks.map((tokens) =>
           instance.sendMulticast({
-            ...data,
-            apns: {
-              ...data?.apns,
-              // do i need 'content-available': 1 ?
-            },
+            ...payload,
             tokens,
           })
         )

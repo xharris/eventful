@@ -5,6 +5,7 @@ import { PipelineStage, Types } from 'mongoose'
 import { Eventful } from 'types'
 import { checkSession } from './auth'
 import { tagAggr } from './tag'
+import { cleanSensitive } from './user'
 
 export const router = express.Router()
 
@@ -100,6 +101,7 @@ export const pingAggr: PingAggr = (user) => [
       localField: 'createdBy',
       foreignField: '_id',
       as: 'createdBy',
+      pipeline: [cleanSensitive()],
     },
   },
   {
@@ -153,26 +155,25 @@ router.post('/pings/add', checkSession, async (req, res) => {
     createdBy: req.session.user?._id,
   })
   let users: Eventful.ID[] = []
+
   // get tags
-  users.concat(
-    (
-      await tag.aggregate([
-        ...tagAggr({
-          user: req.session.user?._id,
-        }),
-        {
-          $match: {
-            _id: {
-              $in: doc.tags,
-            },
-          },
+  const tags = await tag.aggregate([
+    ...tagAggr({
+      user: req.session.user?._id,
+    }),
+    {
+      $match: {
+        _id: {
+          $in: doc.tags,
         },
-      ])
-    ).map((tag) => tag._id)
-  )
+      },
+    },
+  ])
+  users = users.concat(tags.map((tag) => tag._id))
+
   // get contacts
   if (doc.scope === 'contacts') {
-    users.concat(
+    users = users.concat(
       (
         await contact.find({
           $or: [
@@ -185,7 +186,7 @@ router.post('/pings/add', checkSession, async (req, res) => {
           ],
         })
       ).map((docContact) =>
-        docContact.user === req.session.user?._id ? docContact.createdBy : docContact.user
+        docContact.createdBy === req.session.user?._id ? docContact.user : docContact.createdBy
       )
     )
   }
@@ -198,16 +199,55 @@ router.post('/pings/add', checkSession, async (req, res) => {
     },
     {
       general: {
-        title: req.body.title,
-        body: [doc.scope && doc.scope !== 'me' ? PING_SCOPE[doc.scope] : null]
+        id: doc._id.toString(),
+        title: doc.label,
+        subtitle: [doc.scope && doc.scope !== 'me' ? PING_SCOPE[doc.scope] : null]
           .filter((s) => !!s)
           .map((s) => `#${s}`)
           .join(' '),
+        body: doc,
+        category: doc.type,
         ui: true,
       },
     }
   )
+
+  ping
+    .aggregate([
+      ...pingAggr(req.session.user?._id),
+      {
+        $match: {
+          _id: doc._id,
+        },
+      },
+    ])
+    .then((docs) => {
+      if (docs[0]) {
+        console.log('logged in as', req.session.user?.username)
+        console.log('to', `user/${doc.createdBy}`)
+        req.io.to(`user/${doc.createdBy}`).emit('ping:add', docs[0])
+        tags.forEach((tag) => {
+          req.io.to(`tag/${tag._id}`).emit('ping:add', docs[0])
+        })
+      }
+    })
+
   return res.send(doc)
+})
+
+router.get('/pings/:pingId', checkSession, async (req, res) => {
+  const docs = await ping.aggregate([
+    ...pingAggr(req.session.user?._id),
+    {
+      $match: {
+        _id: new Types.ObjectId(req.params.pingId),
+      },
+    },
+  ])
+  if (!docs[0]) {
+    return res.sendStatus(404)
+  }
+  return res.send(docs[0])
 })
 
 router.delete('/pings/:pingId', checkSession, async (req, res) => {
@@ -215,5 +255,8 @@ router.delete('/pings/:pingId', checkSession, async (req, res) => {
   if (!doc.deletedCount) {
     return res.sendStatus(404)
   }
+
+  req.io.emit('ping:delete', req.params.pingId)
+
   return res.send(doc)
 })
