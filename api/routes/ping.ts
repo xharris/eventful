@@ -130,18 +130,36 @@ router.post('/pings', checkSession, async (req, res) => {
   if (req.body.afterTime) {
     aggr.push({
       $match: {
-        createdAt: {
-          $gte: new Date(req.body.afterTime),
-        },
+        $or: [
+          {
+            time: {
+              $gte: new Date(req.body.afterTime),
+            },
+          },
+          {
+            createdAt: {
+              $gte: new Date(req.body.afterTime),
+            },
+          },
+        ],
       },
     })
   }
   if (req.body.beforeTime) {
     aggr.push({
       $match: {
-        createdAt: {
-          $lte: new Date(req.body.beforeTime),
-        },
+        $or: [
+          {
+            time: {
+              $lte: new Date(req.body.beforeTime),
+            },
+          },
+          {
+            createdAt: {
+              $lte: new Date(req.body.beforeTime),
+            },
+          },
+        ],
       },
     })
   }
