@@ -2,28 +2,42 @@ import 'dotenv/config'
 import express from 'express'
 import bodyParser from 'body-parser'
 import { router } from './routes'
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import cors from 'cors'
 import morgan from 'morgan'
 import path from 'path'
 import { Server } from 'socket.io'
 import http from 'http'
-import { ClientToServerEvents, ServerToClientEvents } from 'types'
-import { event } from './models'
+import { ClientToServerEvents, Eventful, ServerToClientEvents } from 'types'
+import { contact, event, tag } from './models'
 import { eventAggr } from './routes/event'
 import { messaging } from './fcm'
 import * as notification from './notification'
 import { PORT, DATABASE_URI } from './config'
 import { limiter } from './util'
+import { tagAggr } from './routes/tag'
 
 const app = express()
 // middleware
-app.use(
-  cors({
-    origin: true,
-    credentials: true,
-  })
-)
+const allowedOrigins = [
+  'capacitor://localhost',
+  'ionic://localhost',
+  'http://localhost',
+  'http://localhost:3001',
+  'http://localhost:8080',
+  'http://localhost:8100',
+]
+const corsOptions: Parameters<typeof cors>['0'] = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      callback(new Error('Origin not allowed by CORS'))
+    }
+  },
+  credentials: true,
+}
+app.use(cors(corsOptions))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(
@@ -42,18 +56,22 @@ mongoose
 // socket
 const server = http.createServer(app)
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
-  cors: {
-    origin: true,
-    credentials: true,
-  },
+  cors: corsOptions,
 })
 app.use((req, _, next) => {
   req.io = io
-  req.fcm = messaging
   next()
 })
+app.use(messaging)
 app.use(notification.router)
 io.on('connection', (socket) => {
+  const logJoined = (user: Eventful.ID | null, roomType: string | null, roomId: Eventful.ID) =>
+    console.log(
+      `${socket.id} ${user ? `(${user})` : ''} join ${roomType ? `${roomType}/` : ''}${roomId}`
+    )
+  const logLeft = (roomType: string, roomId?: Eventful.ID) =>
+    console.log(`${socket.id} left ${roomType}${roomId ? `/${roomId}` : ''}`)
+
   socket.on('event:join', async (eventId, user) => {
     if (!eventId && !user) return
     const docEvent = await event.aggregate([
@@ -65,25 +83,67 @@ io.on('connection', (socket) => {
       ...eventAggr(user),
     ])
     if (docEvent) {
-      console.log(socket.id, 'join', `event/${eventId}`)
+      logJoined(user, 'event', eventId)
       socket.join(`event/${eventId}`)
     }
   })
+  socket.on('event:leave', (eventId) => {
+    if (!eventId || !socket.rooms.has(`event/${eventId}`)) return
+    console.log(socket.id, 'leaves', `event/${eventId}`)
+    logLeft('event', eventId)
+  })
   socket.on('room:join', async ({ key, ref, refModel }) => {
     const roomid = `${refModel}:${key}/${ref}`
-    console.log(socket.id, 'join', roomid)
+    logJoined(null, null, roomid)
     socket.join(roomid)
   })
   socket.on('room:leave', ({ key, ref, refModel }) => {
     const roomid = `${refModel}:${key}/${ref}`
     if (!socket.rooms.has(roomid)) return
-    console.log(socket.id, 'leaves', roomid)
+    logLeft(roomid)
     socket.leave(roomid)
   })
-  socket.on('event:leave', (eventId) => {
-    if (!eventId || !socket.rooms.has(`event/${eventId}`)) return
-    console.log(socket.id, 'leaves', `event/${eventId}`)
-    socket.leave(`event/${eventId}`)
+  socket.on('user:join', async (user) => {
+    // get user's contacts
+    const docs = await contact.find({
+      $or: [
+        {
+          user: user,
+        },
+        {
+          createdBy: user,
+        },
+      ],
+    })
+    docs.forEach((doc) => {
+      const other = doc.user.toString() === user.toString() ? doc.createdBy : doc.user
+      logJoined(user, 'user', other)
+      socket.join(`user/${other}`)
+    })
+  })
+  socket.on('user:leave', () => {
+    socket.rooms.forEach((key) => {
+      if (key.startsWith('user/')) {
+        logLeft(key)
+        socket.leave(key)
+      }
+    })
+  })
+  socket.on('tag:join', async (user) => {
+    // get user's tag memberships
+    const docs = await tag.aggregate(tagAggr({ user }))
+    docs.forEach((doc) => {
+      logJoined(user, 'tag', doc._id)
+      socket.join(`tag/${doc._id}`)
+    })
+  })
+  socket.on('tag:leave', () => {
+    socket.rooms.forEach((key) => {
+      if (key.startsWith('tag/')) {
+        logLeft(key)
+        socket.leave(key)
+      }
+    })
   })
 })
 // routes

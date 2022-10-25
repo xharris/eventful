@@ -1,22 +1,37 @@
 import { Request, Router } from 'express'
-import { notificationSetting } from './models'
 
 export const router = Router()
 
 router.use((req, _, next) => {
-  const send: Request['notification']['send'] = async (setting, data) => {
+  const send: Request['notification']['send'] = async (setting, data = {}) => {
     data.data = {
       ...data.data,
-      ...(req.session.user ? { createdBy: req.session.user._id.toString() } : {}),
+      title: data.general?.title ?? '',
+      message: data.general?.subtitle ?? '',
+      body: data.general?.body ? JSON.stringify(data.general?.body) : '',
     }
-    data.notification = {
-      title: data.general.title,
-      body: data.general.body,
-      ...data.notification,
+    if (data.general?.ui) {
+      data.data = {
+        ...data.data,
+        experienceId: `@xhh950/ping`,
+        scopeKey: '@xhh950/ping',
+        categoryId: data.general.category ?? 'app',
+      }
     }
+    if (data.general?.id) {
+      data.data.id = data.general.id
+    }
+    // data.notification =
+    //   data.notification || data.general?.ui
+    //     ? {
+    //         title: data.general?.title,
+    //         body: data.general?.body,
+    //         ...data.notification,
+    //       }
+    //     : undefined
     data.webpush = {
       fcmOptions: {
-        link: data.general.url,
+        link: data.general?.url,
         ...data.webpush?.fcmOptions,
       },
       ...data.webpush,

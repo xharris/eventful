@@ -7,6 +7,14 @@ import { checkSession } from './auth'
 
 export const router = express.Router()
 
+export const cleanSensitive = () => ({
+  $project: {
+    password: 0,
+    deviceId: 0,
+    method: 0,
+  },
+})
+
 const isMe: RequestHandler = (req, res, next) => {
   if (req.params.userId !== req.session.user?._id.toString()) {
     return res.sendStatus(401)

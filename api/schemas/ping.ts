@@ -1,11 +1,15 @@
 import { Schema } from 'mongoose'
 import type { Eventful } from 'types'
+import location from './location'
 
-export default new Schema<Eventful.Event>(
+export default new Schema<Eventful.Ping>(
   {
-    name: { type: String, required: true },
-    private: Schema.Types.Boolean,
+    type: { type: String, required: true },
+    label: String,
     tags: { type: [Schema.Types.ObjectId], ref: 'tags', required: true },
+    location: { type: location, required: true },
+    time: Date,
+    scope: { type: String, default: 'contacts' },
     createdBy: { type: Schema.Types.ObjectId, ref: 'users', required: true },
   },
   { timestamps: true }

@@ -16,7 +16,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
-    "sourceMap": true
+    "sourceMap": true,
+    "downlevelIteration": true
   },
   "include": ["**/*.js", "**/*.ts", "**/*.jsx", "**/*.tsx", "**/*.d.ts"],
   "files": [],

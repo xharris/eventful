@@ -4,6 +4,13 @@
   - locations + start/end dates/times
   - who is participating
 
+# Problems to solve
+
+- No account needed (nickname prompt, use code to transfer 'account' to another device)
+- I don’t want to have to create an account for your app.
+- I don’t want to have to add my friends.
+- You get the idea: I just want to send out an invite and get no response from you.
+
 # ToDo
 
 - adding another contact

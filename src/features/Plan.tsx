@@ -20,33 +20,36 @@ import { useEvent } from 'src/eventfulLib/event'
 import { CATEGORY_ICON } from 'src/libs/plan'
 import tinycolor from 'tinycolor2'
 import { InlineDialog } from 'src/components/Dialog/InlineDialog'
-import { useMediaQuery } from 'src/libs/styled'
+import { cls, useMediaQuery } from 'src/libs/styled'
+import { ComponentProps } from '@stitches/react'
 
-interface EmptyProps {
+interface EmptyProps extends ComponentProps<typeof Flex> {
   info: CategoryInfo
   plan: Eventful.API.PlanGet
   onEdit: PlanProps['onEdit']
   children: ReactNode
 }
 
-const Empty = ({ plan, info, onEdit, children }: EmptyProps) => {
+const Empty = ({ plan, info, onEdit, children, ...props }: EmptyProps) => {
   const isEmpty = useMemo(
     () => !plan.what?.length && !plan.location?.address?.length && !plan.time,
     [plan]
   )
 
   return isEmpty ? (
-    <H5
-      clickable
-      onClick={() => onEdit()}
-      css={{
-        fontStyle: 'italic',
-      }}
-    >
-      {`Untitled ${info.label.toLowerCase()}`}
-    </H5>
+    <Flex {...props}>
+      <H6
+        clickable
+        onClick={() => onEdit()}
+        css={{
+          fontStyle: 'italic',
+        }}
+      >
+        {`Untitled ${info.label.toLowerCase()}`}
+      </H6>
+    </Flex>
   ) : (
-    <>{children}</>
+    <Flex {...props}>{children}</Flex>
   )
 }
 
@@ -111,31 +114,18 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
   const isSmall = useMediaQuery({ maxSize: 'Tablet' })
 
   return (
-    <Flex
-      column
-      css={{
-        padding: ' $small  $controlPadding',
-        gap: '$small',
-        border: '1px solid $controlBorder',
-        borderRadius: '$control',
-        boxShadow: plan.time ? '$card' : undefined,
-        minHeight: 32,
-        minWidth: isSmall ? 0 : 200,
-        '& > .edit-button': {
-          opacity: 0,
-        },
-        '&:hover > .edit-button': {
-          opacity: 1,
-        },
-      }}
-      data-testid="plan"
-    >
+    <Flex column data-testid="plan">
       {editing && session ? (
         <InlineDialog open={editing} onOpenChange={() => onClose()}>
           <Flex
             column
             css={{
               gap: '$small',
+              borderWidth: 1,
+              borderStyle: 'solid',
+              borderColor: '$controlBorder',
+              borderRadius: 3,
+              padding: '0.15rem 0.5rem',
             }}
           >
             {info.fields.what && (
@@ -181,9 +171,13 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
                   options={whoOptions}
                   fixedUsers={whoFixed}
                   value={
-                    values.who?.map(
-                      (id) => whoAll.find((user2) => user2._id === id) as Eventful.User
-                    ) ?? []
+                    values.who?.reduce((arr, id) => {
+                      const user = whoAll.find((user2) => user2._id === id)
+                      if (user) {
+                        arr.push(user)
+                      }
+                      return arr
+                    }, [] as Eventful.User[]) ?? []
                   }
                   onChange={(users) =>
                     setFieldValue(
@@ -248,83 +242,84 @@ export const Plan = ({ editing, plan, onEdit, onClose }: PlanProps) => {
           </Flex>
         </InlineDialog>
       ) : (
-        <Empty plan={plan} info={info} onEdit={onEdit}>
-          <Flex css={{ gap: '$small' }}>
-            {plan.category !== CATEGORY.None && (
-              <Icon
-                icon={icon}
-                size={25}
-                color={tinycolor(info.color).setAlpha(0.5).toHexString()}
+        <Empty
+          plan={plan}
+          info={info}
+          onEdit={onEdit}
+          css={{
+            gap: '$small',
+            alignItems: 'center',
+            minHeight: 25,
+            borderWidth: 1,
+            borderStyle: 'solid',
+            borderColor: '$controlBorder',
+            borderRadius: 30,
+            padding: 2,
+          }}
+        >
+          {plan.category !== CATEGORY.None && (
+            <Flex css={{ height: 25, flex: '0 0 25px', justifyContent: 'center' }}>
+              <Icon icon={icon} color={tinycolor(info.color).setAlpha(0.5).toHexString()} />
+            </Flex>
+          )}
+          <div className={cls('flx_1')}></div>
+          <Flex column>
+            {(info.fields.what ||
+              plan.category === CATEGORY.Lodging ||
+              plan.category === CATEGORY.Meet) && (
+              <H6
+                clickable
+                onClick={() => onEdit()}
                 css={{
-                  filter: `drop-shadow(2px 2px 0px ${tinycolor(info.color)
-                    .lighten(30)
-                    .toHexString()})`,
+                  flex: 1,
+                  fontStyle: !!label?.length ? 'normal' : 'italic',
+                  color: !!label?.length ? '$black' : '$disabled',
+                  fontWeight: 500,
                 }}
-              />
+              >
+                {!!label?.length ? label : 'Untitled plan'}
+              </H6>
             )}
-            <Flex column css={{ gap: 0 }}>
-              <Flex css={{ justifyContent: 'space-between', alignItems: 'center' }}>
-                {(info.fields.what ||
-                  plan.category === CATEGORY.Lodging ||
-                  plan.category === CATEGORY.Meet) && (
-                  <H4
-                    clickable
-                    onClick={() => onEdit()}
-                    css={{
-                      flex: 1,
-                      fontStyle: !!label?.length ? 'normal' : 'italic',
-                      color: !!label?.length ? '$black' : '$disabled',
-                      fontWeight: 500,
-                    }}
-                  >
-                    {!!label?.length ? label : 'Untitled plan'}
-                  </H4>
-                )}
-                {info.fields.who && (
-                  <Flex flex="0">
-                    {!!plan.who?.length && (
-                      <Popover>
-                        <PopoverTrigger clickable>
-                          <AvatarGroup
-                            avatars={plan.who.map((user) => ({
-                              username: user.username,
-                            }))}
-                          />
-                        </PopoverTrigger>
-                        <PopoverContent>
-                          <Flex column css={{ gap: '$small' }}>
-                            <H5>{`Participants (${plan.who.length})`}</H5>
-                            <Flex css={{ flexWrap: 'wrap', overflow: 'auto', gap: 7 }}>
-                              {plan.who.map((user) => (
-                                <Avatar
-                                  key={user._id.toString()}
-                                  username={user.username}
-                                  size="medium"
-                                  to={`/u/${user.username}`}
-                                />
-                              ))}
-                            </Flex>
-                          </Flex>
-                        </PopoverContent>
-                      </Popover>
-                    )}
-                  </Flex>
+
+            {plan.location && plan.location.address !== label && (
+              <Flex css={{ justifyContent: 'space-between' }}>
+                {info.fields.location && plan.location && plan.location.address !== label ? (
+                  <H6>{plan.location.address}</H6>
+                ) : (
+                  <Flex />
                 )}
               </Flex>
-              {((plan.location && plan.location.address !== label) || plan.time) && (
-                <Flex css={{ justifyContent: 'space-between' }}>
-                  {info.fields.location && plan.location && plan.location.address !== label ? (
-                    <H6>{plan.location.address}</H6>
-                  ) : (
-                    <Flex />
-                  )}
-                  {info.fields.time && plan.time && (
-                    <Time time={plan.time} css={{ justifyContent: 'flex-end' }} />
-                  )}
-                </Flex>
-              )}
-            </Flex>
+            )}
           </Flex>
+
+          {!!plan.who?.length && (
+            <Flex flex="0">
+              <Popover>
+                <PopoverTrigger clickable>
+                  <AvatarGroup
+                    avatars={plan.who.map((user) => ({
+                      username: user.username,
+                    }))}
+                  />
+                </PopoverTrigger>
+                <PopoverContent>
+                  <Flex column css={{ gap: '$small' }}>
+                    <H5>{`Participants (${plan.who.length})`}</H5>
+                    <Flex css={{ flexWrap: 'wrap', overflow: 'auto', gap: 7 }}>
+                      {plan.who.map((user) => (
+                        <Avatar
+                          key={user._id.toString()}
+                          username={user.username}
+                          size="medium"
+                          to={`/u/${user.username}`}
+                        />
+                      ))}
+                    </Flex>
+                  </Flex>
+                </PopoverContent>
+              </Popover>
+            </Flex>
+          )}
         </Empty>
       )}
     </Flex>

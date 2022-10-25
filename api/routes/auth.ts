@@ -5,7 +5,7 @@ import { Eventful } from 'types'
 import session from 'express-session'
 import ConnectMongo from 'connect-mongodb-session'
 import { DATABASE_URI, IS_PRODUCTION } from 'api/config'
-import { cleanUser, limiter } from 'api/util'
+import { cleanUser, limiter, rnd } from 'api/util'
 
 const rlimit = limiter({
   windowMs: 2 * 60 * 1000,
@@ -62,23 +62,37 @@ const destroySession = (req: Request) => {
 }
 
 router.post('/signup', rlimit, async (req, res) => {
-  if (!req.body.username || !req.body.password || !req.body.confirm_password) {
-    return res.status(400).send('INVALID_INPUT')
+  let method = 'password'
+  if (req.body.email) {
+    method = 'email'
   }
-  if (req.body.password !== req.body.confirm_password) {
-    return res.status(400).send('PASSWORD_MISMATCH')
-  }
-  const docExisting = await user.exists({ username: req.body.username })
-  if (docExisting) {
-    return res.status(400).send('EXISTS')
+  if (method !== 'password') {
+    // generate a password
+    req.body.username = rnd(3, rnd.names)
+    req.body.password = rnd(20, rnd.alphaUpper, rnd.num)
+  } else {
+    // method: password
+    if (!req.body.username || !req.body.password || !req.body.confirm_password) {
+      return res.status(400).send('INVALID_INPUT')
+    }
+    if (req.body.password !== req.body.confirm_password) {
+      return res.status(400).send('PASSWORD_MISMATCH')
+    }
+    const docExisting = await user.exists({ username: req.body.username })
+    if (docExisting) {
+      return res.status(400).send('EXISTS')
+    }
   }
   const hashedPassword = await bcrypt.hash(req.body.password, 10)
   const docUser = await user.create({
     username: req.body.username,
     password: hashedPassword,
+    method,
+    email: req.body.email,
+    deviceId: rnd(30, rnd.alphaUpper, rnd.num),
   })
   newSession(req, docUser, req.body.remember)
-  return res.status(200).send(docUser)
+  return res.status(200).send(cleanUser(docUser))
 })
 
 router.post('/login', rlimit, async (req, res) => {
@@ -93,8 +107,7 @@ router.post('/login', rlimit, async (req, res) => {
     return res.status(401).send('INVALID_CREDS')
   }
   newSession(req, docUser, req.body.remember)
-  cleanUser(docUser)
-  return res.status(200).send(docUser)
+  return res.status(200).send(cleanUser(docUser))
 })
 
 router.get('/logout', (req, res) => {
@@ -102,6 +115,6 @@ router.get('/logout', (req, res) => {
   res.sendStatus(200)
 })
 
-router.get('/auth', checkSession, (req, res) => res.send(req.session.user))
+router.get('/auth', checkSession, (req, res) => res.send(cleanUser(req.session.user!)))
 
 export default router

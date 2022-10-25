@@ -22,7 +22,6 @@ interface DayItems<I extends Item> {
   key: string
   day: string
   dayOfWeek: string
-  isOld: boolean
   items: I[]
 }
 
@@ -108,7 +107,7 @@ const Month = <I extends Item = Item>({ label, days, renderItem }: MonthProps<I>
               {day.day}
             </H4>
           </Flex>
-          <Flex column css={{ gap: 0, paddingTop: '$small', opacity: day.isOld ? 0.4 : 1 }}>
+          <Flex column css={{ gap: 0, paddingTop: '$small' }}>
             {day.items.map((item) => (
               <Flex key={item._id.toString()}>{renderItem(item)}</Flex>
             ))}
@@ -213,7 +212,6 @@ export const Agenda = <I extends Item = Item>({
                 key: `${year}-${month}-${day}`,
                 day,
                 dayOfWeek: moment(`${year}-${month}-${day}`, 'YYYY-MMMM-DD').format('ddd'),
-                isOld: moment(`${year}-${month}-${day}`, 'YYYY-MMMM-DD').isBefore(new Date()),
                 items,
               })),
           })),

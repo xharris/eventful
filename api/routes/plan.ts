@@ -36,7 +36,7 @@ export const planNotify = async (
       },
       ...planAggr(),
     ])
-    .then((docs) => req.io.to(`event/${docs[0].event}`).emit(key, docs[0]))
+    .then((docs) => key && req.io.to(`event/${docs[0].event}`).emit(key, docs[0]))
   if (desc) {
     await plan
       .findById<Eventful.Plan & { event: Eventful.Event }>(id)
@@ -69,7 +69,36 @@ export const planAggr: () => PipelineStage[] = () => [
       localField: 'who',
       foreignField: '_id',
       as: 'who',
+      let: {
+        event: '$event',
+      },
       pipeline: [
+        {
+          $lookup: {
+            from: 'accesses',
+            as: 'access',
+            pipeline: [
+              {
+                $match: {
+                  ref: '$$event',
+                },
+              },
+            ],
+          },
+        },
+        {
+          $unwind: {
+            path: '$accesses',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $match: {
+            isRemoved: {
+              $in: [false, null],
+            },
+          },
+        },
         {
           $project: {
             password: 0,
@@ -105,9 +134,6 @@ router.put<{ planId: string }>('/plan/:planId', async (req, res) => {
     { _id: req.params.planId },
     {
       ...req.body,
-    },
-    {
-      new: true,
     }
   )
   if (!docPlan) {
